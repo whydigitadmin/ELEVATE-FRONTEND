@@ -5,7 +5,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import enUS from 'date-fns/locale/en-US';
 import { ToastContainer } from 'react-toastify';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
-import CommonListViewTable from './CommonListViewTable';
+import CommonListViewTable from '../basicMaster/CommonListViewTable';
 import ToastComponent, { showToast } from 'utils/toast-component';
 import SearchIcon from '@mui/icons-material/Search';
 import SaveIcon from '@mui/icons-material/Save';

@@ -13,8 +13,6 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 // login option 3 routing
 // const Fin1 = Loadable(lazy(() => import('views/Finance')));
 const AdjustmentJournal = Loadable(lazy(() => import('views/Finance/AdjustmentJournal')));
-const EltCompany = Loadable(lazy(() => import('views/elevateCompany/eltCompany')));
-const ClientCompany = Loadable(lazy(() => import('views/clientCompany/ClientCompany')));
 const Deposit = Loadable(lazy(() => import('views/Finance/Deposit')));
 const Withdrawal = Loadable(lazy(() => import('views/Finance/Withdrawal')));
 const ContraVoucher = Loadable(lazy(() => import('views/Finance/ContraVoucher')));
@@ -72,6 +70,10 @@ const ARAPDetail = Loadable(lazy(() => import('views/Finance/ARAP-Details')));
 const ARAPAdjustment = Loadable(lazy(() => import('views/Finance/APAP-Adjustment')));
 const PartMaster = Loadable(lazy(() => import('views/Finance/PartyMaster')));
 // const AuthRegister3 = Loadable(lazy(() => import('views/pages/authentication/authentication3/Register3')));
+const EltCompany = Loadable(lazy(() => import('views/elevateCompany/eltCompany')));
+const ClientCompany = Loadable(lazy(() => import('views/elevateCompany/ClientCompany')));
+const CreateClient = Loadable(lazy(() => import('views/elevateCompany/CreateClient')));
+const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/CreateCompanyEmploye')));
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
@@ -328,8 +330,16 @@ const FinanceRoute = {
       element: <EltCompany />
     },
     {
-      path: '/clientCompany/clientCompany',
+      path: '/elevateCompany/clientCompany',
       element: <ClientCompany />
+    },
+    {
+      path: '/elevateCompany/createClient',
+      element: <CreateClient />
+    },
+    {
+      path: '/elevateCompany/createCompanyEmployee',
+      element: <CreateCompanyEmployee />
     }
   ]
 };

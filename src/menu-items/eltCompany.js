@@ -18,13 +18,13 @@ const icons2 = {
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 const eltCompany = {
     id: 'elevateCompany',
-    title: 'Elevate Company',
+    title: 'Elevate',
     //   caption: 'Pages Caption',
     type: 'group',
     children: [
       {
         id: 'elevateCompany',
-        title: 'Elevate Company',
+        title: 'Elevate',
         type: 'collapse',
         icon: icons.IconCopyright,
   
@@ -35,44 +35,32 @@ const eltCompany = {
             type: 'item',
             url: '/elevateCompany/eltCompany',
             icon: icons1.IconSquareRoundedPlus
+          },
+          {
+            id: 'clientCompany',
+            title: 'Client Company',
+            type: 'item',
+            url: '/elevateCompany/clientCompany',
+            icon: icons1.IconSquareRoundedPlus
+          },
+          {
+            id: 'createClient',
+            title: 'Create Client',
+            type: 'item',
+            url: '/elevateCompany/createClient',
+            icon: icons1.IconSquareRoundedPlus
+          },
+          {
+            id: 'createCompanyEmployee',
+            title: 'Create Company Employee',
+            type: 'item',
+            url: '/elevateCompany/createCompanyEmployee',
+            icon: icons1.IconSquareRoundedPlus
           }
         ]
       }
     ]
   };
-
-
-// const eltCompany = {
-//   id: 'EltCompany',
-//   title: 'Elt Company',
-//   //   caption: 'Pages Caption',
-//   type: 'group',
-//   children: [
-//     {
-//       id: 'EltCompany',
-//       title: 'Elt Company',
-//       type: 'collapse',
-//       icon: icons.IconCopyright,
-
-//       children: [
-//         {
-//           id: 'EltCompany',
-//           title: 'Elt Company',
-//           type: 'item',
-//           url: '/eltCompany/eltCompany',
-//           icon: icons1.IconSquareRoundedPlus
-//         },
-//         {
-//           id: 'company',
-//           title: 'Company Setup',
-//           type: 'item',
-//           url: '/companysetup/companysetup',
-//           icon: icons2.IconSettingsPlus
-//         }
-//       ]
-//     }
-//   ]
-// };
 
 export default eltCompany;
 
