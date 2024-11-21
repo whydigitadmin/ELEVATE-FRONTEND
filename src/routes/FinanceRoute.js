@@ -7,13 +7,14 @@ import DocumentTypeMaster from 'views/Finance/DocumentType/documentType';
 import DocumentTypeMappingMaster from 'views/Finance/DocumentType/documentTypeMapping';
 import ReconcileCash from 'views/Finance/Reconcile/ReconcileCash';
 import ReconcileCorp from 'views/Finance/Reconcile/ReconcileCorp';
-import CreateClient from 'views/basicMaster/CreateClient';
+// import CreateClient from 'views/basicMaster/CreateClient';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
 // login option 3 routing
 // const Fin1 = Loadable(lazy(() => import('views/Finance')));
 const AdjustmentJournal = Loadable(lazy(() => import('views/Finance/AdjustmentJournal')));
 const EltCompany = Loadable(lazy(() => import('views/elevateCompany/eltCompany')));
+const ClientCompany = Loadable(lazy(() => import('views/clientCompany/ClientCompany')));
 const Deposit = Loadable(lazy(() => import('views/Finance/Deposit')));
 const Withdrawal = Loadable(lazy(() => import('views/Finance/Withdrawal')));
 const ContraVoucher = Loadable(lazy(() => import('views/Finance/ContraVoucher')));
@@ -58,7 +59,7 @@ const FinYear = Loadable(lazy(() => import('views/basicMaster/finYear')));
 const Roles = Loadable(lazy(() => import('views/basicMaster/roles')));
 const ScreenNames = Loadable(lazy(() => import('views/basicMaster/ScreenNames')));
 const Employee = Loadable(lazy(() => import('views/basicMaster/employee')));
-const FirstPage = Loadable(lazy(() => import('views/basicMaster/FirstPage')));
+// const FirstPage = Loadable(lazy(() => import('views/basicMaster/FirstPage')));
 const ChargeTypeRequest = Loadable(lazy(() => import('views/Finance/ChargeTypeRequest')));
 
 const TaxInvoiceDetail = Loadable(lazy(() => import('views/Finance/taxInvoice/taxInvoiceDetail')));
@@ -222,14 +223,14 @@ const FinanceRoute = {
       path: '/basicMaster/country',
       element: <Country />
     },
-    {
-      path: '/basicMaster/FirstPage',
-      element: <FirstPage />
-    },
-    {
-      path: '/basicMaster/CreateClient',
-      element: <CreateClient />
-    },
+    // {
+    //   path: '/basicMaster/FirstPage',
+    //   element: <FirstPage />
+    // },
+    // {
+    //   path: '/basicMaster/CreateClient',
+    //   element: <CreateClient />
+    // },
     {
       path: '/basicMaster/state',
       element: <State />
@@ -325,6 +326,10 @@ const FinanceRoute = {
     {
       path: '/elevateCompany/eltCompany',
       element: <EltCompany />
+    },
+    {
+      path: '/clientCompany/clientCompany',
+      element: <ClientCompany />
     }
   ]
 };
