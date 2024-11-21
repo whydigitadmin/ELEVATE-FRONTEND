@@ -7,6 +7,8 @@ import Loadable from 'ui-component/Loadable';
 // login option 3 routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 const UserCreation = Loadable(lazy(() => import('views/admin/user-creation/UserCreation')));
+const CreateClientUser = Loadable(lazy(() => import('views/admin/user-creation/CreateClientUser')));
+
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
@@ -21,6 +23,10 @@ const AdminRoute = {
     {
       path: '/admin/user-creation/UserCreation',
       element: <UserCreation />
+    },
+     {
+      path: '/admin/user-creation/CreateClientUser',
+      element: <CreateClientUser />
     }
   ]
 };

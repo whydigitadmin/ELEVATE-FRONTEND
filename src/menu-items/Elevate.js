@@ -13,33 +13,36 @@ const icons1 = {
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
-const admin = {
-  id: 'admin',
-  title: 'Admin',
+const Elevate = {
+  id: 'Elevate',
+  title: 'Elevate',
+  //   caption: 'Pages Caption',
   type: 'group',
   children: [
     {
-      id: 'admin',
-      title: 'Admin',
+      id: 'Elevate',
+      title: 'Elevate',
       type: 'collapse',
       icon: icons.IconCopyright,
+
       children: [
         {
-          id: 'admin',
-          title: 'Company User Creation',
+          id: 'FirstData',
+          title: 'FirstData',
           type: 'item',
-          url: '/admin/user-creation/userCreation',
+          url: '/FirstData',
           icon: icons1.IconSquareRoundedPlus
         },
         {
-          id: 'Client User Creation',
-          title: 'Client User Creation',
+          id: 'CreateClient',
+          title: 'Create Client',
           type: 'item',
-          url: '/admin/user-creation/CreateClientUser',
+          url: '/CreateClient',
           icon: icons1.IconSquareRoundedPlus
         }
       ]
     }
   ]
 };
-export default admin;
+
+export default Elevate;

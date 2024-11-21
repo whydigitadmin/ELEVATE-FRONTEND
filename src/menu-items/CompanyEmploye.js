@@ -13,33 +13,29 @@ const icons1 = {
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
-const admin = {
-  id: 'admin',
-  title: 'Admin',
+const CompanyEmploye = {
+  id: 'CompanyEmploye',
+  title: 'Company Employe',
+  //   caption: 'Pages Caption',
   type: 'group',
   children: [
     {
-      id: 'admin',
-      title: 'Admin',
+      id: 'CompanyEmploye',
+      title: 'Company Employe',
       type: 'collapse',
       icon: icons.IconCopyright,
+
       children: [
         {
-          id: 'admin',
-          title: 'Company User Creation',
+          id: 'CreateCompanyEmploye',
+          title: 'Create Company Employe',
           type: 'item',
-          url: '/admin/user-creation/userCreation',
-          icon: icons1.IconSquareRoundedPlus
-        },
-        {
-          id: 'Client User Creation',
-          title: 'Client User Creation',
-          type: 'item',
-          url: '/admin/user-creation/CreateClientUser',
+          url: '/CompanyEmploye/CreateCompanyEmploye',
           icon: icons1.IconSquareRoundedPlus
         }
       ]
     }
   ]
 };
-export default admin;
+
+export default CompanyEmploye;

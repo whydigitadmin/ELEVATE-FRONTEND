@@ -1,5 +1,29 @@
 import apiCalls from 'apicall';
 
+//get all active company code
+
+export const getAllActiveCompanyCode = async (orgId) => {
+  try {
+    const response = await apiCalls('get', `companycontroller/getAllEltCompany`);
+    console.log('API Response:', response);
+
+    if (response.status === true) {
+      const companyCodeData = response.paramObjectsMap.eltCompanyVOs
+        .filter((row) => row.active === 'Active')
+        .map(({ id, companyCode }) => ({ id, companyCode }));
+
+      return companyCodeData;
+    } else {
+      console.error('API Error:', response);
+      return response;
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return error;
+  }
+};
+
+
 export const getAllActiveCountries = async (orgId) => {
   try {
     const response = await apiCalls('get', `commonmaster/country?orgid=${orgId}`);

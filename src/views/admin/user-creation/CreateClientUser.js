@@ -23,7 +23,7 @@ import ToastComponent, { showToast } from 'utils/toast-component';
 import CommonListViewTable from 'views/basicMaster/CommonListViewTable';
 import { encryptPassword } from 'views/utilities/passwordEnc';
 
-const UserCreation = () => {
+const CreateClientUser = () => {
   const [showForm, setShowForm] = useState(true);
   const [data, setData] = useState(true);
   const [listViewData, setListViewData] = useState([]);
@@ -714,7 +714,7 @@ const UserCreation = () => {
                   </FormControl>
                 </div> */}
 
-                <div className="col-md-2 mb-3">
+                <div className="col-md-3 mb-3">
                   <FormGroup>
                     <FormControlLabel
                       control={
@@ -1069,4 +1069,4 @@ const UserCreation = () => {
     </>
   );
 };
-export default UserCreation;
+export default CreateClientUser;
