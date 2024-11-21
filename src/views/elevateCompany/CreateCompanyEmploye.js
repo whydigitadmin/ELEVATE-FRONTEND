@@ -118,50 +118,68 @@ const CreateClientEmploye = () => {
 
     const handleInputChange = (e) => {
         const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
+    
+        // Validation regex
         const nameRegex = /^[A-Za-z ]*$/;
         const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-
+    
         if (name === 'clientName' && !clientNameRegex.test(value)) {
             setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
+            return;
         } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
             setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+            return;
         } else if (name === 'clientAdminName' && !nameRegex.test(value)) {
             setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-        } else {
-            let updatedValue = value;
-
-            if (name === 'email') {
-                updatedValue = updatedValue.toLowerCase();
-              } else if (name === 'webSite') {
-                updatedValue = updatedValue.toLowerCase()
-              } else if (name === 'phone') {
-                updatedValue = updatedValue.replace(/[^0-9]/g, '');
-              } else {
-                updatedValue = updatedValue.toUpperCase();
-              }
-
-            if (type === 'checkbox') {
-                setFormData({ ...formData, [name]: checked });
+            return;
+        } else if (name === 'phone') {
+            const sanitizedValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+            if (sanitizedValue.length > 10) {
+                setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be exactly 10 digits' });
+                return;
+            } else if (sanitizedValue.length < 10 && sanitizedValue.length > 0) {
+                setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be exactly 10 digits' });
             } else {
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    [name]: updatedValue
-                }));
-            }
-
-            setFieldErrors({ ...fieldErrors, [name]: '' });
-
-            // Update the cursor position after the input change only for text inputs
-            if (type === 'text' || type === 'email' || type === 'textarea') {
-                setTimeout(() => {
-                    const inputElement = document.getElementsByName(name)[0];
-                    inputElement.setSelectionRange(selectionStart, selectionEnd);
-                }, 0);
+                setFieldErrors({ ...fieldErrors, [name]: '' });
             }
         }
+    
+        let updatedValue = value;
+    
+        // Value transformations
+        if (name === 'email') {
+            updatedValue = updatedValue.toLowerCase();
+        } else if (name === 'webSite') {
+            updatedValue = updatedValue.toLowerCase();
+        } else if (name === 'phone') {
+            updatedValue = value.replace(/[^0-9]/g, ''); // Sanitize non-numeric characters
+        } else {
+            updatedValue = updatedValue.toUpperCase();
+        }
+    
+        // Update form data
+        if (type === 'checkbox') {
+            setFormData({ ...formData, [name]: checked });
+        } else {
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                [name]: updatedValue
+            }));
+        }
+    
+        // Update the cursor position after the input change only for text inputs
+        if (type === 'text' || type === 'email' || type === 'textarea') {
+            setTimeout(() => {
+                const inputElement = document.getElementsByName(name)[0];
+                if (inputElement) {
+                    inputElement.setSelectionRange(selectionStart, selectionEnd);
+                }
+            }, 0);
+        }
     };
+    
 
 
     const handleClear = () => {
@@ -194,22 +212,22 @@ const CreateClientEmploye = () => {
         //     errors.companyCode = 'client Code is required';
         // }
         if (!formData.email) {
-            errors.email = 'email Name is required';
+            errors.email = 'Email is required';
         }
         if (!formData.employeeCode) {
-            errors.employeeCode = 'employeeCode is required';
+            errors.employeeCode = 'Code is required';
         }
         if (!formData.employeeName) {
-            errors.employeeName = 'employeeName is required';
+            errors.employeeName = 'Name is required';
         }
         // if (!formData.clientType) {
         //   errors.clientType = 'client Type is required';
         // }
         if (!formData.phone) {
-            errors.phone = 'phone is required';
+            errors.phone = 'Phone Number is required';
         }
         if (!formData.webSite) {
-            errors.webSite = 'webSite is required';
+            errors.webSite = 'Website is required';
         }
 
         if (Object.keys(errors).length === 0) {
@@ -336,7 +354,7 @@ const CreateClientEmploye = () => {
                             {/* employe Code */}
                             <div className="col-md-3 mb-3">
                                 <TextField
-                                    label="Employe Code"
+                                    label="Code"
                                     variant="outlined"
                                     size="small"
                                     fullWidth
@@ -351,7 +369,7 @@ const CreateClientEmploye = () => {
                             {/* employe Name */}
                             <div className="col-md-3 mb-3">
                                 <TextField
-                                    label="Employe Name"
+                                    label="Name"
                                     variant="outlined"
                                     size="small"
                                     fullWidth
@@ -366,7 +384,7 @@ const CreateClientEmploye = () => {
                             {/* employe Mail */}
                             <div className="col-md-3 mb-3">
                                 <TextField
-                                    label="Email Id"
+                                    label="Email"
                                     variant="outlined"
                                     size="small"
                                     fullWidth
@@ -381,7 +399,7 @@ const CreateClientEmploye = () => {
                             {/* phone number */}
                             <div className="col-md-3 mb-3">
                                 <TextField
-                                    label="phone"
+                                    label="Phone"
                                     variant="outlined"
                                     size="small"
                                     fullWidth
@@ -396,7 +414,7 @@ const CreateClientEmploye = () => {
                             {/* webSite */}
                             <div className="col-md-3 mb-3">
                                 <TextField
-                                    label="webSite"
+                                    label="Website"
                                     variant="outlined"
                                     size="small"
                                     fullWidth

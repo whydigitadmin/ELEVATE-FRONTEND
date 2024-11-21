@@ -34,7 +34,7 @@ const EltCompany = () => {
     companyName: '',
     phone: '',
     email: '',
-    webSite: '',
+    Website: '',
     active: ''
   });
 
@@ -122,44 +122,56 @@ const EltCompany = () => {
   const handleInputChange = (e) => {
     const { name, value, checked, type } = e.target;
 
+    // Regular expressions
     const companyNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
     const companyCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-    const phoneNumberRegex = /^[0-9]*$/;
+    const phoneNumberRegex = /^[0-9]*$/; 
 
     let updatedValue = value;
 
     if (name === 'companyName' && !companyNameRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
-      return;
+        setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+        return;
     } else if (name === 'companyCode' && !companyCodeRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-      return;
-    } else if (name === 'phone' && !phoneNumberRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Only numeric values are allowed' });
-      return;
+        setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+        return;
+    } else if (name === 'phone') {
+        if (!phoneNumberRegex.test(value)) {
+            setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+            return;
+        }
+        if (value.length > 10) {
+            setFieldErrors({ ...fieldErrors, [name]: 'Phone number cannot exceed 10 digits' });
+            return;
+        } else if (value.length < 10 && value.length > 0) {
+            setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be 10 digits' });
+        } else {
+            setFieldErrors({ ...fieldErrors, [name]: '' });
+        }
     } else {
-      setFieldErrors({ ...fieldErrors, [name]: '' });
+        setFieldErrors({ ...fieldErrors, [name]: '' });
     }
 
     if (name === 'email') {
-      updatedValue = updatedValue.toLowerCase();
+        updatedValue = updatedValue.toLowerCase();
     } else if (name === 'webSite') {
-      updatedValue = updatedValue.toLowerCase()
+        updatedValue = updatedValue.toLowerCase();
     } else if (name === 'phone') {
-      updatedValue = updatedValue.replace(/[^0-9]/g, '');
+        updatedValue = updatedValue.replace(/[^0-9]/g, '');
     } else {
-      updatedValue = updatedValue.toUpperCase();
+        updatedValue = updatedValue.toUpperCase();
     }
 
     if (type === 'checkbox') {
-      setFormData({ ...formData, [name]: checked });
+        setFormData({ ...formData, [name]: checked });
     } else {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: updatedValue,
-      }));
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: updatedValue,
+        }));
     }
-  };
+};
+
 
   const handleClear = () => {
     setFormData({
@@ -185,21 +197,21 @@ const EltCompany = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formData.companyCode) {
-      errors.companyCode = 'Company Code is required';
+      errors.companyCode = 'Code is required';
     }
     if (!formData.companyName) {
-      errors.companyName = 'Company is required';
+      errors.companyName = 'Name is required';
     }
     if (!formData.phone) {
       errors.phone = 'Phone Number is required';
     }
     if (!formData.webSite) {
-      errors.webSite = 'webSite is required';
+      errors.webSite = 'Website is required';
     }
     if (!formData.email) {
-      errors.email = 'Company Admin Email ID is required';
+      errors.email = 'Email is required';
     } else if (!emailRegex.test(formData.email)) {
-      errors.email = 'Invalid Email Format';
+      errors.email = 'Invalid Format';
     }
 
     if (Object.keys(errors).length === 0) {
@@ -273,7 +285,7 @@ const EltCompany = () => {
             <div className="row">
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Company Code"
+                  label="Code"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -286,7 +298,7 @@ const EltCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Company Name"
+                  label="Name"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -300,7 +312,7 @@ const EltCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Company Email Id"
+                  label="Email"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -313,7 +325,7 @@ const EltCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="webSite"
+                  label="Website"
                   variant="outlined"
                   size="small"
                   fullWidth

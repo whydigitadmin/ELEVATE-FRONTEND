@@ -31,32 +31,33 @@ const eltCompany = {
         children: [
           {
             id: 'eltCompany',
-            title: 'Elt Company',
+            title: 'Company',
             type: 'item',
             url: '/elevateCompany/eltCompany',
             icon: icons1.IconSquareRoundedPlus
           },
           {
             id: 'clientCompany',
-            title: 'Client Company',
+            title: 'Client',
             type: 'item',
             url: '/elevateCompany/clientCompany',
             icon: icons1.IconSquareRoundedPlus
           },
           {
-            id: 'createClient',
-            title: 'Create Client',
-            type: 'item',
-            url: '/elevateCompany/createClient',
-            icon: icons1.IconSquareRoundedPlus
-          },
-          {
             id: 'createCompanyEmployee',
-            title: 'Create Company Employee',
+            title: 'Company Employee',
             type: 'item',
             url: '/elevateCompany/createCompanyEmployee',
             icon: icons1.IconSquareRoundedPlus
+          },
+          {
+            id: 'createClient',
+            title: 'Client Employee',
+            type: 'item',
+            url: '/elevateCompany/createClient',
+            icon: icons1.IconSquareRoundedPlus
           }
+          
         ]
       }
     ]

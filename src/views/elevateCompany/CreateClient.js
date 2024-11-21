@@ -130,22 +130,22 @@ const CreateClient = () => {
 
     const handleDataSubmit = async () => {
         const errors = {};
-        if (!formData?.clientCode) {
+        if (!formData.clientCode) {
             errors.clientCode = 'Code is required';
         }
-        if (!formData?.client) {
-            errors.client = 'Client Name is required';
+        if (!formData.client) {
+            errors.client = 'Name is required';
         }
-        if (!formData?.clintAdminName) {
-            errors.clintAdminName = 'Admin Name is required';
+        if (!formData.clintAdminName) {
+            errors.clintAdminName = 'Access is required';
         }
-        if (!formData?.clientMail) {
-            errors.clientMail = 'Client Mail Id is required';
+        if (!formData.clientMail) {
+            errors.clientMail = 'Email is required';
         }
-        if (!formData?.clientType) {
-            errors.clientType = 'Client Type is required';
+        if (!formData.clientType) {
+            errors.clientType = 'Type is required';
         }
-        if (!formData?.phoneNo) {
+        if (!formData.phoneNo) {
             errors.phoneNo = 'Phone Number is required';
         }
 
@@ -199,138 +199,132 @@ const CreateClient = () => {
     return (
         <>
             <ToastContainer />
-            <LocalizationProvider dateAdapter={AdapterDateFns} locale={enUS}>
-                <Container
-                    maxWidth="lg"
-                    sx={{
-                        padding: '30px',
-                        backgroundColor: 'white',
-                        borderRadius: '8px',
-                    }}
-                >
-                    <form style={{ width: '100%' }}>
-                        {/* Top Button Actions */}
-                        <Container sx={{ display: 'flex' }}>
-                            <ActionButton icon={SearchIcon} title='search' />
-                            <ActionButton icon={ClearIcon} title='Clear' onClick={handleClear} />
-                            <ActionButton icon={FormatListBulletedTwoToneIcon} title='List View' onClick={handleView} />
-                            <ActionButton icon={SaveIcon} title='Save' onClick={handleDataSubmit} disabled={isLoading} />
+            <div className="card w-full p-6 bg-base-100 shadow-xl" style={{ padding: '20px', borderRadius: '10px' }}>
+                {/* <LocalizationProvider dateAdapter={AdapterDateFns} locale={enUS}> */}
 
-                        </Container>
+                <form style={{ width: '100%' }}>
+                    {/* Top Button Actions */}
+                    {/* <Container sx={{ display: 'flex' }}> */}
+                    <ActionButton icon={SearchIcon} title='search' />
+                    <ActionButton icon={ClearIcon} title='Clear' onClick={handleClear} />
+                    <ActionButton icon={FormatListBulletedTwoToneIcon} title='List View' onClick={handleView} />
+                    <ActionButton icon={SaveIcon} title='Save' onClick={handleDataSubmit} disabled={isLoading} />
 
-                        {/* ListView or Form */}
-                        {listView ? (
-                            <div className="mt-4">
-                                <CommonListViewTable
-                                    data={listViewData}
-                                    columns={listViewColumns}
-                                    blockEdit={true}
-                                    toEdit={getClientById}
-                                />
-                            </div>
-                        ) : (
-                            <Container
-                                maxWidth="lg"
-                                sx={{
-                                    padding: '30px',
-                                    backgroundColor: 'white',
-                                    borderRadius: '8px',
-                                }}
-                            >
+                    {/* </Container> */}
+
+                    {/* ListView or Form */}
+                    {listView ? (
+                        <div className="mt-4">
+                            <CommonListViewTable
+                                data={listViewData}
+                                columns={listViewColumns}
+                                blockEdit={true}
+                                toEdit={getClientById}
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="row mt-4">
                                 {/* Editable Form */}
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="Code"
-                                            fullWidth
-                                            required
-                                            value={formData.clientCode}
-                                            onChange={(e) => handleInputChange('clientCode', e.target.value)}
-                                            error={!!fieldErrors.clientCode}
-                                            helperText={fieldErrors.clientCode}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="Client Name"
-                                            fullWidth
-                                            required
-                                            value={formData.client}
-                                            onChange={(e) => handleInputChange('client', e.target.value)}
-                                            error={!!fieldErrors.client}
-                                            helperText={fieldErrors.client}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="Client Access"
-                                            fullWidth
-                                            select
-                                            required
-                                            value={formData.clintAdminName}
-                                            onChange={(e) => handleInputChange('clintAdminName', e.target.value)}
-                                            error={!!fieldErrors.clintAdminName}
-                                            helperText={fieldErrors.clintAdminName}
-                                        >
-                                        <MenuItem value="PRODUCT_OWNER">PRODUCT_OWNER</MenuItem>
-                                            <MenuItem value="ADMIN">ADMIN</MenuItem>
-                                            <MenuItem value="USER">USER</MenuItem>
-                                            <MenuItem value="GUEST USER">GUEST USER</MenuItem>
-                                            </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="Client Email Id"
-                                            type="email"
-                                            fullWidth
-                                            value={formData.clientMail}
-                                            onChange={(e) => handleInputChange('clientMail', e.target.value)}
-                                            error={!!fieldErrors.clientMail}
-                                            helperText={fieldErrors.clientMail}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="client Type"
-                                            required
-                                            select
-                                            fullWidth
-                                            value={formData.clientType}
-                                            onChange={(e) => handleInputChange('clientType', e.target.value)}
-                                            error={!!fieldErrors.clientMail}
-                                            helperText={fieldErrors.clientMail}
-                                        >
-                                            <MenuItem value="PRODUCT_OWNER">PRODUCT_OWNER</MenuItem>
-                                            <MenuItem value="ADMIN">ADMIN</MenuItem>
-                                            <MenuItem value="USER">USER</MenuItem>
-                                            <MenuItem value="GUEST USER">GUEST USER</MenuItem>
-                                        </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <TextField
-                                            label="Phone Number"
-                                            required
-                                            fullWidth
-                                            value={formData.phoneNo}
-                                            onChange={(e) => handleInputChange('phoneNo', e.target.value)}
-                                            error={!!fieldErrors.phoneNo}
-                                            helperText={fieldErrors.phoneNo}
-                                        />
-                                    </Grid>
-                                    <FormControlLabel
-                                        control={<Checkbox defaultChecked size='large' />}
-                                        label="Active"
-                                        sx={{ 
-                                            marginTop: '15px',
-                                            marginLeft: '15px'
-                                        }}
+                                <div className="col-md-3 mb-3">
+                                    <TextField
+                                        label="Code"
+                                        size="small"
+                                        fullWidth
+                                        required
+                                        value={formData.clientCode}
+                                        onChange={(e) => handleInputChange('clientCode', e.target.value)}
+                                        error={!!fieldErrors.clientCode}
+                                        helperText={fieldErrors.clientCode}
                                     />
-                                </Grid>
-                            </Container>
-                        )}
-                    </form>
-                </Container >
-            </LocalizationProvider >
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <TextField
+                                        label="Name"
+                                        size="small"
+                                        fullWidth
+                                        required
+                                        value={formData.client}
+                                        onChange={(e) => handleInputChange('client', e.target.value)}
+                                        error={!!fieldErrors.client}
+                                        helperText={fieldErrors.client}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <TextField
+                                        label="Access"
+                                        size="small"
+                                        fullWidth
+                                        select
+                                        required
+                                        value={formData.clintAdminName}
+                                        onChange={(e) => handleInputChange('clintAdminName', e.target.value)}
+                                        error={!!fieldErrors.clintAdminName}
+                                        helperText={fieldErrors.clintAdminName}
+                                    >
+                                        <MenuItem value="PRODUCT_OWNER">PRODUCT_OWNER</MenuItem>
+                                        <MenuItem value="ADMIN">ADMIN</MenuItem>
+                                        <MenuItem value="USER">USER</MenuItem>
+                                        <MenuItem value="GUEST USER">GUEST USER</MenuItem>
+                                    </TextField>
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <TextField
+                                        label="Email"
+                                        size="small"
+                                        type="email"
+                                        fullWidth
+                                        value={formData.clientMail}
+                                        onChange={(e) => handleInputChange('clientMail', e.target.value)}
+                                        error={!!fieldErrors.clientMail}
+                                        helperText={fieldErrors.clientMail}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <TextField
+                                        label="Type"
+                                        size="small"
+                                        required
+                                        select
+                                        fullWidth
+                                        value={formData.clientType}
+                                        onChange={(e) => handleInputChange('clientType', e.target.value)}
+                                        error={!!fieldErrors.clientMail}
+                                        helperText={fieldErrors.clientMail}
+                                    >
+                                        <MenuItem value="PRODUCT_OWNER">PRODUCT_OWNER</MenuItem>
+                                        <MenuItem value="ADMIN">ADMIN</MenuItem>
+                                        <MenuItem value="USER">USER</MenuItem>
+                                        <MenuItem value="GUEST USER">GUEST USER</MenuItem>
+                                    </TextField>
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <TextField
+                                        label="Phone Number"
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        value={formData.phoneNo}
+                                        onChange={(e) => handleInputChange('phoneNo', e.target.value)}
+                                        error={!!fieldErrors.phoneNo}
+                                        helperText={fieldErrors.phoneNo}
+                                    />
+                                </div>
+                                
+                                <div className="col-md-3 mb-2">
+                                    <FormControlLabel
+                                        className='mb-3'
+                                        control={<Checkbox defaultChecked />}
+                                        label="Active"
+                                        
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </form>
+                {/* </LocalizationProvider > */}
+            </div>
             <ToastComponent />
         </>
     );
