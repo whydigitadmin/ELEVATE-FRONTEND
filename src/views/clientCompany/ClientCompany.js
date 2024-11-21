@@ -132,21 +132,23 @@ const ClientCompany = () => {
     const nameRegex = /^[A-Za-z ]*$/;
     const phoneRegex = /^[0-9 ]*$/;
     const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-    const websiteRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    // const websiteRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
     if (name === 'clientName' && !clientNameRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
     } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } else if (name === 'email' && !emailRegex.test(value)) {
+    } else if (name === 'phone' && !phoneRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    }  else if (name === 'phone' && !phoneRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } else if (name === 'webSite' && !websiteRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    }
+    } 
+    // else if (name === 'email' && !emailRegex.test(value)) {
+    //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    // }  
+    // else if (name === 'webSite' && !websiteRegex.test(value)) {
+    //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    // }
      else {
       let updatedValue = value;
 
