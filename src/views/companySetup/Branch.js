@@ -23,7 +23,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ActionButton from 'utils/ActionButton';
 import ToastComponent, { showToast } from 'utils/toast-component';
-import { getAllActiveCitiesByState, getAllActiveCountries, getAllActiveEmployee, getAllActiveStatesByCountry } from 'utils/CommonFunctions';
+import { getAllActiveCitiesByState, getAllActiveCountries, getAllActiveStatesByCountry } from 'utils/CommonFunctions';
 import apiCalls from 'apicall';
 
 const Branch = () => {
@@ -89,7 +89,7 @@ const Branch = () => {
   const [listViewData, setListViewData] = useState([]);
   useEffect(() => {
     getAllCountries();
-    getAllActiveEmployees();
+    // getAllActiveEmployees();
     getCompanyDetails();
     getAllBranches();
     if (formData.country) {
@@ -101,14 +101,14 @@ const Branch = () => {
   }, [formData.country, formData.state]);
 
 
-  const getAllActiveEmployees = async () => {
-    try {
-      const empData = await getAllActiveEmployee();
-      setEmployeeList(empData);
-    } catch (error) {
-      console.error('Error fetching country data:', error);
-    }
-  };
+  // const getAllActiveEmployees = async () => {
+  //   try {
+  //     const empData = await getAllActiveEmployee();
+  //     setEmployeeList(empData);
+  //   } catch (error) {
+  //     console.error('Error fetching country data:', error);
+  //   }
+  // };
 
 
   const getCompanyDetails = async () => {
