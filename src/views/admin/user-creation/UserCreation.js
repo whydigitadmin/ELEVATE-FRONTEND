@@ -30,9 +30,10 @@ const UserCreation = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState(false);
-  const [branchData, setBranchData] = useState([]);
+  // const [branchData, setBranchData] = useState([]);
   const [roleList, setRoleList] = useState([]);
   const [branchList, setBranchList] = useState([]);
+  const [clientList, setClientList] = useState([]);
   const [dataToEdit, setDataToEdit] = useState([]);
   const [orgId, setOrgId] = useState(parseInt(localStorage.getItem('orgId')));
   const [roleDataSelect, setRoleDataSelect] = useState([]);
@@ -112,10 +113,28 @@ const UserCreation = () => {
       clientCode: '',
     }
   ]);
+  const getAllActiveClients = async (orgId) => {
+    try {
+      const response = await apiCalls('get', `commonmaster/getAllClients?orgId=${orgId}`);
+      if (response.status === true) {
+        const clientData = response.paramObjectsMap.clientVOs
+          .filter((row) => row.active === 'Active')
+          .map(({ id, client, clientCode }) => ({ id, client, clientCode }));
+        return clientData;
+      } else {
+        console.error('API Error:');
+        return response;
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      return error;
+    }
+  };
 
   useEffect(() => {
     getAllUsers();
     getAllBranches();
+    getAllClients();
     getAllRoles();
     getAllUserCreation();
   }, []);
@@ -230,15 +249,22 @@ const UserCreation = () => {
     } catch (error) {
       console.error('Error fetching country data:', error);
     }
+  };const getAllClients = async () => {
+    try {
+      const ClientData = await getAllActiveClients(orgId);
+      setClientList(ClientData);
+    } catch (error) {
+      console.error('Error fetching country data:', error);
+    }
   };
 
   const getAllUsers = async () => {
     try {
-      const response = await apiCalls('get', `/master/getAllEmployeeByOrgId?orgId=${orgId}`);
+      const response = await apiCalls('get', `/companycontroller/getAllCompanyEmployeeByOrgId?orgId=${orgId}`);
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setEmpList(response.paramObjectsMap.employeeVO);
+        setEmpList(response.paramObjectsMap.companyEmployeeVO);
       } else {
         console.error('API Error:', response);
       }
@@ -263,8 +289,8 @@ const UserCreation = () => {
   };
 
   const getUserById = async (row) => {
-    console.log('THE SELECTED EMPLOYEE ID IS:', row.original.id);
-    setEditId(row.original.id);
+    console.log('THE SELECTED EMPLOYEE ID IS:', row?.original?.id);
+    setEditId(row?.original?.id);
     try {
       const response = await apiCalls('get', `auth/getUserById?userId=${row.original.id}`);
       console.log('API Response:', response);
@@ -292,6 +318,13 @@ const UserCreation = () => {
             // roleId: role.roleId,
             startDate: role.startDate,
             endDate: role.endDate
+          }))
+        );
+        setClientTableData(
+          particularUser.clientAccessVO.map((client) => ({
+            id: client.id,
+            client: client.client,
+            clientCode: client.clientCode
           }))
         );
 
@@ -365,7 +398,26 @@ const UserCreation = () => {
 
     setBranchTableErrors(newTableErrors1);
 
-    if (Object.keys(errors).length === 0 && roleTableDataValid && branchTableDataValid) {
+    let clientTableDataValid = true;
+    const newTableErrors2 = clientTableData.map((row) => {
+      const rowErrors = {};
+      if (!row.client) {
+        rowErrors.client = 'client is required';
+        clientTableDataValid = false;
+      }
+      if (!row.clientCode) {
+        rowErrors.clientCode = 'Client Code is required';
+        clientTableDataValid = false;
+      }
+
+      return rowErrors;
+    });
+    setFieldErrors(errors);
+
+    setRoleTableDataErrors(newTableErrors2);
+
+
+    if (Object.keys(errors).length === 0 && roleTableDataValid && branchTableDataValid && clientTableDataValid) {
       setIsLoading(true);
 
       const encryptedPassword = encryptPassword('Wds@2022');
@@ -381,6 +433,11 @@ const UserCreation = () => {
         branchCode: row.branchCode,
         branch: row.branch
       }));
+      const clientVo = clientTableData.map((row) => ({
+        // ...(editId && { id: row.id }),
+        clientCode: row.clientCode,
+        client: row.client
+      }));
 
       const saveFormData = {
         ...(editId && { id: formData.docId }),
@@ -394,7 +451,8 @@ const UserCreation = () => {
         active: formData.active === 'Active' ? true : false,
         orgId: orgId,
         roleAccessDTO: roleVo,
-        branchAccessDTOList: branchVo
+        branchAccessDTOList: branchVo,
+        clientAccessDTO: clientVo
       };
       console.log('DATA TO SAVE IS:', saveFormData);
       try {
@@ -451,6 +509,8 @@ const UserCreation = () => {
     setRoleTableDataErrors('');
     setBranchTableData([{ id: 1, branchCode: '', branch: '' }]);
     setBranchTableErrors('');
+    setClientTableData([{ id: 1, clientCode: '', client: '' }]);
+    setClientTableDataErrors('');
     setEditId('');
   };
 
@@ -500,6 +560,24 @@ const UserCreation = () => {
       }
     ]);
   };
+  const handleAddRow2 = () => {
+    if (isLastRowEmpty(branchTableData)) {
+      displayRowError(branchTableData);
+      return;
+    }
+    const newRow = {
+      id: Date.now(),
+      clientCode: '',
+      client: ''
+    };
+    setClientTableData([...clientTableData, newRow]);
+    setClientTableDataErrors([
+      ...clientTableDataErrors,
+      {
+        clientCode: ''
+      }
+    ]);
+  };
 
   const isLastRowEmpty = (table) => {
     const lastRow = table[table.length - 1];
@@ -509,6 +587,8 @@ const UserCreation = () => {
       return !lastRow.role || !lastRow.startDate;
     } else if (table === branchTableData) {
       return !lastRow.branchCode;
+    }else if (table === clientTableData) {
+      return !lastRow.clientCode;
     }
     return false;
   };
@@ -521,6 +601,16 @@ const UserCreation = () => {
           ...newErrors[table.length - 1],
           role: !table[table.length - 1].role ? 'Role is required' : '',
           startDate: !table[table.length - 1].startDate ? 'Start Date is required' : ''
+        };
+        return newErrors;
+      });
+    }if (table === clientTableData) {
+      setClientTableDataErrors((prevErrors) => {
+        const newErrors = [...prevErrors];
+        newErrors[table.length - 1] = {
+          ...newErrors[table.length - 1],
+          client: !table[table.length - 1].client ? 'client is required' : '',
+          clientCode: !table[table.length - 1].clientCode ? 'Client Code is required' : ''
         };
         return newErrors;
       });
@@ -548,6 +638,23 @@ const UserCreation = () => {
     }
   };
 
+  // const getAvailableclientCodes = (currentRowId) => {
+  //   const selectedclients = clientTableData.filter((row) => row.id !== currentRowId).map((row) => row.client);
+  //   return clientList?.filter((client) => !selectedclients.includes(client.client));
+  // };
+  // const handleClientCodeChange = (row, index, event) => {
+  //   const value = event.target.value;
+  //   const selectedclient = clientList.find((client) => client.client === value);
+  //   setClientTableData((prev) => prev.map((r) => (r.id === row.id ? { ...r, client: value, clientId: selectedclient.id } : r)));
+  //   setClientTableDataErrors((prev) => {
+  //     const newErrors = [...prev];
+  //     newErrors[index] = {
+  //       ...newErrors[index],
+  //       client: !value ? 'Client is required' : ''
+  //     };
+  //     return newErrors;
+  //   });
+  // };
   const getAvailableRoles = (currentRowId) => {
     const selectedRoles = roleTableData.filter((row) => row.id !== currentRowId).map((row) => row.role);
     return roleList?.filter((role) => !selectedRoles.includes(role.role));
@@ -581,6 +688,26 @@ const UserCreation = () => {
       newErrors[index] = {
         ...newErrors[index],
         branchCode: !value ? 'Branch Code is required' : ''
+      };
+      return newErrors;
+    });
+  };
+
+  const getAvailableclientCodes = (currentRowId) => {
+    const selectedclientCodes = clientTableData.filter((row) => row.id !== currentRowId).map((row) => row.clientCode);
+    return clientList.filter((client) => !selectedclientCodes.includes(client.clientCode));
+  };
+  const handleClientCodeChange = (row, index, event) => {
+    const value = event.target.value;
+    const selectedclient = clientList.find((client) => client.clientCode === value);
+    setClientTableData((prev) =>
+      prev.map((r) => (r.id === row.id ? { ...r, clientCode: value, client: selectedclient ? selectedclient.client : '' } : r))
+    );
+    setClientTableDataErrors((prev) => {
+      const newErrors = [...prev];
+      newErrors[index] = {
+        ...newErrors[index],
+        clientCode: !value ? 'Client Code is required' : ''
       };
       return newErrors;
     });
@@ -694,6 +821,7 @@ const UserCreation = () => {
                       </MenuItem>
                       <MenuItem value="ADMIN">ADMIN</MenuItem>
                       <MenuItem value="USER">USER</MenuItem>
+                      <MenuItem value="GUESTUSER">GUEST USER</MenuItem>
                     </Select>
                     {fieldErrors.userType && <FormHelperText>{fieldErrors.userType}</FormHelperText>}
                   </FormControl>
@@ -1036,26 +1164,26 @@ const UserCreation = () => {
                                       </td>
                                       <td className="border px-2 py-2">
                                         <select
-                                          value={row.branchCode}
-                                          onChange={(e) => handleBranchCodeChange(row, index, e)}
+                                          value={row.clientCode}
+                                          onChange={(e) => handleClientCodeChange(row, index, e)}
                                           onKeyDown={(e) => handleKeyDown(e, row, clientTableData)}
-                                          className={clientTableDataErrors[index]?.branchCode ? 'error form-control' : 'form-control'}
+                                          className={clientTableDataErrors[index]?.clientCode ? 'error form-control' : 'form-control'}
                                         >
                                           <option value="">Select</option>
-                                          {getAvailableBranchCodes(row.id).map((branch) => (
-                                            <option key={branch.id} value={branch.branchCode}>
-                                              {branch.branchCode}
+                                          {getAvailableclientCodes(row.id).map((client) => (
+                                            <option key={client.id} value={client.clientCode}>
+                                              {client.clientCode}
                                             </option>
                                           ))}
                                         </select>
-                                        {clientTableDataErrors[index]?.branchCode && (
+                                        {clientTableDataErrors[index]?.clientCode && (
                                           <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
-                                            {clientTableDataErrors[index].branchCode}
+                                            {clientTableDataErrors[index].clientCode}
                                           </div>
                                         )}
                                       </td>
 
-                                      <td className="border px-2 py-2 text-center pt-3">{row.branch}</td>
+                                      <td className="border px-2 py-2 text-center pt-3">{row.client}</td>
                                     </tr>
                                   ))}
                                 </tbody>
