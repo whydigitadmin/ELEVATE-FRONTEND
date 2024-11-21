@@ -39,7 +39,7 @@ const Responsibilities = () => {
   const theme = useTheme();
   const [listView, setListView] = useState(false);
   const [listViewData, setListViewData] = useState([]);
-  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
+  // const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState('');
   const [screenList, setScreenList] = useState([]);
@@ -48,7 +48,7 @@ const Responsibilities = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    orgId: orgId,
+    // orgId: orgId,
     active: true
   });
 
@@ -147,7 +147,7 @@ const Responsibilities = () => {
 
   const getAllScreens = async () => {
     try {
-      const screensData = await getAllActiveScreens(orgId);
+      const screensData = await getAllActiveScreens();
       setScreenList(screensData);
     } catch (error) {
       console.error('Error fetching country data:', error);
@@ -156,7 +156,7 @@ const Responsibilities = () => {
 
   const getAllResponsibilities = async () => {
     try {
-      const response = await apiCalls('get', `auth/allResponsibilityByOrgId?orgId=${orgId}`);
+      const response = await apiCalls('get', `auth/allResponsibility`);
 
       setListViewData(response.paramObjectsMap.responsibilityVO);
       console.log('Test', response);
@@ -212,7 +212,7 @@ const Responsibilities = () => {
         ...(editId && { id: editId }),
         active: formData.active,
         responsibility: formData.name,
-        orgId: orgId,
+        // orgId: orgId,
         createdby: loginUserName,
         screensDTO: screenVo
       };

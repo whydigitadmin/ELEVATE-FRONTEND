@@ -90,7 +90,7 @@ const Roles = () => {
 
   const getRole = async () => {
     try {
-      const response = await apiCalls('get', `/auth/allRolesByOrgId?orgId=${orgId}`);
+      const response = await apiCalls('get', `/auth/allRoles`);
 
       if (response.status === true) {
         console.log('Role=>', response.paramObjectsMap.rolesVO);

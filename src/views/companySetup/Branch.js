@@ -23,7 +23,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ActionButton from 'utils/ActionButton';
 import ToastComponent, { showToast } from 'utils/toast-component';
-import { getAllActiveCitiesByState, getAllActiveCountries, getAllActiveStatesByCountry } from 'utils/CommonFunctions';
+import { getAllActiveCitiesByState, getAllActiveCountries, getAllActiveEmployee, getAllActiveStatesByCountry } from 'utils/CommonFunctions';
 import apiCalls from 'apicall';
 
 const Branch = () => {
@@ -35,9 +35,9 @@ const Branch = () => {
   const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
   const [editId, setEditId] = useState('');
-
+  const [employeeList, setEmployeeList] = useState([]);
   const [formData, setFormData] = useState({
-    companyName: '',
+    employCode: '',
     branchCode: '',
     branchName: '',
     mobile: '',
@@ -52,7 +52,7 @@ const Branch = () => {
   });
 
   const [fieldErrors, setFieldErrors] = useState({
-    companyName: '',
+    employCode: '',
     branchCode: '',
     branchName: '',
     mobile: '',
@@ -89,6 +89,7 @@ const Branch = () => {
   const [listViewData, setListViewData] = useState([]);
   useEffect(() => {
     getAllCountries();
+    getAllActiveEmployees();
     getCompanyDetails();
     getAllBranches();
     if (formData.country) {
@@ -99,6 +100,17 @@ const Branch = () => {
     }
   }, [formData.country, formData.state]);
 
+
+  const getAllActiveEmployees = async () => {
+    try {
+      const empData = await getAllActiveEmployee();
+      setEmployeeList(empData);
+    } catch (error) {
+      console.error('Error fetching country data:', error);
+    }
+  };
+
+
   const getCompanyDetails = async () => {
     try {
       const response = await apiCalls('get', `commonmaster/company/${orgId}`);
@@ -107,7 +119,7 @@ const Branch = () => {
       if (response.status === true) {
         const particularCompany = response.paramObjectsMap.companyVO[0];
 
-        setFormData({ ...formData, companyName: particularCompany.companyName });
+        setFormData({ ...formData, employCode: particularCompany.employCode });
       } else {
         console.error('API Error:', response);
       }
@@ -273,6 +285,7 @@ const Branch = () => {
 
   const handleClear = () => {
     setFormData({
+      employCode: '',
       branchCode: '',
       branchName: '',
       mobile: '',
@@ -286,7 +299,7 @@ const Branch = () => {
       active: true
     });
     setFieldErrors({
-      // companyName: '',
+      employCode: '',
       branchCode: '',
       branchName: '',
       mobile: '',
@@ -303,6 +316,9 @@ const Branch = () => {
 
   const handleSave = async () => {
     const errors = {};
+    if (!formData.employCode) {
+      errors.employCode = 'Company Name is required';
+    }
     if (!formData.branchCode) {
       errors.branchCode = 'Company Code is required';
     }
@@ -337,6 +353,7 @@ const Branch = () => {
       setIsLoading(true);
       const saveFormData = {
         ...(editId && { id: editId }),
+        employCode: formData.employCode,
         branchCode: formData.branchCode,
         branch: formData.branchName,
         phone: formData.mobile,
@@ -396,6 +413,7 @@ const Branch = () => {
       if (response.status === true) {
         const particularBranch = response.paramObjectsMap.Branch;
         setFormData({
+          employCode: particularBranch.employCode,
           branchCode: particularBranch.branchCode,
           branchName: particularBranch.branch,
           mobile: particularBranch.phone,
@@ -444,17 +462,36 @@ const Branch = () => {
         ) : (
           <>
             <div className="row">
-              <div className="col-md-3 mb-3">
-                <TextField
+             
+                {/* <TextField
                   // label="Company"
                   variant="outlined"
                   size="small"
                   fullWidth
                   name="companyName"
                   value={formData.companyName}
-                  disabled
-                />
-              </div>
+                  onChange={handleInputChange}
+                // disabled
+                /> */}
+
+                {/* EmployeeCode------- */}
+                {/* <div className="col-md-3 mb-3">
+                  <FormControl size="small" variant="outlined" fullWidth error={!!fieldErrors.employCode}>
+                    <InputLabel id="company-label" >Employee Code</InputLabel>
+                    <Select labelId="company-label" label="Company" value={formData.employCode} onChange={handleInputChange} name="employCode"> 
+                      {Array.isArray(employeeList) &&
+                        employeeList?.map((row) => (
+                          <MenuItem key={row.id} value={row.clientCode}>
+                            {row.clientCode}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                    {fieldErrors.employCode && <FormHelperText>{fieldErrors.employCode}</FormHelperText>}
+                  </FormControl>
+                </div> */}
+
+
+            
               <div className="col-md-3 mb-3">
                 <TextField
                   label="Branch Code"

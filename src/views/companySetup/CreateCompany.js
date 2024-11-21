@@ -74,6 +74,7 @@ const CreateCompany = () => {
       console.error('Error fetching data:', error);
     }
   };
+  
   const getCompanyById = async (row) => {
     console.log('THE SELECTED COMPANY ID IS:', row.original.id);
     setEditId(row.original.id);

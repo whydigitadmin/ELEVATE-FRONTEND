@@ -14,7 +14,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
 import { showToast } from 'utils/toast-component';
 import CommonListViewTable from 'views/basicMaster/CommonListViewTable';
-import { encryptPassword } from 'views/utilities/encryptPassword';
 
 const EltCompany = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,20 +23,21 @@ const EltCompany = () => {
   const [formData, setFormData] = useState({
     companyCode: '',
     companyName: '',
-    phoneNo: '',
-    companyEmail: '',
-    website: '',
+    phone: '',
+    email: '',
+    webSite: '',
     active: true
   });
 
   const [fieldErrors, setFieldErrors] = useState({
     companyCode: '',
     companyName: '',
-    phoneNo: '',
-    companyEmail: '',
-    website: '',
+    phone: '',
+    email: '',
+    webSite: '',
     active: ''
   });
+
   const [listView, setListView] = useState(false);
   const listViewColumns = [
     { accessorKey: 'companyCode', header: 'Company Code', size: 140 },
@@ -47,35 +47,34 @@ const EltCompany = () => {
       size: 140
     },
     {
-      accessorKey: 'companyMail',
+      accessorKey: 'phone',
+      header: 'phone Number',
+      size: 140
+    },
+    {
+      accessorKey: 'email',
       header: 'companyMail',
       size: 140
     },
     {
-      accessorKey: 'phoneNo',
-      header: 'phoneNo',
-      size: 140
-    },
-    {
-      accessorKey: 'website',
-      header: 'Website',
+      accessorKey: 'webSite',
+      header: 'webSite',
       size: 140
     },
     { accessorKey: 'active', header: 'Active', size: 140 }
   ];
-
   const [listViewData, setListViewData] = useState([]);
 
   useEffect(() => {
-    // getAllCompanies();
+    getAllCompanies();
   }, []);
   const getAllCompanies = async () => {
     try {
-      const response = await apiCalls('get', `commonmaster/company`);
+      const response = await apiCalls('get', `companycontroller/getAllEltCompany`);
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setListViewData(response.paramObjectsMap.companyVO);
+        setListViewData(response.paramObjectsMap.eltCompanyVOs);
       } else {
         console.error('API Error:', response);
       }
@@ -83,25 +82,33 @@ const EltCompany = () => {
       console.error('Error fetching data:', error);
     }
   };
+
   const getCompanyById = async (row) => {
-    console.log('THE SELECTED COMPANY ID IS:', row.original.id);
-    setEditId(row.original.id);
+    if (!row || !row.original || !row.original.id) {
+      console.error('Invalid row data passed:', row);
+      return;
+    }
+
+    const companyId = row.original.id;
+    console.log('The selected company ID is:', companyId);
+    setEditId(companyId);
+
     try {
-      const response = await apiCalls('get', `commonmaster/company/${row.original.id}`);
+      const response = await apiCalls('get', `companycontroller/getEltCompanyById?id=${companyId}`);
       console.log('API Response:', response);
 
       if (response.status === true) {
         setListView(false);
-        const particularCompany = response.paramObjectsMap.companyVO[0];
-        console.log('THE PARTICULAR COMPANY DETAILS ARE:', particularCompany);
+        const particularCompany = response.paramObjectsMap.eltCompanyVO;
+        console.log('The particular company details are:', particularCompany);
 
         setFormData({
           companyCode: particularCompany.companyCode,
           companyName: particularCompany.companyName,
-          phoneNo: particularCompany.phoneNo,
-          companyEmail: particularCompany.email,
-          website: particularCompany.website,
-          active: particularCompany.active === 'Active' ? true : false
+          phone: particularCompany.phone,
+          email: particularCompany.email,
+          webSite: particularCompany.webSite,
+          active: particularCompany.active === 'Active',
         });
       } else {
         console.error('API Error:', response);
@@ -111,75 +118,64 @@ const EltCompany = () => {
     }
   };
 
+
   const handleInputChange = (e) => {
-    const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
-  
-    // Regex Patterns
-    const nameRegex = /^[A-Za-z ]*$/;
+    const { name, value, checked, type } = e.target;
+
     const companyNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const companyCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-    const phoneNumberRegex = /^[0-9]*$/; // Only numbers allowed
-  
+    const phoneNumberRegex = /^[0-9]*$/;
+
+    let updatedValue = value;
+
     if (name === 'companyName' && !companyNameRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
+      return;
     } else if (name === 'companyCode' && !companyCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } else if (name === 'phoneNo' && !phoneNumberRegex.test(value)) {
+      return;
+    } else if (name === 'phone' && !phoneNumberRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Only numeric values are allowed' });
+      return;
     } else {
-      let updatedValue = value;
-  
-      // Enforce lowercase for email fields
-      if (name === 'companyEmail') {
-        updatedValue = value.toLowerCase();
-      } 
-      // Ensure phoneNo is numeric only
-      else if (name === 'phoneNo') {
-        updatedValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-      } 
-      // Convert other fields to uppercase
-      else {
-        updatedValue = value.toUpperCase();
-      }
-  
-      if (type === 'checkbox') {
-        setFormData({ ...formData, [name]: checked });
-      } else {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [name]: updatedValue
-        }));
-      }
-  
       setFieldErrors({ ...fieldErrors, [name]: '' });
-  
-      // Update the cursor position after the input change only for text inputs
-      if (type === 'text' || type === 'email' || type === 'textarea') {
-        setTimeout(() => {
-          const inputElement = document.getElementsByName(name)[0];
-          inputElement.setSelectionRange(selectionStart, selectionEnd);
-        }, 0);
-      }
+    }
+
+    if (name === 'email') {
+      updatedValue = updatedValue.toLowerCase();
+    } else if (name === 'webSite') {
+      updatedValue = updatedValue.toLowerCase()
+    } else if (name === 'phone') {
+      updatedValue = updatedValue.replace(/[^0-9]/g, '');
+    } else {
+      updatedValue = updatedValue.toUpperCase();
+    }
+
+    if (type === 'checkbox') {
+      setFormData({ ...formData, [name]: checked });
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: updatedValue,
+      }));
     }
   };
-  
 
   const handleClear = () => {
     setFormData({
       companyCode: '',
       companyName: '',
-      phoneNo: '',
-      companyEmail: '',
-      website: '',
+      phone: '',
+      email: '',
+      webSite: '',
       active: true
     });
     setFieldErrors({
       companyCode: '',
       companyName: '',
-      phoneNo: '',
-      companyEmail: '',
-      website:''
+      phone: '',
+      email: '',
+      webSite: ''
     });
     setEditId('');
   };
@@ -194,16 +190,16 @@ const EltCompany = () => {
     if (!formData.companyName) {
       errors.companyName = 'Company is required';
     }
-    if (!formData.phoneNo) {
-      errors.phoneNo = 'Phone Number is required';
+    if (!formData.phone) {
+      errors.phone = 'Phone Number is required';
     }
-    if (!formData.website) {
-      errors.website = 'website is required';
+    if (!formData.webSite) {
+      errors.webSite = 'webSite is required';
     }
-    if (!formData.companyEmail) {
-      errors.companyEmail = 'company Admin Email ID is required';
-    } else if (!emailRegex.test(formData.companyEmail)) {
-      errors.companyEmail = 'Invalid MailID Format';
+    if (!formData.email) {
+      errors.email = 'Company Admin Email ID is required';
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Invalid Email Format';
     }
 
     if (Object.keys(errors).length === 0) {
@@ -215,40 +211,37 @@ const EltCompany = () => {
         companyCode: formData.companyCode,
         companyName: formData.companyName,
         createdBy: loginUserName,
-        email: formData.companyEmail,
-        phoneNo: formData.phoneNo,
-        website: formData.website,
-        employeeCode: formData.employeeCode,
-        // orgId: orgId
+        email: formData.email,
+        phone: formData.phone,
+        webSite: formData.webSite,
+        orgId: orgId
       };
+
       console.log('DATA TO SAVE IS:', saveData);
 
       try {
-        const method = editId ? 'put' : 'post';
-        const url = editId ? 'commonmaster/updateCompany' : 'companycontroller/updateCreateCompany';
-
-        const response = await apiCalls(method, url, saveData);
+        const response = await apiCalls('put', `/companycontroller/updateCreateCompany`, saveData);
         if (response.status === true) {
           console.log('Response:', response);
-          showToast('success', editId ? ' Company Updated Successfully' : 'Company created successfully');
-
+          showToast('success', editId ? ' Elevate Company page Updated Successfully' : 'Elevate Company page created successfully');
           handleClear();
-          // getAllCompanies();
+          getAllCompanies();
+          // getCompanyById();
           setIsLoading(false);
         } else {
-          showToast('error', response.paramObjectsMap.errorMessage || 'Company creation failed');
+          showToast('error', response.paramObjectsMap.message || 'Elevate Company creation failed');
           setIsLoading(false);
         }
       } catch (error) {
         console.error('Error:', error);
-        showToast('error', 'Company creation failed');
-
+        showToast('error', 'Elevate Company creation failed');
         setIsLoading(false);
       }
     } else {
       setFieldErrors(errors);
     }
   };
+
 
   const handleView = () => {
     setListView(!listView);
@@ -271,7 +264,7 @@ const EltCompany = () => {
               data={listViewData}
               columns={listViewColumns}
               // editCallback={editEmployee}
-              blockEdit={true} // DISAPLE THE MODAL IF TRUE
+              blockEdit={true}
               toEdit={getCompanyById}
             />
           </div>
@@ -311,38 +304,38 @@ const EltCompany = () => {
                   variant="outlined"
                   size="small"
                   fullWidth
-                  name="companyEmail"
-                  value={formData.companyEmail}
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.companyEmail}
-                  helperText={fieldErrors.companyEmail}
+                  error={!!fieldErrors.email}
+                  helperText={fieldErrors.email}
                 />
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Website"
+                  label="webSite"
                   variant="outlined"
                   size="small"
                   fullWidth
-                  name="Website"
-                  value={formData.website}
+                  name="webSite"
+                  value={formData.webSite}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.website}
-                  helperText={fieldErrors.website}
+                  error={!!fieldErrors.webSite}
+                  helperText={fieldErrors.webSite}
                 />
               </div>
-              
+
               <div className="col-md-3 mb-3">
                 <TextField
                   label="Phone Number"
                   variant="outlined"
                   size="small"
                   fullWidth
-                  name="phoneNo"
-                  value={formData.phoneNo}
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.phoneNo}
-                  helperText={fieldErrors.phoneNo}
+                  error={!!fieldErrors.phone}
+                  helperText={fieldErrors.phone}
                 />
               </div>
               <div className="col-md-3 mb-3">
