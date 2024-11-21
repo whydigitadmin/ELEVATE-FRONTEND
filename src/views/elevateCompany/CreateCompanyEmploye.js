@@ -410,24 +410,7 @@ const CreateClientEmploye = () => {
                                     helperText={fieldErrors.phone}
                                 />
                             </div>
-
-                            {/* webSite */}
-                            <div className="col-md-3 mb-3">
-                                <TextField
-                                    label="Website"
-                                    variant="outlined"
-                                    size="small"
-                                    fullWidth
-                                    name="webSite"
-                                    value={formData.webSite}
-                                    onChange={handleInputChange}
-                                    error={!!fieldErrors.webSite}
-                                    helperText={fieldErrors.webSite}
-                                />
-                            </div>
-
-
-
+                            
                             {/* Active Checkbox */}
                             <div className="col-md-3 mb-3">
                                 <FormControlLabel

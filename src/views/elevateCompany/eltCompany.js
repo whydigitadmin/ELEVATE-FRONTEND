@@ -141,10 +141,8 @@ const EltCompany = () => {
             return;
         }
         if (value.length > 10) {
-            setFieldErrors({ ...fieldErrors, [name]: 'Phone number cannot exceed 10 digits' });
+            setFieldErrors({ ...fieldErrors, [name]: '' });
             return;
-        } else if (value.length < 10 && value.length > 0) {
-            setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be 10 digits' });
         } else {
             setFieldErrors({ ...fieldErrors, [name]: '' });
         }

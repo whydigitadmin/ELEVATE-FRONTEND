@@ -105,6 +105,14 @@ const UserCreation = () => {
     }
   ]);
 
+  const [clientTableData, setClientTableData] = useState([{ id: 1, client: '', clientCode: '' }]);
+  const [clientTableDataErrors, setClientTableDataErrors] = useState([
+    {
+      client: '',
+      clientCode: '',
+    }
+  ]);
+
   useEffect(() => {
     getAllUsers();
     getAllBranches();
@@ -1006,7 +1014,7 @@ const UserCreation = () => {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {branchTableData.map((row, index) => (
+                                  {clientTableData.map((row, index) => (
                                     <tr key={row.id}>
                                       <td className="border px-2 py-2 text-center">
                                         <ActionButton
@@ -1015,10 +1023,10 @@ const UserCreation = () => {
                                           onClick={() =>
                                             handleDeleteRow(
                                               row.id,
-                                              branchTableData,
-                                              setBranchTableData,
-                                              branchTableErrors,
-                                              setBranchTableErrors
+                                              clientTableData,
+                                              setClientTableData,
+                                              clientTableDataErrors,
+                                              setClientTableDataErrors
                                             )
                                           }
                                         />
@@ -1030,8 +1038,8 @@ const UserCreation = () => {
                                         <select
                                           value={row.branchCode}
                                           onChange={(e) => handleBranchCodeChange(row, index, e)}
-                                          onKeyDown={(e) => handleKeyDown(e, row, branchTableData)}
-                                          className={branchTableErrors[index]?.branchCode ? 'error form-control' : 'form-control'}
+                                          onKeyDown={(e) => handleKeyDown(e, row, clientTableData)}
+                                          className={clientTableDataErrors[index]?.branchCode ? 'error form-control' : 'form-control'}
                                         >
                                           <option value="">Select</option>
                                           {getAvailableBranchCodes(row.id).map((branch) => (
@@ -1040,9 +1048,9 @@ const UserCreation = () => {
                                             </option>
                                           ))}
                                         </select>
-                                        {branchTableErrors[index]?.branchCode && (
+                                        {clientTableDataErrors[index]?.branchCode && (
                                           <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
-                                            {branchTableErrors[index].branchCode}
+                                            {clientTableDataErrors[index].branchCode}
                                           </div>
                                         )}
                                       </td>

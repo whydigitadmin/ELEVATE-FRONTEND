@@ -102,7 +102,7 @@ const ClientCompany = () => {
       console.error('Error fetching data:', error);
     }
   };
-  
+
   const getAllcompanyCode = async () => {
     try {
       const response = await apiCalls('get', `companycontroller/getAllEltCompany`);
@@ -130,18 +130,42 @@ const ClientCompany = () => {
   const handleInputChange = (e) => {
     const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
     const nameRegex = /^[A-Za-z ]*$/;
+    const phoneNumberRegex = /^[0-9]*$/;
     const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
 
     if (name === 'clientName' && !clientNameRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
+      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
     } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } else {
+    } 
+  //   else if (name === 'phone') {
+  //     if (!phoneNumberRegex.test(value)) {
+  //         setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+  //         return;
+  //     }
+  //     if (value.length > 10) {
+  //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number cannot exceed 10 digits' });
+  //         return;
+  //     } else if (value.length < 10 && value.length > 0) {
+  //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be 10 digits' });
+  //     } else {
+  //         setFieldErrors({ ...fieldErrors, [name]: '' });
+  //     }
+  // } 
+    else if (name === 'phone' && !phoneNumberRegex.test(value)) {
+      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    } 
+    // else if (name === 'email' && !emailRegex.test(value)) {
+    //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    // }  
+    // else if (name === 'webSite' && !websiteRegex.test(value)) {
+    //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    // }
+     else {
       let updatedValue = value;
 
-      if (name !== 'email') {
+      if (name !== 'email' && name !== 'webSite' ) {
         updatedValue = value.toUpperCase();
       }
 
@@ -334,7 +358,7 @@ const ClientCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Client Code"
+                  label="Code"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -347,7 +371,7 @@ const ClientCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Client Name"
+                  label="Name"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -394,6 +418,7 @@ const ClientCompany = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
+                  inputProps={{ maxLength: 10 }}
                   error={!!fieldErrors.phone}
                   helperText={fieldErrors.phone}
                 />
