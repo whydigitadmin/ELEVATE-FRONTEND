@@ -6,7 +6,11 @@ import { ButtonBase } from '@mui/material';
 
 // project imports
 import { MENU_OPEN } from 'store/actions';
+<<<<<<< HEAD
 import LogoImage from '../../../../src/assets/images/Elevate_Logo.png';
+=======
+import LogoImage from '../../../../src/assets/images/Elevate_logo.jpeg';
+>>>>>>> c222cb9997f8b69953128b0985b94cf37e0d55e4
 
 // ==============================|| MAIN LOGO ||============================== //
 

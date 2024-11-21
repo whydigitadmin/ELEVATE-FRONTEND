@@ -20,6 +20,7 @@ export const Employee = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState('');
   const [branchList, setBranchList] = useState([]);
+
   const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
 
@@ -27,8 +28,9 @@ export const Employee = () => {
     empCode: '',
     empName: '',
     gender: '',
-    branch: '',
-    branchCode: '',
+    email: '',
+    // branch: '',
+    // branchCode: '',
     dept: '',
     designation: '',
     dob: null,
@@ -43,8 +45,9 @@ export const Employee = () => {
     empCode: '',
     empName: '',
     gender: '',
-    branch: '',
-    branchCode: '',
+    email: '',
+    // branch: '',
+    // branchCode: '',
     dept: '',
     designation: '',
     dob: '',
@@ -58,90 +61,80 @@ export const Employee = () => {
     getAllEmployees();
   }, []);
 
-  // const handleInputChange = (e) => {
-  //   const { name, value, checked } = e.target;
-  //   const codeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-  //   const nameRegex = /^[A-Za-z ]*$/;
-
-  //   if (name === 'empCode' && !codeRegex.test(value)) {
-  //     setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-  //   } else if (name === 'empName' && !nameRegex.test(value)) {
-  //     setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-  //   } else if (name === 'branch') {
-  //     const selectedBranch = branchList.find((br) => br.branch === value);
-  //     if (selectedBranch) {
-  //       setFormData((prevData) => ({
-  //         ...prevData,
-  //         branch: value,
-  //         branchCode: selectedBranch.branchCode
-  //       }));
-  //     }
-  //   } else {
-  //     setFormData({ ...formData, [name]: value.toUpperCase() });
-  //     setFieldErrors({ ...fieldErrors, [name]: '' });
-  //   }
-  // };
-
   const handleInputChange = (e) => {
     const { name, value, checked, type, selectionStart, selectionEnd } = e.target;
+  
     const codeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
     const nameRegex = /^[A-Za-z ]*$/;
-
+    const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+  
     let errorMessage = '';
-
-    // Validation for empCode
-    if (name === 'empCode' && !codeRegex.test(value)) {
-      errorMessage = 'Invalid Format';
-    }
-    // Validation for empName
-    else if (name === 'empName' && !nameRegex.test(value)) {
-      errorMessage = 'Invalid Format';
-    }
-
-    // Set or clear error messages
-    if (errorMessage) {
+  
+    if (name === 'email') {
+      const normalizedValue = value.toLowerCase();
+      e.target.value = normalizedValue;
+      if (normalizedValue && !emailRegex.test(normalizedValue)) {
+        errorMessage = 'Invalid email format.';
+      }
       setFieldErrors((prevErrors) => ({ ...prevErrors, [name]: errorMessage }));
-    } else {
-      setFieldErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
-
-      if (name === 'branch') {
-        // Handle branch selection
-        const selectedBranch = branchList.find((br) => br.branch === value);
-        if (selectedBranch) {
-          setFormData((prevData) => ({
-            ...prevData,
-            branch: value,
-            branchCode: selectedBranch.branchCode
-          }));
-        } else {
-          // Optionally handle cases where the branch is not found
-          setFormData((prevData) => ({
-            ...prevData,
-            branch: value,
-            branchCode: ''
-          }));
+      setFormData((prevData) => ({ ...prevData, [name]: normalizedValue }));
+      return;
+    }
+  
+    switch (name) {
+      case 'empCode':
+        if (!codeRegex.test(value)) {
+          errorMessage = 'Invalid format. Only alphanumeric and special characters (#, _, -, /, \\) are allowed.';
         }
-      } else if (type === 'checkbox') {
-        // Handle checkbox inputs
-        setFormData((prevData) => ({ ...prevData, [name]: checked }));
-      } else if (type === 'text' || type === 'textarea') {
-        // Handle text-based inputs: convert to uppercase and maintain cursor
+        break;
+  
+      case 'empName':
+        if (!nameRegex.test(value)) {
+          errorMessage = 'Invalid format. Only letters and spaces are allowed.';
+        }
+        break;
+  
+      default:
+        break;
+    }
+  
+    setFieldErrors((prevErrors) => ({ ...prevErrors, [name]: errorMessage }));
+  
+    if (errorMessage) {
+      return;
+    }
+  
+    setFormData((prevData) => {
+      if (name === 'branch') {
+        const selectedBranch = branchList.find((br) => br.branch === value);
+        return {
+          ...prevData,
+          branch: value,
+          branchCode: selectedBranch ? selectedBranch.branchCode : '',
+        };
+      }
+  
+      if (type === 'checkbox') {
+        return { ...prevData, [name]: checked };
+      }
+  
+      if (type === 'text' || type === 'textarea') {
         const upperCaseValue = value.toUpperCase();
-        setFormData((prevData) => ({ ...prevData, [name]: upperCaseValue }));
-
-        // Maintain cursor position
         setTimeout(() => {
           const inputElement = document.getElementsByName(name)[0];
           if (inputElement && inputElement.setSelectionRange) {
             inputElement.setSelectionRange(selectionStart, selectionEnd);
           }
         }, 0);
-      } else {
-        // Handle other input types (e.g., select, radio) without transformation
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
+        return { ...prevData, [name]: upperCaseValue };
       }
-    }
+  
+      return { ...prevData, [name]: value };
+    });
   };
+  
+
+
 
   const handleDateChange = (field, date) => {
     const formattedDate = dayjs(date).format('YYYY-MM-DD');
@@ -155,8 +148,9 @@ export const Employee = () => {
       empCode: '',
       empName: '',
       gender: '',
-      branch: '',
-      branchCode: '',
+      email: '',
+      // branch: '',
+      // branchCode: '',
       dept: '',
       designation: '',
       dob: null,
@@ -167,8 +161,9 @@ export const Employee = () => {
       empCode: '',
       empName: '',
       gender: '',
-      branch: '',
-      branchCode: '',
+      email: '',
+      // branch: '',
+      // branchCode: '',
       dept: '',
       designation: '',
       dob: '',
@@ -178,8 +173,8 @@ export const Employee = () => {
 
   const getAllBranches = async () => {
     try {
-      const branchData = await getAllActiveBranches(orgId);
-      setBranchList(branchData);
+      const empData = await getAllActiveBranches(orgId);
+      setBranchList(empData);
     } catch (error) {
       console.error('Error fetching country data:', error);
     }
@@ -219,8 +214,9 @@ export const Employee = () => {
           gender: particularEmp.gender,
           dept: particularEmp.department,
           designation: particularEmp.designation,
-          branch: particularEmp.branch,
-          branchCode: selectedBranch ? selectedBranch.branchCode : '', // Handle case where selectedBranch might be undefined
+          email: particularEmp.email,
+          // branch: particularEmp.branch,
+          // branchCode: selectedBranch ? selectedBranch.branchCode : '', // Handle case where selectedBranch might be undefined
           dob: particularEmp.dateOfBirth,
           doj: particularEmp.joiningDate,
           active: particularEmp.active === 'Active' ? true : false
@@ -244,9 +240,12 @@ export const Employee = () => {
     if (!formData.gender) {
       errors.gender = 'Gender is required';
     }
-    if (!formData.branch) {
-      errors.branch = 'Branch is required';
+    if (!formData.email) {
+      errors.email = 'Email is required';
     }
+    // if (!formData.branch) {
+    //   errors.branch = 'Branch is required';
+    // }
     if (!formData.dept) {
       errors.dept = 'Department is required';
     }
@@ -269,8 +268,9 @@ export const Employee = () => {
         employeeCode: formData.empCode,
         employeeName: formData.empName,
         gender: formData.gender,
-        branch: formData.branch,
-        branchCode: formData.branchCode,
+        email: formData.email,
+        // branch: formData.branch,
+        // branchCode: formData.branchCode,
         department: formData.dept,
         designation: formData.designation,
         dateOfBirth: formData.dob,
@@ -309,7 +309,8 @@ export const Employee = () => {
   const listViewColumns = [
     { accessorKey: 'employeeCode', header: 'Emp Code', size: 140 },
     { accessorKey: 'employeeName', header: 'Employee', size: 140 },
-    { accessorKey: 'branch', header: 'Branch', size: 140 },
+    { accessorKey: 'email', header: 'Email', size: 140 },
+    // { accessorKey: 'branch', header: 'Branch', size: 140 },
     { accessorKey: 'department', header: 'Dept', size: 140 },
     { accessorKey: 'designation', header: 'Designation', size: 140 },
     { accessorKey: 'joiningDate', header: 'Joining Date', size: 140 },
@@ -372,7 +373,7 @@ export const Employee = () => {
                   {fieldErrors.gender && <FormHelperText>{fieldErrors.gender}</FormHelperText>}
                 </FormControl>
               </div>
-              <div className="col-md-3 mb-3">
+              {/* <div className="col-md-3 mb-3">
                 <FormControl size="small" variant="outlined" fullWidth error={!!fieldErrors.branch}>
                   <InputLabel id="branch-label">Branch</InputLabel>
                   <Select labelId="branch-label" label="Branch" value={formData.branch} onChange={handleInputChange} name="branch">
@@ -384,6 +385,19 @@ export const Employee = () => {
                   </Select>
                   {fieldErrors.branch && <FormHelperText>{fieldErrors.branch}</FormHelperText>}
                 </FormControl>
+              </div> */}
+              <div className="col-md-3 mb-3">
+                <TextField
+                  label="Email"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  error={!!fieldErrors.email}
+                  helperText={fieldErrors.email}
+                />
               </div>
               <div className="col-md-3 mb-3">
                 <FormControl size="small" variant="outlined" fullWidth error={!!fieldErrors.dept}>

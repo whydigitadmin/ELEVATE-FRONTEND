@@ -6,6 +6,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import apiCalls from 'apicall';
+import eltCompany from 'menu-items/eltCompany';
 import { useEffect, useState } from 'react';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
@@ -13,9 +14,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
 import { showToast } from 'utils/toast-component';
 import CommonListViewTable from 'views/basicMaster/CommonListViewTable';
-import { encryptPassword } from 'views/utilities/encryptPassword';
 
-const CreateCompany = () => {
+const EltCompany = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
@@ -23,22 +23,21 @@ const CreateCompany = () => {
   const [formData, setFormData] = useState({
     companyCode: '',
     companyName: '',
-    companyAdminName: '',
-    companyAdminEmail: '',
-    companyAdminPwd: '',
-    employeeCode: '',
+    phone: '',
+    email: '',
+    webSite: '',
     active: true
   });
 
   const [fieldErrors, setFieldErrors] = useState({
     companyCode: '',
     companyName: '',
-    companyAdminName: '',
-    companyAdminEmail: '',
-    companyAdminPwd: '',
-    employeeCode: '',
+    phone: '',
+    email: '',
+    webSite: '',
     active: ''
   });
+
   const [listView, setListView] = useState(false);
   const listViewColumns = [
     { accessorKey: 'companyCode', header: 'Company Code', size: 140 },
@@ -48,13 +47,22 @@ const CreateCompany = () => {
       size: 140
     },
     {
-      accessorKey: 'employeeName',
-      header: 'Admin',
+      accessorKey: 'phone',
+      header: 'phone Number',
+      size: 140
+    },
+    {
+      accessorKey: 'email',
+      header: 'companyMail',
+      size: 140
+    },
+    {
+      accessorKey: 'webSite',
+      header: 'webSite',
       size: 140
     },
     { accessorKey: 'active', header: 'Active', size: 140 }
   ];
-
   const [listViewData, setListViewData] = useState([]);
 
   useEffect(() => {
@@ -62,11 +70,11 @@ const CreateCompany = () => {
   }, []);
   const getAllCompanies = async () => {
     try {
-      const response = await apiCalls('get', `commonmaster/company`);
+      const response = await apiCalls('get', `companycontroller/getAllEltCompany`);
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setListViewData(response.paramObjectsMap.companyVO);
+        setListViewData(response.paramObjectsMap.eltCompanyVOs);
       } else {
         console.error('API Error:', response);
       }
@@ -74,26 +82,33 @@ const CreateCompany = () => {
       console.error('Error fetching data:', error);
     }
   };
-  
+
   const getCompanyById = async (row) => {
-    console.log('THE SELECTED COMPANY ID IS:', row.original.id);
-    setEditId(row.original.id);
+    if (!row || !row.original || !row.original.id) {
+      console.error('Invalid row data passed:', row);
+      return;
+    }
+
+    const companyId = row.original.id;
+    console.log('The selected company ID is:', companyId);
+    setEditId(companyId);
+
     try {
-      const response = await apiCalls('get', `commonmaster/company/${row.original.id}`);
+      const response = await apiCalls('get', `companycontroller/getEltCompanyById?id=${companyId}`);
       console.log('API Response:', response);
 
       if (response.status === true) {
         setListView(false);
-        const particularCompany = response.paramObjectsMap.companyVO[0];
-        console.log('THE PARTICULAR COMPANY DETAILS ARE:', particularCompany);
+        const particularCompany = response.paramObjectsMap.eltCompanyVO;
+        console.log('The particular company details are:', particularCompany);
 
         setFormData({
           companyCode: particularCompany.companyCode,
           companyName: particularCompany.companyName,
-          companyAdminName: particularCompany.employeeName,
-          companyAdminEmail: particularCompany.email,
-          employeeCode: particularCompany.employeeCode,
-          active: particularCompany.active === 'Active' ? true : false
+          phone: particularCompany.phone,
+          email: particularCompany.email,
+          webSite: particularCompany.webSite,
+          active: particularCompany.active === 'Active',
         });
       } else {
         console.error('API Error:', response);
@@ -103,44 +118,46 @@ const CreateCompany = () => {
     }
   };
 
+
   const handleInputChange = (e) => {
-    const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
-    const nameRegex = /^[A-Za-z ]*$/;
+    const { name, value, checked, type } = e.target;
+
     const companyNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const companyCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
+    const phoneNumberRegex = /^[0-9]*$/;
+
+    let updatedValue = value;
 
     if (name === 'companyName' && !companyNameRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
+      return;
     } else if (name === 'companyCode' && !companyCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } else if (name === 'companyAdminName' && !nameRegex.test(value)) {
-      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+      return;
+    } else if (name === 'phone' && !phoneNumberRegex.test(value)) {
+      setFieldErrors({ ...fieldErrors, [name]: 'Only numeric values are allowed' });
+      return;
     } else {
-      let updatedValue = value;
-
-      if (name !== 'companyAdminEmail') {
-        updatedValue = value.toUpperCase();
-      }
-
-      if (type === 'checkbox') {
-        setFormData({ ...formData, [name]: checked });
-      } else {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [name]: updatedValue
-        }));
-      }
-
       setFieldErrors({ ...fieldErrors, [name]: '' });
+    }
 
-      // Update the cursor position after the input change only for text inputs
-      if (type === 'text' || type === 'email' || type === 'textarea') {
-        setTimeout(() => {
-          const inputElement = document.getElementsByName(name)[0];
-          inputElement.setSelectionRange(selectionStart, selectionEnd);
-        }, 0);
-      }
+    if (name === 'email') {
+      updatedValue = updatedValue.toLowerCase();
+    } else if (name === 'webSite') {
+      updatedValue = updatedValue.toLowerCase()
+    } else if (name === 'phone') {
+      updatedValue = updatedValue.replace(/[^0-9]/g, '');
+    } else {
+      updatedValue = updatedValue.toUpperCase();
+    }
+
+    if (type === 'checkbox') {
+      setFormData({ ...formData, [name]: checked });
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: updatedValue,
+      }));
     }
   };
 
@@ -148,19 +165,17 @@ const CreateCompany = () => {
     setFormData({
       companyCode: '',
       companyName: '',
-      companyAdminName: '',
-      companyAdminEmail: '',
-      companyAdminPwd: '',
-      employeeCode: '',
+      phone: '',
+      email: '',
+      webSite: '',
       active: true
     });
     setFieldErrors({
       companyCode: '',
       companyName: '',
-      companyAdminName: '',
-      companyAdminEmail: '',
-      employeeCode: '',
-      companyAdminPwd: ''
+      phone: '',
+      email: '',
+      webSite: ''
     });
     setEditId('');
   };
@@ -175,16 +190,16 @@ const CreateCompany = () => {
     if (!formData.companyName) {
       errors.companyName = 'Company is required';
     }
-    if (!formData.companyAdminName) {
-      errors.companyAdminName = 'Admin Name is required';
+    if (!formData.phone) {
+      errors.phone = 'Phone Number is required';
     }
-    if (!formData.employeeCode) {
-      errors.employeeCode = 'Employee Code is required';
+    if (!formData.webSite) {
+      errors.webSite = 'webSite is required';
     }
-    if (!formData.companyAdminEmail) {
-      errors.companyAdminEmail = 'company Admin Email ID is required';
-    } else if (!emailRegex.test(formData.companyAdminEmail)) {
-      errors.companyAdminEmail = 'Invalid MailID Format';
+    if (!formData.email) {
+      errors.email = 'Company Admin Email ID is required';
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Invalid Email Format';
     }
 
     if (Object.keys(errors).length === 0) {
@@ -193,55 +208,40 @@ const CreateCompany = () => {
       const saveData = {
         ...(editId && { id: editId }),
         active: formData.active,
-        address: '',
-        city: '',
         companyCode: formData.companyCode,
         companyName: formData.companyName,
-        ceo: '',
-        country: '',
         createdBy: loginUserName,
-        currency: '',
-        email: formData.companyAdminEmail,
-        employeeName: formData.companyAdminName,
-        mainCurrency: '',
-        note: '',
-        password: encryptPassword('Wds@2022'),
-        phone: '',
-        state: '',
-        gst: '',
-        webSite: '',
-        employeeCode: formData.employeeCode,
-        zip: '',
+        email: formData.email,
+        phone: formData.phone,
+        webSite: formData.webSite,
         orgId: orgId
       };
+
       console.log('DATA TO SAVE IS:', saveData);
 
       try {
-        const method = editId ? 'put' : 'post';
-        const url = editId ? 'commonmaster/updateCompany' : 'commonmaster/company';
-
-        const response = await apiCalls(method, url, saveData);
+        const response = await apiCalls('put', `/companycontroller/updateCreateCompany`, saveData);
         if (response.status === true) {
           console.log('Response:', response);
-          showToast('success', editId ? ' Company Updated Successfully' : 'Company created successfully');
-
+          showToast('success', editId ? ' Elevate Company page Updated Successfully' : 'Elevate Company page created successfully');
           handleClear();
           getAllCompanies();
+          // getCompanyById();
           setIsLoading(false);
         } else {
-          showToast('error', response.paramObjectsMap.errorMessage || 'Company creation failed');
+          showToast('error', response.paramObjectsMap.message || 'Elevate Company creation failed');
           setIsLoading(false);
         }
       } catch (error) {
         console.error('Error:', error);
-        showToast('error', 'Company creation failed');
-
+        showToast('error', 'Elevate Company creation failed');
         setIsLoading(false);
       }
     } else {
       setFieldErrors(errors);
     }
   };
+
 
   const handleView = () => {
     setListView(!listView);
@@ -264,7 +264,7 @@ const CreateCompany = () => {
               data={listViewData}
               columns={listViewColumns}
               // editCallback={editEmployee}
-              blockEdit={true} // DISAPLE THE MODAL IF TRUE
+              blockEdit={true}
               toEdit={getCompanyById}
             />
           </div>
@@ -273,7 +273,7 @@ const CreateCompany = () => {
             <div className="row">
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Code"
+                  label="Company Code"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -286,7 +286,7 @@ const CreateCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Name"
+                  label="Company Name"
                   variant="outlined"
                   size="small"
                   fullWidth
@@ -295,61 +295,49 @@ const CreateCompany = () => {
                   onChange={handleInputChange}
                   error={!!fieldErrors.companyName}
                   helperText={fieldErrors.companyName}
-                  // inputRef={companyNameRef}
+                // inputRef={companyNameRef}
                 />
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Admin Name"
+                  label="Company Email Id"
                   variant="outlined"
                   size="small"
                   fullWidth
-                  name="companyAdminName"
-                  value={formData.companyAdminName}
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.companyAdminName}
-                  helperText={fieldErrors.companyAdminName}
+                  error={!!fieldErrors.email}
+                  helperText={fieldErrors.email}
                 />
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Admin Email Id"
+                  label="webSite"
                   variant="outlined"
                   size="small"
                   fullWidth
-                  name="companyAdminEmail"
-                  value={formData.companyAdminEmail}
+                  name="webSite"
+                  value={formData.webSite}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.companyAdminEmail}
-                  helperText={fieldErrors.companyAdminEmail}
+                  error={!!fieldErrors.webSite}
+                  helperText={fieldErrors.webSite}
                 />
               </div>
+
               <div className="col-md-3 mb-3">
                 <TextField
-                  label="Emp Code"
+                  label="Phone Number"
                   variant="outlined"
                   size="small"
                   fullWidth
-                  name="employeeCode"
-                  value={formData.employeeCode}
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.employeeCode}
-                  helperText={fieldErrors.employeeCode}
+                  error={!!fieldErrors.phone}
+                  helperText={fieldErrors.phone}
                 />
               </div>
-              {/* <div className="col-md-3 mb-3">
-                <TextField
-                  label="Password"
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  name="companyAdminPwd"
-                  value={formData.companyAdminPwd}
-                  onChange={handleInputChange}
-                  error={!!fieldErrors.companyAdminPwd}
-                  helperText={fieldErrors.companyAdminPwd}
-                />
-              </div> */}
               <div className="col-md-3 mb-3">
                 <FormControlLabel
                   control={<Checkbox checked={formData.active} onChange={handleInputChange} name="active" />}
@@ -365,4 +353,4 @@ const CreateCompany = () => {
   );
 };
 
-export default CreateCompany;
+export default EltCompany;
