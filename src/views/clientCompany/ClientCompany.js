@@ -102,7 +102,7 @@ const ClientCompany = () => {
       console.error('Error fetching data:', error);
     }
   };
-  
+
   const getAllcompanyCode = async () => {
     try {
       const response = await apiCalls('get', `companycontroller/getAllEltCompany`);
@@ -130,18 +130,27 @@ const ClientCompany = () => {
   const handleInputChange = (e) => {
     const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
     const nameRegex = /^[A-Za-z ]*$/;
+    const phoneRegex = /^[0-9 ]*$/;
     const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
+    const websiteRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
     if (name === 'clientName' && !clientNameRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
     } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } else {
+    } else if (name === 'email' && !emailRegex.test(value)) {
+      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    }  else if (name === 'phone' && !phoneRegex.test(value)) {
+      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    } else if (name === 'webSite' && !websiteRegex.test(value)) {
+      setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    }
+     else {
       let updatedValue = value;
 
-      if (name !== 'email') {
+      if (name !== 'email' ) {
         updatedValue = value.toUpperCase();
       }
 
@@ -394,6 +403,7 @@ const ClientCompany = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
+                  inputProps={{ maxLength: 10 }}
                   error={!!fieldErrors.phone}
                   helperText={fieldErrors.phone}
                 />
