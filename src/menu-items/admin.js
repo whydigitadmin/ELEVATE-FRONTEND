@@ -32,7 +32,7 @@ const admin = {
           icon: icons1.IconSquareRoundedPlus
         },
         {
-          id: 'Client User Creation',
+          id: 'admin',
           title: 'Client User Creation',
           type: 'item',
           url: '/admin/user-creation/CreateClientUser',
