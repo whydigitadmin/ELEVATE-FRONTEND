@@ -542,7 +542,7 @@ const CreateClientUser = () => {
 
   const getAvailableRoles = (currentRowId) => {
     const selectedRoles = roleTableData.filter((row) => row.id !== currentRowId).map((row) => row.role);
-    return roleList.filter((role) => !selectedRoles.includes(role.role));
+    return roleList?.filter((role) => !selectedRoles.includes(role.role));
   };
   const handleRoleChange = (row, index, event) => {
     const value = event.target.value;
