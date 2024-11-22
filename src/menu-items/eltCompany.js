@@ -56,8 +56,14 @@ const eltCompany = {
             type: 'item',
             url: '/elevateCompany/createClient',
             icon: icons1.IconSquareRoundedPlus
+          },
+          {
+            id: 'admin',
+            title: 'Company User Creation',
+            type: 'item',
+            url: '/elevateCompany/admin/user-creation/userCreation',
+            icon: icons1.IconSquareRoundedPlus
           }
-          
         ]
       }
     ]

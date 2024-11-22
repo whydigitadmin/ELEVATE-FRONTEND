@@ -316,9 +316,9 @@ const Branch = () => {
 
   const handleSave = async () => {
     const errors = {};
-    if (!formData.employCode) {
-      errors.employCode = 'Company Name is required';
-    }
+    // if (!formData.employCode) {
+    //   errors.employCode = 'Company Name is required';
+    // }
     if (!formData.branchCode) {
       errors.branchCode = 'Company Code is required';
     }

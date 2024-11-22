@@ -10,6 +10,8 @@ import ReconcileCorp from 'views/Finance/Reconcile/ReconcileCorp';
 // import CreateClient from 'views/basicMaster/CreateClient';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
+const UserCreation = Loadable(lazy(() => import('views/elevateCompany/admin/user-creation/UserCreation')));
+
 // login option 3 routing
 // const Fin1 = Loadable(lazy(() => import('views/Finance')));
 const AdjustmentJournal = Loadable(lazy(() => import('views/Finance/AdjustmentJournal')));
@@ -57,7 +59,7 @@ const FinYear = Loadable(lazy(() => import('views/basicMaster/finYear')));
 const Roles = Loadable(lazy(() => import('views/basicMaster/roles')));
 const ScreenNames = Loadable(lazy(() => import('views/basicMaster/ScreenNames')));
 const Employee = Loadable(lazy(() => import('views/basicMaster/employee')));
-// const FirstPage = Loadable(lazy(() => import('views/basicMaster/FirstPage')));
+const FirstPage = Loadable(lazy(() => import('views/basicMaster/FirstPage')));
 const ChargeTypeRequest = Loadable(lazy(() => import('views/Finance/ChargeTypeRequest')));
 
 const TaxInvoiceDetail = Loadable(lazy(() => import('views/Finance/taxInvoice/taxInvoiceDetail')));
@@ -225,10 +227,10 @@ const FinanceRoute = {
       path: '/basicMaster/country',
       element: <Country />
     },
-    // {
-    //   path: '/basicMaster/FirstPage',
-    //   element: <FirstPage />
-    // },
+    {
+      path: '/basicMaster/FirstPage',
+      element: <FirstPage />
+    },
     // {
     //   path: '/basicMaster/CreateClient',
     //   element: <CreateClient />
@@ -340,6 +342,9 @@ const FinanceRoute = {
     {
       path: '/elevateCompany/createCompanyEmployee',
       element: <CreateCompanyEmployee />
+    },{
+      path: '/elevateCompany/admin/user-creation/userCreation',
+      element: <UserCreation />
     }
   ]
 };
