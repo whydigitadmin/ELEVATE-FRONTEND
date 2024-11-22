@@ -1,16 +1,14 @@
 import { Link } from 'react-router-dom';
 
 // material-ui
-import { Chip, Divider, Grid, Stack, Typography, useMediaQuery } from '@mui/material';
+import { Button, Chip, Divider, Grid, Stack, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 // project imports
-import LogoImage from '../../../../assets/images/BIN_BEE.png';
+import LogoImage from '../../../../assets/images/Elevate_logo.jpeg';
 import AuthCardWrapper from '../AuthCardWrapper';
 import AuthWrapper1 from '../AuthWrapper1';
 import AuthLogin from '../auth-forms/AuthLogin';
-
-// assets
 
 // ================================|| AUTH3 - LOGIN ||================================ //
 
@@ -26,6 +24,12 @@ const Login = () => {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
 
+  const handleGuestLogin = () => {
+    // You can handle the guest login logic here
+    console.log('Guest login clicked');
+    // Redirect or pre-fill guest credentials
+  };
+
   return (
     <AuthWrapper1>
       <Grid container direction="column" justifyContent="flex-end" sx={{ minHeight: '100vh' }}>
@@ -36,7 +40,6 @@ const Login = () => {
                 <Grid container spacing={2} alignItems="center" justifyContent="center">
                   <Grid item>
                     <Link to="#">
-                      {/* <Logo /> */}
                       <img
                         src={LogoImage}
                         alt="logo"
@@ -44,16 +47,13 @@ const Login = () => {
                           width: '150px',
                           height: 'auto'
                         }}
-                      ></img>
+                      />
                     </Link>
                   </Grid>
                   <Grid item xs={12}>
                     <Grid container direction={matchDownSM ? 'column-reverse' : 'row'} alignItems="center" justifyContent="center">
                       <Grid item>
                         <Stack alignItems="center" justifyContent="center" spacing={1}>
-                          <div style={bevanRegularStyle} className="my-2 mt-3">
-                            Finance
-                          </div>
                           <Stack alignItems="center" justifyContent="center" spacing={1}>
                             <Typography color={theme.palette.secondary.main} gutterBottom variant={matchDownSM ? 'h5' : 'h4'}>
                               Hi, Welcome Back
@@ -79,6 +79,16 @@ const Login = () => {
                       </Typography>
                     </Grid>
                   </Grid>
+                  <Grid item xs={12}>
+                    <Divider />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Stack direction="row" justifyContent="center" spacing={2} sx={{ mb: 2 }}>
+                      <Button variant="outlined" onClick={handleGuestLogin}>
+                        Login as Guest
+                      </Button>
+                    </Stack>
+                  </Grid>
                   <Stack direction="row" justifyContent="center" sx={{ mb: 1, mt: 1 }}>
                     <Chip label={process.env.REACT_APP_VERSION} disabled chipcolor="secondary" size="small" sx={{ cursor: 'pointer' }} />
                   </Stack>
@@ -87,9 +97,6 @@ const Login = () => {
             </Grid>
           </Grid>
         </Grid>
-        {/* <Grid item xs={12} sx={{ m: 1 }}>
-          <AuthFooter />
-        </Grid> */}
       </Grid>
     </AuthWrapper1>
   );
