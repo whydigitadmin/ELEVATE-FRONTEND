@@ -43,11 +43,11 @@ const ClientCompany = () => {
   });
   const [listView, setListView] = useState(false);
   const listViewColumns = [
-    { accessorKey: 'clientCode', header: 'Company Code', size: 140 },
-    { accessorKey: 'companyCode', header: 'Company Name', size: 140 },
+    { accessorKey: 'companyCode', header: 'Company Code', size: 140 },
+    { accessorKey: 'clientCode', header: 'Client Code', size: 140 },
     {
       accessorKey: 'clientName',
-      header: 'Company',
+      header: 'Client Name',
       size: 140
     },
     { accessorKey: 'active', header: 'Active', size: 140 }
@@ -78,7 +78,7 @@ const ClientCompany = () => {
     console.log('THE SELECTED COMPANY ID IS:', row.original.id);
     setEditId(row.original.id);
     try {
-      const response = await apiCalls('get', `clientcompanycontroller/getClientCompanyById?id=${orgId}`);
+      const response = await apiCalls('get', `clientcompanycontroller/getClientCompanyById?id=${row.original.id}`);
       console.log('API Response get by Id:', response.paramObjectsMap.clientCompanyVO);
 
       if (response.status === true) {
@@ -87,8 +87,8 @@ const ClientCompany = () => {
         console.log('THE PARTICULAR COMPANY DETAILS ARE:', particularClientCompany);
 
         setFormData({
-          clientCode: particularClientCompany.clientCode,
           companyCode: particularClientCompany.companyCode,
+          clientCode: particularClientCompany.clientCode,
           clientName: particularClientCompany.clientName,
           email: particularClientCompany.email,
           phone: particularClientCompany.phone,
@@ -138,34 +138,34 @@ const ClientCompany = () => {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
     } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } 
-  //   else if (name === 'phone') {
-  //     if (!phoneNumberRegex.test(value)) {
-  //         setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-  //         return;
-  //     }
-  //     if (value.length > 10) {
-  //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number cannot exceed 10 digits' });
-  //         return;
-  //     } else if (value.length < 10 && value.length > 0) {
-  //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be 10 digits' });
-  //     } else {
-  //         setFieldErrors({ ...fieldErrors, [name]: '' });
-  //     }
-  // } 
+    }
+    //   else if (name === 'phone') {
+    //     if (!phoneNumberRegex.test(value)) {
+    //         setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+    //         return;
+    //     }
+    //     if (value.length > 10) {
+    //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number cannot exceed 10 digits' });
+    //         return;
+    //     } else if (value.length < 10 && value.length > 0) {
+    //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be 10 digits' });
+    //     } else {
+    //         setFieldErrors({ ...fieldErrors, [name]: '' });
+    //     }
+    // } 
     else if (name === 'phone' && !phoneNumberRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    } 
+    }
     // else if (name === 'email' && !emailRegex.test(value)) {
     //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
     // }  
     // else if (name === 'webSite' && !websiteRegex.test(value)) {
     //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
     // }
-     else {
+    else {
       let updatedValue = value;
 
-      if (name !== 'email' && name !== 'webSite' ) {
+      if (name !== 'email' && name !== 'webSite') {
         updatedValue = value.toUpperCase();
       }
 
@@ -242,17 +242,6 @@ const ClientCompany = () => {
       const saveFormData = {
         ...(editId && { id: editId }),
         active: formData.active,
-        // address: '',
-        // city: '',
-        // ceo: '',
-        // country: '',
-        // currency: '',
-        // mainCurrency: '',
-        // note: '',
-        // state: '',
-        // gst: '',
-        // webSite: '',
-        // zip: '',
         companyCode: formData.companyCode,
         clientCode: formData.clientCode,
         clientName: formData.clientName,
@@ -380,7 +369,7 @@ const ClientCompany = () => {
                   onChange={handleInputChange}
                   error={!!fieldErrors.clientName}
                   helperText={fieldErrors.clientName}
-                  // inputRef={clientNameRef}
+                // inputRef={clientNameRef}
                 />
               </div>
               <div className="col-md-3 mb-3">

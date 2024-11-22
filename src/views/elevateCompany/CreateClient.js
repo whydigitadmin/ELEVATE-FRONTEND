@@ -23,32 +23,25 @@ const CreateClient = () => {
     const [fieldErrors, setFieldErrors] = useState({
         clientCode: '',
         client: '',
-        clintAdminName: '',
         clientMail: '',
-        clientType: '',
         phoneNo: '',
+        type: '',
         active: ''
     });
     const [formData, setFormData] = useState({
         clientCode: '',
         client: '',
-        clintAdminName: '',
         clientMail: '',
-        clientType: '',
         phoneNo: '',
+        type: '',
         active: ''
     });
     const listViewColumns = [
         { accessorKey: 'clientCode', header: 'Code', size: 140 },
         { accessorKey: 'client', header: 'Client Name', size: 140 },
-        {
-            accessorKey: 'clintAdminName',
-            header: 'Admin Name',
-            size: 140
-        },
         { accessorKey: 'clientMail', header: 'Client Mail Id', size: 140 },
-        { accessorKey: 'clientType', header: 'Client Type', size: 140 },
         { accessorKey: 'phoneNo', header: 'Phone Number', size: 140 },
+        { accessorKey: 'type', header: 'Type', size: 140 },
         { accessorKey: 'active', header: 'Active', size: 140 }
     ];
 
@@ -74,29 +67,38 @@ const CreateClient = () => {
         setFormData({
             clientCode: '',
             client: '',
-            clintAdminName: '',
             clientMail: '',
-            clientType: '',
             phoneNo: '',
+            type: '',
             active: true
         });
         setFieldErrors({
             clientCode: '',
             client: '',
-            clintAdminName: '',
             clientMail: '',
-            clientType: '',
             phoneNo: '',
+            type: '',
             active: '',
         });
         setEditId('');
     };
 
     const handleInputChange = (field, value) => {
-        // Convert email to lowercase if the field is 'clientMail'
-        const formattedValue = field === 'clientMail' ? value.toLowerCase() : value;
+        let formattedValue = value;
+
+        if (field === 'clientCode' || field === 'client') {
+            formattedValue = value.toUpperCase(); // Convert to uppercase
+        } else if (field === 'clientMail') {
+            formattedValue = value.toLowerCase(); // Convert to lowercase
+        } else if (field === 'phoneNo') {
+            // Allow only numeric values and restrict to 10 digits
+            formattedValue = value.replace(/\D/g, '').slice(0, 10); // Remove non-numeric characters and limit to 10 digits
+        }
+
         setFormData((prevState) => ({ ...prevState, [field]: formattedValue }));
     };
+
+
 
 
     const getClientById = async (row) => {
@@ -114,10 +116,9 @@ const CreateClient = () => {
                 setFormData({
                     clientCode: particularClient.clientCode,
                     client: particularClient.client,
-                    clintAdminName: particularClient.clintAdminName,
                     clientMail: particularClient.clientMail,
-                    clientType: particularClient.clientType,
                     phoneNo: particularClient.phoneNo,
+                    type: particularClient.type,
                     active: particularClient.active === 'Active',
                 });
             } else {
@@ -136,17 +137,14 @@ const CreateClient = () => {
         if (!formData.client) {
             errors.client = 'Name is required';
         }
-        if (!formData.clintAdminName) {
-            errors.clintAdminName = 'Access is required';
-        }
         if (!formData.clientMail) {
             errors.clientMail = 'Email is required';
         }
-        if (!formData.clientType) {
-            errors.clientType = 'Type is required';
-        }
         if (!formData.phoneNo) {
             errors.phoneNo = 'Phone Number is required';
+        }
+        if (!formData.type) {
+            errors.type = 'Type is required';
         }
 
         if (Object.keys(errors).length === 0) {
@@ -155,13 +153,11 @@ const CreateClient = () => {
                 ...(editId && { id: editId }),
                 active: true,
                 cancel: true,
-                clientCode: formData.clientCode,
                 client: formData.client,
-                clintAdminName: formData.clintAdminName,
+                clientCode: formData.clientCode,
                 clientMail: formData.clientMail,
-                clientType: formData.clientType,
                 phoneNo: formData.phoneNo,
-                contactPerson: '',
+                type: formData.type,
                 orgId: orgId,
                 password: encryptPassword('Test@123'),
                 createdBy: loginUserName,
@@ -252,24 +248,6 @@ const CreateClient = () => {
                                 </div>
                                 <div className="col-md-3 mb-3">
                                     <TextField
-                                        label="Access"
-                                        size="small"
-                                        fullWidth
-                                        select
-                                        required
-                                        value={formData.clintAdminName}
-                                        onChange={(e) => handleInputChange('clintAdminName', e.target.value)}
-                                        error={!!fieldErrors.clintAdminName}
-                                        helperText={fieldErrors.clintAdminName}
-                                    >
-                                        <MenuItem value="PRODUCT_OWNER">PRODUCT_OWNER</MenuItem>
-                                        <MenuItem value="ADMIN">ADMIN</MenuItem>
-                                        <MenuItem value="USER">USER</MenuItem>
-                                        <MenuItem value="GUEST USER">GUEST USER</MenuItem>
-                                    </TextField>
-                                </div>
-                                <div className="col-md-3 mb-3">
-                                    <TextField
                                         label="Email"
                                         size="small"
                                         type="email"
@@ -279,24 +257,6 @@ const CreateClient = () => {
                                         error={!!fieldErrors.clientMail}
                                         helperText={fieldErrors.clientMail}
                                     />
-                                </div>
-                                <div className="col-md-3 mb-3">
-                                    <TextField
-                                        label="Type"
-                                        size="small"
-                                        required
-                                        select
-                                        fullWidth
-                                        value={formData.clientType}
-                                        onChange={(e) => handleInputChange('clientType', e.target.value)}
-                                        error={!!fieldErrors.clientMail}
-                                        helperText={fieldErrors.clientMail}
-                                    >
-                                        <MenuItem value="PRODUCT_OWNER">PRODUCT_OWNER</MenuItem>
-                                        <MenuItem value="ADMIN">ADMIN</MenuItem>
-                                        <MenuItem value="USER">USER</MenuItem>
-                                        <MenuItem value="GUEST USER">GUEST USER</MenuItem>
-                                    </TextField>
                                 </div>
                                 <div className="col-md-3 mb-3">
                                     <TextField
@@ -310,13 +270,30 @@ const CreateClient = () => {
                                         helperText={fieldErrors.phoneNo}
                                     />
                                 </div>
-                                
+                                <div className="col-md-3 mb-3">
+                                        <TextField
+                                            label="Type"
+                                            size="small"
+                                            value={formData.type}
+                                            select
+                                            required
+                                            onChange={(e) => handleInputChange('type', e.target.value)}
+                                            error={!!fieldErrors.type}
+                                            helperText={fieldErrors.type}
+                                            fullWidth
+                                        >
+                                            <MenuItem value="ADMIN">ADMIN</MenuItem>
+                                            <MenuItem value="USER">USER</MenuItem>
+                                            <MenuItem value="GUEST">GUEST</MenuItem>
+                                        </TextField>
+                                    </div>
+
                                 <div className="col-md-3 mb-2">
                                     <FormControlLabel
                                         className='mb-3'
                                         control={<Checkbox defaultChecked />}
                                         label="Active"
-                                        
+
                                     />
                                 </div>
                             </div>
