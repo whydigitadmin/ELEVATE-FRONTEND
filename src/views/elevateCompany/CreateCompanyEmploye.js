@@ -25,31 +25,28 @@ const CreateClientEmploye = () => {
     const [editId, setEditId] = useState('');
     const [formData, setFormData] = useState({
         // companyCode: '',
-        email: '',
         employeeCode: '',
         employeeName: '',
+        email: '',
         phone: '',
-        webSite: '',
         active: true
     });
 
     const [fieldErrors, setFieldErrors] = useState({
         // companyCode: '',
-        email: '',
         employeeCode: '',
         employeeName: '',
+        email: '',
         phone: '',
-        webSite: '',
         active: ''
     });
     const [listView, setListView] = useState(false);
     const listViewColumns = [
         // { accessorKey: 'companyCode', header: 'company Code', size: 140 },
-        { accessorKey: 'email', header: 'email', size: 140 },
         { accessorKey: 'employeeCode', header: 'employee Code', size: 140 },
         { accessorKey: 'employeeName', header: 'employee Name', size: 140 },
+        { accessorKey: 'email', header: 'email', size: 140 },
         { accessorKey: 'phone', header: 'phone', size: 140 },
-        { accessorKey: 'webSite', header: 'webSite', size: 140 },
         { accessorKey: 'active', header: 'Active', size: 140 },
     ];
 
@@ -101,11 +98,10 @@ const CreateClientEmploye = () => {
 
                 setFormData({
                     // companyCode: particularCompany.companyCode,
-                    email: particularCompany.email,
                     employeeCode: particularCompany.employeeCode,
                     employeeName: particularCompany.employeeName,
+                    email: particularCompany.email,
                     phone: particularCompany.phone,
-                    webSite: particularCompany.webSite,
                     active: particularCompany.active === 'Active' ? true : false
                 });
             } else {
@@ -118,13 +114,13 @@ const CreateClientEmploye = () => {
 
     const handleInputChange = (e) => {
         const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
-    
+
         // Validation regex
         const nameRegex = /^[A-Za-z ]*$/;
         const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-    
+
         if (name === 'clientName' && !clientNameRegex.test(value)) {
             setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
             return;
@@ -137,17 +133,15 @@ const CreateClientEmploye = () => {
         } else if (name === 'phone') {
             const sanitizedValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
             if (sanitizedValue.length > 10) {
-                setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be exactly 10 digits' });
+                setFieldErrors({ ...fieldErrors, [name]: '' });
                 return;
-            } else if (sanitizedValue.length < 10 && sanitizedValue.length > 0) {
-                setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be exactly 10 digits' });
             } else {
                 setFieldErrors({ ...fieldErrors, [name]: '' });
             }
         }
-    
+
         let updatedValue = value;
-    
+
         // Value transformations
         if (name === 'email') {
             updatedValue = updatedValue.toLowerCase();
@@ -158,7 +152,7 @@ const CreateClientEmploye = () => {
         } else {
             updatedValue = updatedValue.toUpperCase();
         }
-    
+
         // Update form data
         if (type === 'checkbox') {
             setFormData({ ...formData, [name]: checked });
@@ -168,7 +162,7 @@ const CreateClientEmploye = () => {
                 [name]: updatedValue
             }));
         }
-    
+
         // Update the cursor position after the input change only for text inputs
         if (type === 'text' || type === 'email' || type === 'textarea') {
             setTimeout(() => {
@@ -179,27 +173,22 @@ const CreateClientEmploye = () => {
             }, 0);
         }
     };
-    
-
 
     const handleClear = () => {
         setFormData({
             // companyCode: '',
-            email: '',
             employeeCode: '',
             employeeName: '',
+            email: '',
             phone: '',
-            webSite: '',
             active: true
         });
         setFieldErrors({
             // companyCode: '',
-            email: '',
             employeeCode: '',
             employeeName: '',
+            email: '',
             phone: '',
-            webSite: '',
-
         });
         setEditId('');
     };
@@ -211,23 +200,21 @@ const CreateClientEmploye = () => {
         // if (!formData.companyCode) {
         //     errors.companyCode = 'client Code is required';
         // }
-        if (!formData.email) {
-            errors.email = 'Email is required';
-        }
+
         if (!formData.employeeCode) {
             errors.employeeCode = 'Code is required';
         }
         if (!formData.employeeName) {
             errors.employeeName = 'Name is required';
         }
+        if (!formData.email) {
+            errors.email = 'Email is required';
+        }
         // if (!formData.clientType) {
         //   errors.clientType = 'client Type is required';
         // }
         if (!formData.phone) {
             errors.phone = 'Phone Number is required';
-        }
-        if (!formData.webSite) {
-            errors.webSite = 'Website is required';
         }
 
         if (Object.keys(errors).length === 0) {
@@ -237,9 +224,9 @@ const CreateClientEmploye = () => {
                 ...(editId && { id: editId }),
                 active: formData.active,
                 // companyCode: formData.companyCode,
-                email: formData.email,
                 employeeCode: formData.employeeCode,
                 employeeName: formData.employeeName,
+                email: formData.email,
                 phone: formData.phone,
                 webSite: formData.webSite,
                 orgId: orgId
@@ -253,6 +240,7 @@ const CreateClientEmploye = () => {
                     showToast('success', editId ? ' CompanyEmployee Updated Successfully' : 'CompanyEmployee created successfully');
 
                     handleClear();
+                    getCompanyEmployeeById();
                     // getAllCompanyCode();
                     setIsLoading(false);
                 } else {
@@ -410,7 +398,7 @@ const CreateClientEmploye = () => {
                                     helperText={fieldErrors.phone}
                                 />
                             </div>
-                            
+
                             {/* Active Checkbox */}
                             <div className="col-md-3 mb-3">
                                 <FormControlLabel
