@@ -323,7 +323,7 @@ const UserCreation = () => {
         setClientTableData(
           particularUser.clientAccessVO.map((client) => ({
             id: client.id,
-            client: client.client,
+            client: client.clientName,
             clientCode: client.clientCode
           }))
         );
@@ -448,7 +448,7 @@ const UserCreation = () => {
         employeeName: formData.employeeName,
         email: formData.email,
         allIndiaAcces: formData.allIndiaAccess,
-        active: formData.active === 'Active' ? true : false,
+        active: formData.active,
         orgId: orgId,
         roleAccessDTO: roleVo,
         branchAccessDTOList: branchVo,
@@ -463,6 +463,7 @@ const UserCreation = () => {
           handleClear();
           getAllUsers();
           setIsLoading(false);
+          getAllUserCreation();
         } else {
           showToast('error', response.paramObjectsMap.errorMessage || 'User creation failed');
           setIsLoading(false);
