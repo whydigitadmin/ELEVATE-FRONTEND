@@ -401,10 +401,10 @@ const UserCreation = () => {
     let clientTableDataValid = true;
     const newTableErrors2 = clientTableData.map((row) => {
       const rowErrors = {};
-      if (!row.client) {
-        rowErrors.client = 'client is required';
-        clientTableDataValid = false;
-      }
+      // if (!row.client) {
+      //   rowErrors.client = 'client is required';
+      //   clientTableDataValid = false;
+      // }
       if (!row.clientCode) {
         rowErrors.clientCode = 'Client Code is required';
         clientTableDataValid = false;
@@ -414,7 +414,7 @@ const UserCreation = () => {
     });
     setFieldErrors(errors);
 
-    setRoleTableDataErrors(newTableErrors2);
+    setClientTableDataErrors(newTableErrors2);
 
 
     if (Object.keys(errors).length === 0 && roleTableDataValid && branchTableDataValid && clientTableDataValid) {
@@ -436,7 +436,7 @@ const UserCreation = () => {
       const clientVo = clientTableData.map((row) => ({
         // ...(editId && { id: row.id }),
         clientCode: row.clientCode,
-        client: row.client
+        clientName: row.client
       }));
 
       const saveFormData = {
@@ -452,7 +452,7 @@ const UserCreation = () => {
         orgId: orgId,
         roleAccessDTO: roleVo,
         branchAccessDTOList: branchVo,
-        clientAccessDTO: clientVo
+        clientAccessDTOList: clientVo
       };
       console.log('DATA TO SAVE IS:', saveFormData);
       try {
@@ -561,8 +561,8 @@ const UserCreation = () => {
     ]);
   };
   const handleAddRow2 = () => {
-    if (isLastRowEmpty(branchTableData)) {
-      displayRowError(branchTableData);
+    if (isLastRowEmpty(clientTableData)) {
+      displayRowError(clientTableData);
       return;
     }
     const newRow = {
@@ -1121,7 +1121,7 @@ const UserCreation = () => {
                     <>
                       <div className="row d-flex ml">
                         <div className="mb-1">
-                          <ActionButton title="Add" icon={AddIcon} onClick={handleAddRow1} />
+                          <ActionButton title="Add" icon={AddIcon} onClick={handleAddRow2} />
                         </div>
                         <div className="row mt-2">
                           <div className="col-lg-6">
