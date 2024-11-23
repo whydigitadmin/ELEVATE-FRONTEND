@@ -15,6 +15,14 @@ import LogoImage from '../../../../assets/images/Elevate_logo.jpeg';
 
 // ===============================|| AUTH3 - REGISTER ||=============================== //
 
+const bevanRegularStyle = {
+  fontFamily: "'Bevan', serif",
+  fontWeight: 300,
+  fontStyle: 'normal',
+  fontSize: 25,
+  color: '#673ab7',
+};
+
 const Register = () => {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
@@ -44,7 +52,7 @@ const Register = () => {
                     <Grid container direction={matchDownSM ? 'column-reverse' : 'row'} alignItems="center" justifyContent="center">
                       <Grid item>
                         <Stack alignItems="center" justifyContent="center" spacing={1}>
-                          <Typography color={theme.palette.secondary.main} gutterBottom variant={matchDownSM ? 'h3' : 'h2'}>
+                          <Typography style={bevanRegularStyle} color={theme.palette.secondary.main} gutterBottom variant={matchDownSM ? 'h3' : 'h2'}>
                             Create Account
                           </Typography>
                           {/* <Typography variant="caption" fontSize="16px" textAlign={matchDownSM ? 'center' : 'inherit'}>
@@ -55,13 +63,13 @@ const Register = () => {
                     </Grid>
                   </Grid>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <Divider />
+                    <Divider sx={{ display: 'none' }} />
                   </Grid>
                   <Grid item xs={12}>
                     <AuthRegister />
                   </Grid>
                   <Grid item xs={12}>
-                    <Divider />
+                    <Divider sx={{ display: 'none' }} />
                   </Grid>
                   <Grid item xs={12}>
                     <Grid item container direction="column" alignItems="center" xs={12}>
