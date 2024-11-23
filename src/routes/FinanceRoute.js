@@ -59,7 +59,7 @@ const FinYear = Loadable(lazy(() => import('views/basicMaster/finYear')));
 const Roles = Loadable(lazy(() => import('views/basicMaster/roles')));
 const ScreenNames = Loadable(lazy(() => import('views/basicMaster/ScreenNames')));
 const Employee = Loadable(lazy(() => import('views/basicMaster/employee')));
-const FirstPage = Loadable(lazy(() => import('views/basicMaster/FirstPage')));
+// const FirstPage = Loadable(lazy(() => import('views/basicMaster/FirstPage')));
 const ChargeTypeRequest = Loadable(lazy(() => import('views/Finance/ChargeTypeRequest')));
 
 const TaxInvoiceDetail = Loadable(lazy(() => import('views/Finance/taxInvoice/taxInvoiceDetail')));
@@ -227,10 +227,10 @@ const FinanceRoute = {
       path: '/basicMaster/country',
       element: <Country />
     },
-    {
-      path: '/basicMaster/FirstPage',
-      element: <FirstPage />
-    },
+    // {
+    //   path: '/basicMaster/FirstPage',
+    //   element: <FirstPage />
+    // },
     // {
     //   path: '/basicMaster/CreateClient',
     //   element: <CreateClient />
