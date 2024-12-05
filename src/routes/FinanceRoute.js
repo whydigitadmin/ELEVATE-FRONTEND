@@ -76,9 +76,9 @@ const EltCompany = Loadable(lazy(() => import('views/elevateCompany/eltCompany')
 const ClientCompany = Loadable(lazy(() => import('views/elevateCompany/ClientCompany')));
 const CreateClient = Loadable(lazy(() => import('views/elevateCompany/CreateClient')));
 const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/CreateCompanyEmploye')));
-const ElevateLetgers = Loadable(lazy(() => import('views/Letgers/elevateLetgers')));
-const ClientLetgers = Loadable(lazy(() => import('views/Letgers/clientLetgers')));
-const LetgersMapping = Loadable(lazy(() => import('views/Letgers/letgersMapping')));
+const ElevateLedgers = Loadable(lazy(() => import('views/Ledgers/elevateLedgers')));
+const ClientLedgers = Loadable(lazy(() => import('views/Ledgers/clientLedgers')));
+const LedgersMapping = Loadable(lazy(() => import('views/Ledgers/ledgersMapping')));
 
 
 
@@ -352,16 +352,16 @@ const FinanceRoute = {
       element: <UserCreation />
     },
     {
-      path: '/letgers/elevateLetgers',
-      element: <ElevateLetgers />
+      path: '/ledgers/elevateLedgers',
+      element: <ElevateLedgers />
     },
     {
-      path: '/letgers/clientLetgers',
-      element: <ClientLetgers />
+      path: '/ledgers/clientLedgers',
+      element: <ClientLedgers />
     },
     {
-      path: '/letgers/letgersMapping',
-      element: <LetgersMapping />
+      path: '/ledgers/ledgersMapping',
+      element: <LedgersMapping />
     }
   ]
 };
