@@ -129,40 +129,32 @@ const ClientCompany = () => {
 
   const handleInputChange = (e) => {
     const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
+
     const nameRegex = /^[A-Za-z ]*$/;
     const phoneNumberRegex = /^[0-9]*$/;
     const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
     const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
+    const emailRegex = /^[a-z0-9@.]*$/;
 
     if (name === 'clientName' && !clientNameRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
     } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    }
-    //   else if (name === 'phone') {
-    //     if (!phoneNumberRegex.test(value)) {
-    //         setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    //         return;
-    //     }
-    //     if (value.length > 10) {
-    //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number cannot exceed 10 digits' });
-    //         return;
-    //     } else if (value.length < 10 && value.length > 0) {
-    //         setFieldErrors({ ...fieldErrors, [name]: 'Phone number must be 10 digits' });
-    //     } else {
-    //         setFieldErrors({ ...fieldErrors, [name]: '' });
-    //     }
-    // } 
-    else if (name === 'phone' && !phoneNumberRegex.test(value)) {
+    } else if (name === 'phone' && !phoneNumberRegex.test(value)) {
       setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    }
-    // else if (name === 'email' && !emailRegex.test(value)) {
-    //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    // }  
-    // else if (name === 'webSite' && !websiteRegex.test(value)) {
-    //   setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
-    // }
-    else {
+    } else if (name === 'email') {
+      if (!emailRegex.test(value)) {
+        setFieldErrors({ ...fieldErrors, [name]: 'Invalid Email Format' });
+        return;
+      }
+
+      let updatedValue = value.toLowerCase();
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: updatedValue,
+      }));
+      setFieldErrors({ ...fieldErrors, [name]: '' });
+    } else {
       let updatedValue = value;
 
       if (name !== 'email' && name !== 'webSite') {
@@ -174,19 +166,17 @@ const ClientCompany = () => {
       } else {
         setFormData((prevFormData) => ({
           ...prevFormData,
-          [name]: updatedValue
+          [name]: updatedValue,
         }));
       }
-
       setFieldErrors({ ...fieldErrors, [name]: '' });
+    }
 
-      // Update the cursor position after the input change only for text inputs
-      if (type === 'text' || type === 'email' || type === 'textarea') {
-        setTimeout(() => {
-          const inputElement = document.getElementsByName(name)[0];
-          inputElement.setSelectionRange(selectionStart, selectionEnd);
-        }, 0);
-      }
+    if (type === 'text' || type === 'email' || type === 'textarea') {
+      setTimeout(() => {
+        const inputElement = document.getElementsByName(name)[0];
+        inputElement.setSelectionRange(selectionStart, selectionEnd);
+      }, 0);
     }
   };
 

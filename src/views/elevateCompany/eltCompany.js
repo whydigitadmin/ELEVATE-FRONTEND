@@ -122,10 +122,10 @@ const EltCompany = () => {
   const handleInputChange = (e) => {
     const { name, value, checked, type } = e.target;
 
-    // Regular expressions
     const companyNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
     const companyCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-    const phoneNumberRegex = /^[0-9]*$/; 
+    const phoneNumberRegex = /^[0-9]*$/;
+    const emailRegex = /^[a-z0-9@.]*$/;
 
     let updatedValue = value;
 
@@ -146,17 +146,21 @@ const EltCompany = () => {
         } else {
             setFieldErrors({ ...fieldErrors, [name]: '' });
         }
+    } else if (name === 'email') {
+        if (!emailRegex.test(value)) {
+            setFieldErrors({ ...fieldErrors, [name]: 'Invalid Email Format' });
+            return;
+        }
+        updatedValue = value.toLowerCase();
     } else {
         setFieldErrors({ ...fieldErrors, [name]: '' });
     }
 
-    if (name === 'email') {
-        updatedValue = updatedValue.toLowerCase();
-    } else if (name === 'webSite') {
+    if (name === 'webSite') {
         updatedValue = updatedValue.toLowerCase();
     } else if (name === 'phone') {
         updatedValue = updatedValue.replace(/[^0-9]/g, '');
-    } else {
+    } else if (name !== 'email') {
         updatedValue = updatedValue.toUpperCase();
     }
 
@@ -169,6 +173,7 @@ const EltCompany = () => {
         }));
     }
 };
+
 
 
   const handleClear = () => {

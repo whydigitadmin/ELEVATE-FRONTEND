@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Checkbox, Container, FormControlLabel, Grid, TextField, MenuItem } from '@mui/material';
-import { LocalizationProvider, ClearIcon } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import enUS from 'date-fns/locale/en-US';
+import { ClearIcon } from '@mui/x-date-pickers';
 import { ToastContainer } from 'react-toastify';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import CommonListViewTable from '../basicMaster/CommonListViewTable';
@@ -25,7 +23,7 @@ const CreateClient = () => {
         client: '',
         clientMail: '',
         phoneNo: '',
-        type: '',
+        clientType: '',
         active: ''
     });
     const [formData, setFormData] = useState({
@@ -33,7 +31,7 @@ const CreateClient = () => {
         client: '',
         clientMail: '',
         phoneNo: '',
-        type: '',
+        clientType: '',
         active: ''
     });
     const listViewColumns = [
@@ -41,7 +39,7 @@ const CreateClient = () => {
         { accessorKey: 'client', header: 'Client Name', size: 140 },
         { accessorKey: 'clientMail', header: 'Client Mail Id', size: 140 },
         { accessorKey: 'phoneNo', header: 'Phone Number', size: 140 },
-        { accessorKey: 'type', header: 'Type', size: 140 },
+        { accessorKey: 'clientType', header: 'Type', size: 140 },
         { accessorKey: 'active', header: 'Active', size: 140 }
     ];
 
@@ -69,7 +67,7 @@ const CreateClient = () => {
             client: '',
             clientMail: '',
             phoneNo: '',
-            type: '',
+            clientType: '',
             active: true
         });
         setFieldErrors({
@@ -77,7 +75,7 @@ const CreateClient = () => {
             client: '',
             clientMail: '',
             phoneNo: '',
-            type: '',
+            clientType: '',
             active: '',
         });
         setEditId('');
@@ -85,21 +83,22 @@ const CreateClient = () => {
 
     const handleInputChange = (field, value) => {
         let formattedValue = value;
-
+    
         if (field === 'clientCode' || field === 'client') {
-            formattedValue = value.toUpperCase(); // Convert to uppercase
+            formattedValue = value.toUpperCase();
         } else if (field === 'clientMail') {
-            formattedValue = value.toLowerCase(); // Convert to lowercase
+            const emailRegex = /^[a-z0-9.@]*$/;
+            formattedValue = value.toLowerCase();
+    
+            if (!emailRegex.test(value)) {
+                return;
+            }
         } else if (field === 'phoneNo') {
-            // Allow only numeric values and restrict to 10 digits
-            formattedValue = value.replace(/\D/g, '').slice(0, 10); // Remove non-numeric characters and limit to 10 digits
+            formattedValue = value.replace(/\D/g, '').slice(0, 10);
         }
-
+    
         setFormData((prevState) => ({ ...prevState, [field]: formattedValue }));
     };
-
-
-
 
     const getClientById = async (row) => {
         console.log('THE SELECTED Client ID IS:', row.original.id);
@@ -118,7 +117,7 @@ const CreateClient = () => {
                     client: particularClient.client,
                     clientMail: particularClient.clientMail,
                     phoneNo: particularClient.phoneNo,
-                    type: particularClient.type,
+                    clientType: particularClient.clientType,
                     active: particularClient.active === 'Active',
                 });
             } else {
@@ -143,8 +142,8 @@ const CreateClient = () => {
         if (!formData.phoneNo) {
             errors.phoneNo = 'Phone Number is required';
         }
-        if (!formData.type) {
-            errors.type = 'Type is required';
+        if (!formData.clientType) {
+            errors.clientType = 'Type is required';
         }
 
         if (Object.keys(errors).length === 0) {
@@ -157,7 +156,7 @@ const CreateClient = () => {
                 clientCode: formData.clientCode,
                 clientMail: formData.clientMail,
                 phoneNo: formData.phoneNo,
-                type: formData.type,
+                clientType: formData.clientType,
                 orgId: orgId,
                 password: encryptPassword('Test@123'),
                 createdBy: loginUserName,
@@ -227,7 +226,6 @@ const CreateClient = () => {
                                         label="Code"
                                         size="small"
                                         fullWidth
-                                        required
                                         value={formData.clientCode}
                                         onChange={(e) => handleInputChange('clientCode', e.target.value)}
                                         error={!!fieldErrors.clientCode}
@@ -239,7 +237,6 @@ const CreateClient = () => {
                                         label="Name"
                                         size="small"
                                         fullWidth
-                                        required
                                         value={formData.client}
                                         onChange={(e) => handleInputChange('client', e.target.value)}
                                         error={!!fieldErrors.client}
@@ -262,7 +259,6 @@ const CreateClient = () => {
                                     <TextField
                                         label="Phone Number"
                                         size="small"
-                                        required
                                         fullWidth
                                         value={formData.phoneNo}
                                         onChange={(e) => handleInputChange('phoneNo', e.target.value)}
@@ -274,12 +270,11 @@ const CreateClient = () => {
                                         <TextField
                                             label="Type"
                                             size="small"
-                                            value={formData.type}
+                                            value={formData.clientType}
                                             select
-                                            required
-                                            onChange={(e) => handleInputChange('type', e.target.value)}
-                                            error={!!fieldErrors.type}
-                                            helperText={fieldErrors.type}
+                                            onChange={(e) => handleInputChange('clientType', e.target.value)}
+                                            error={!!fieldErrors.clientType}
+                                            helperText={fieldErrors.clientType}
                                             fullWidth
                                         >
                                             <MenuItem value="ADMIN">ADMIN</MenuItem>

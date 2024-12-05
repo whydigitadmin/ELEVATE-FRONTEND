@@ -63,7 +63,7 @@ const CreateClientEmploye = () => {
     const getCompanyEmployeeById = async () => {
         try {
             const result = await apiCalls('get', `companycontroller/getAllCompanyEmployeeByOrgId?orgId=${orgId}`);
-            setListViewData(result.paramObjectsMap.companyEmployeeVO.reverse());
+            setListViewData(result.paramObjectsMap.companyEmployeeVO);
             console.log('Test', result);
         } catch (err) {
             console.log('error', err);
@@ -114,37 +114,42 @@ const CreateClientEmploye = () => {
 
     const handleInputChange = (e) => {
         const { name, value, checked, selectionStart, selectionEnd, type } = e.target;
-
+    
         // Validation regex
         const nameRegex = /^[A-Za-z ]*$/;
         const clientNameRegex = /^[A-Za-z 0-9@_\-*]*$/;
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const emailRegex = /^[a-z0-9.@]*$/;
         const clientCodeRegex = /^[a-zA-Z0-9#_\-\/\\]*$/;
-
+    
         if (name === 'clientName' && !clientNameRegex.test(value)) {
-            setFieldErrors({ ...fieldErrors, [name]: 'Only alphabetic characters and @*_- are allowed' });
+            setFieldErrors({ ...fieldErrors, [name]: '' });
             return;
         } else if (name === 'clientCode' && !clientCodeRegex.test(value)) {
-            setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+            setFieldErrors({ ...fieldErrors, [name]: '' });
             return;
         } else if (name === 'clientAdminName' && !nameRegex.test(value)) {
-            setFieldErrors({ ...fieldErrors, [name]: 'Invalid Format' });
+            setFieldErrors({ ...fieldErrors, [name]: '' });
             return;
         } else if (name === 'phone') {
-            const sanitizedValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+            const sanitizedValue = value.replace(/[^0-9]/g, '');
             if (sanitizedValue.length > 10) {
                 setFieldErrors({ ...fieldErrors, [name]: '' });
                 return;
             } else {
                 setFieldErrors({ ...fieldErrors, [name]: '' });
             }
+        } else if (name === 'email') {
+            if (!emailRegex.test(value)) {
+                setFieldErrors({ ...fieldErrors, [name]: '' });
+                return;
+            }
         }
-
+    
         let updatedValue = value;
-
+    
         // Value transformations
         if (name === 'email') {
-            updatedValue = updatedValue.toLowerCase();
+            updatedValue = updatedValue.toLowerCase(); // Force lowercase for email
         } else if (name === 'webSite') {
             updatedValue = updatedValue.toLowerCase();
         } else if (name === 'phone') {
@@ -152,7 +157,7 @@ const CreateClientEmploye = () => {
         } else {
             updatedValue = updatedValue.toUpperCase();
         }
-
+    
         // Update form data
         if (type === 'checkbox') {
             setFormData({ ...formData, [name]: checked });
@@ -162,7 +167,10 @@ const CreateClientEmploye = () => {
                 [name]: updatedValue
             }));
         }
-
+    
+        // Clear error if valid
+        setFieldErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
+    
         // Update the cursor position after the input change only for text inputs
         if (type === 'text' || type === 'email' || type === 'textarea') {
             setTimeout(() => {
@@ -173,6 +181,7 @@ const CreateClientEmploye = () => {
             }, 0);
         }
     };
+    
 
     const handleClear = () => {
         setFormData({
@@ -265,7 +274,7 @@ const CreateClientEmploye = () => {
 
     return (
         <>
-            <div className="card w-full p-6 bg-base-100 shadow-lg" style={{ padding: '20px', borderRadius: '10px' }}>
+            <div className="card w-full p-6 bg-base-100" style={{ padding: '20px', borderRadius: '10px' }}>
                 <div className="row d-flex ml">
                     <div className="col-lg-12 col-sm-12 col-md-12 col-12 d-flex justify-content-start align-items-center ml-auto" style={{ display: 'flex', justifyContent: 'flex-end', gap: '5px' }}>
                         <div className="d-flex flex-wrap justify-content-start" style={{ marginBottom: '20px' }}>
