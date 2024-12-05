@@ -7,6 +7,7 @@ import finance from './finance';
 import RolesAndResponsibilities from './RolesAndResponsibilities';
 import transaction from './transaction';
 import eltCompany from './eltCompany';
+import Letgers from './letgers';
 
 // Function to get menu items based on localStorage value
 const getMenuItems = () => {
@@ -14,18 +15,18 @@ const getMenuItems = () => {
 
   // Define default menu items
   const defaultMenuItems = {
-    items: [dashboard, basicMaster, finance, transaction, ar, ap, eltCompany]
+    items: [dashboard, basicMaster, finance, transaction, ar, ap, eltCompany,Letgers]
   };
 
   // Define menu items based on localStorage value
   switch (localStorageValue) {
     case 'ROLE_SUPER_ADMIN':
       return {
-        items: [dashboard, companySetup, basicMaster,eltCompany]
+        items: [dashboard, companySetup, basicMaster,eltCompany,Letgers]
       };
     case 'ROLE_ADMIN':
       return {
-        items: [dashboard, companySetup, RolesAndResponsibilities, basicMaster, finance, transaction, ar, ap, eltCompany]
+        items: [dashboard, companySetup, RolesAndResponsibilities, basicMaster, finance, transaction, ar, ap, eltCompany,Letgers]
       };
     // Add more cases as needed
     default:

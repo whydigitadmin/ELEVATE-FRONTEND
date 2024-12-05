@@ -76,6 +76,11 @@ const EltCompany = Loadable(lazy(() => import('views/elevateCompany/eltCompany')
 const ClientCompany = Loadable(lazy(() => import('views/elevateCompany/ClientCompany')));
 const CreateClient = Loadable(lazy(() => import('views/elevateCompany/CreateClient')));
 const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/CreateCompanyEmploye')));
+const ElevateLetgers = Loadable(lazy(() => import('views/Letgers/elevateLetgers')));
+const ClientLetgers = Loadable(lazy(() => import('views/Letgers/clientLetgers')));
+const LetgersMapping = Loadable(lazy(() => import('views/Letgers/letgersMapping')));
+
+
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
@@ -345,6 +350,18 @@ const FinanceRoute = {
     },{
       path: '/elevateCompany/admin/user-creation/userCreation',
       element: <UserCreation />
+    },
+    {
+      path: '/letgers/elevateLetgers',
+      element: <ElevateLetgers />
+    },
+    {
+      path: '/letgers/clientLetgers',
+      element: <ClientLetgers />
+    },
+    {
+      path: '/letgers/letgersMapping',
+      element: <LetgersMapping />
     }
   ]
 };
