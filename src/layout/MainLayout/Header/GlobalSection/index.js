@@ -43,6 +43,7 @@ const GlobalSection = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [finYearValue, setFinYearValue] = useState('');
+  const [monthValue, setMonthValue] = useState('');
   const [companyValue, setCompanyValue] = useState('');
   const [customerValue, setCustomerValue] = useState('');
   // const [warehouseValue, setWarehouseValue] = useState('');
@@ -215,6 +216,9 @@ const GlobalSection = () => {
   const handleFinYearChange = (event) => {
     setFinYearValue(event.target.value);
   };
+  const handleMonthChange = (value) => {
+    setMonthValue(value); // Update state with the selected value
+  };
 
   const handleClientChange = (event) => {
     setClientValue(event.target.value);
@@ -324,9 +328,40 @@ const GlobalSection = () => {
                                   {option.finYear}
                                 </option>
                               ))}
+                              <option value="2023-24">2023-24</option>
+                              <option value="2024-25">2024-25</option>
                             </TextField>
                           </Box>
                         </Grid>
+
+                        <Grid item xs={12}>
+                          <Box sx={{ px: 2, pt: 0.25 }}>
+                            <TextField
+                              id="outlined-select-month-native"
+                              select
+                              fullWidth
+                              label="Month"
+                              value={monthValue} // Ensure monthValue reflects the selected value
+                              onChange={(e) => handleMonthChange(e.target.value)} // Update value on change
+                              SelectProps={{
+                                native: true
+                              }}
+                              size="small"
+                            >
+                              <option value="" disabled>
+                                
+                              </option>
+                              <option value="April">April</option>
+                              <option value="May">May</option>
+                              {finVO?.map((option) => (
+                                <option key={option.id} value={option.month}>
+                                  {option.month}
+                                </option>
+                              ))}
+                            </TextField>
+                          </Box>
+                        </Grid>
+
 
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
@@ -335,7 +370,7 @@ const GlobalSection = () => {
                               select
                               small
                               fullWidth
-                              label="Branch"
+                              label="Client"
                               value={branchValue}
                               onChange={handleBranchChange}
                               SelectProps={{
@@ -351,9 +386,12 @@ const GlobalSection = () => {
                                   {option.branch}
                                 </option>
                               ))}
+                              <option value="Client 1">Client-1</option>
+                              <option value="Client 2">Client-2</option>
                             </TextField>
                           </Box>
                         </Grid>
+
                         {/* 
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>

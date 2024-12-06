@@ -1,54 +1,168 @@
-import React, { useState } from 'react';
-import { ToastContainer } from 'react-toastify';
-import ToastComponent, { showToast } from 'utils/toast-component';
-import EditIcon from '@mui/icons-material/Edit';
+import ClearIcon from '@mui/icons-material/Clear';
+import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
-import ActionButton from 'utils/ActionButton';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box } from '@mui/system';
-import { ClearIcon } from '@mui/x-date-pickers';
-import UploadIcon from '@mui/icons-material/Upload';
-import { Checkbox } from '@mui/material';
-import CommonBulkUpload from 'utils/CommonBulkUpload';
+import { FormHelperText } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
+import apiCalls from 'apicall';
+import { useEffect, useRef, useState } from 'react';
+import 'react-tabs/style/react-tabs.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import ActionButton from 'utils/ActionButton';
+import { getAllActiveCurrency } from 'utils/CommonFunctions';
+import { showToast } from 'utils/toast-component';
+import CommonTable from 'views/basicMaster/CommonTable';
 import { toast } from 'react-toastify';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import UploadIcon from '@mui/icons-material/Upload';
+import CommonBulkUpload from 'utils/CommonBulkUpload';
 
-const ElevateLedgers = () => {
-  const [uploadOpen, setUploadOpen] = useState(false);
+const CustomerCOA = () => {
+  const theme = useTheme();
+  const anchorRef = useRef(null);
+  const [data, setData] = useState([]);
+  const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [listViewData, setListViewData] = useState([
-    { id: 1, elevateLedgers: 'Ledger 1', active: true },
-    { id: 2, elevateLedgers: 'Ledger 2', active: false },
-    { id: 3, elevateLedgers: 'Ledger 3', active: true },
-    { id: 4, elevateLedgers: 'Ledger 4', active: false },
-    { id: 5, elevateLedgers: 'Ledger 5', active: true },
-    { id: 6, elevateLedgers: 'Ledger 6', active: true },
-    { id: 7, elevateLedgers: 'Ledger 7', active: false },
-    { id: 8, elevateLedgers: 'Ledger 8', active: true },
-    { id: 9, elevateLedgers: 'Ledger 9', active: true },
-    { id: 10, elevateLedgers: 'Ledger 10', active: false },
-    { id: 11, elevateLedgers: 'Ledger 11', active: true },
-    { id: 12, elevateLedgers: 'Ledger 12', active: false },
-    { id: 13, elevateLedgers: 'Ledger 13', active: true },
-    { id: 14, elevateLedgers: 'Ledger 14', active: true },
-    { id: 15, elevateLedgers: 'Ledger 15', active: false },
-  ]);
-  const [editId, setEditId] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
+  const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
+  const [currencies, setCurrencies] = useState([]);
+  const [editId, setEditId] = useState('');
+  const [groupList, setGroupList] = useState([]);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [formData, setFormData] = useState({
-    elevateLedgers: '',
-    active: true,
+    groupName: '',
+    gstTaxFlag: '',
+    accountCode: '',
+    coaList: '',
+    accountGroupName: '',
+    type: '',
+    interBranchAc: false,
+    controllAc: false,
+    category: '',
+    currency: 'INR',
+    active: false
   });
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5; // Number of rows per page, set to 5 now
+  const [fieldErrors, setFieldErrors] = useState({
+    groupName: false,
+    gstTaxFlag: false,
+    accountCode: false,
+    coaList: false,
+    accountGroupName: false,
+    type: false,
+    interBranchAc: false,
+    controllAc: false,
+    category: false,
 
-  // Get rows for the current page
-  const getCurrentPageData = () => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return listViewData.slice(startIndex, endIndex);
+    currency: false,
+    active: false
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Replace with your orgId or fetch it from somewhere
+        const currencyData = await getAllActiveCurrency(orgId);
+        setCurrencies(currencyData);
+
+        console.log('currency', currencyData);
+      } catch (error) {
+        console.error('Error fetching country data:', error);
+      }
+    };
+
+    fetchData();
+    getGroup();
+    getAllGroupName();
+  }, []);
+
+  // const handleInputChange = (e) => {
+  //   const { name, value, type, checked } = e.target;
+  //   const inputValue = type === 'checkbox' ? checked : value;
+  //   setFormData({ ...formData, [name]: inputValue });
+  //   setFieldErrors({ ...fieldErrors, [name]: false });
+  // };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const inputValue = type === 'checkbox' ? checked : value;
+
+    let errorMessage = '';
+    let validInputValue = inputValue; // Initialize valid input value
+
+    // Validation for accountCode (alphanumeric only)
+    if (name === 'accountCode') {
+      const alphanumericPattern = /^[a-zA-Z0-9]*$/; // Pattern for alphanumeric
+      if (!alphanumericPattern.test(inputValue)) {
+        errorMessage = 'Only alphabets and numbers are allowed.';
+        // Set validInputValue to prevent invalid character input
+        validInputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
+      }
+    }
+
+    // Validation for accountGroupName (alphabets only)
+
+    // Update the form data with the valid input value
+    setFormData({ ...formData, [name]: validInputValue });
+
+    // Update the error messages
+    setFieldErrors({ ...fieldErrors, [name]: errorMessage });
+  };
+
+  const getGroup = async () => {
+    try {
+      const result = await apiCalls('get', `/master/getAllGroupLedgerByOrgId?orgId=${orgId}`);
+      if (result) {
+        setData(result.paramObjectsMap.groupLedgerVO.reverse());
+      } else {
+        // Handle error
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const validateForm = (formData) => {
+    let errors = {};
+
+    if (formData.type === 'ACCOUNT' ? !formData.groupName : '') {
+      errors.groupName = 'Group Name is required';
+    }
+
+    if (!formData.gstTaxFlag) {
+      errors.gstTaxFlag = 'GST Tax Flag is required';
+    }
+
+    if (!formData.coaList || formData.coaList.length === 0) {
+      errors.coaList = 'COA List is required';
+    }
+
+    if (!formData.accountGroupName) {
+      errors.accountGroupName = 'Account Group Name is required';
+    }
+
+    if (!formData.type) {
+      errors.type = 'Type is required';
+    }
+
+    if (!formData.category) {
+      errors.category = 'Category is required';
+    }
+
+    // if (!formData.currency) {
+    //   errors.currency = 'Currency is required';
+    // }
+
+    return errors;
   };
 
   const handleBulkUploadOpen = () => {
@@ -70,209 +184,395 @@ const ElevateLedgers = () => {
     // getAllData();
   };
 
-  const handleDataSubmit = async () => {
-    const errors = {};
-
-    if (!formData.elevateLedgers.trim()) {
-      errors.elevateLedgers = 'Client Ledgers is required';
-    }
+  const handleSave = async () => {
+    const errors = validateForm(formData); // Validate the form data
 
     if (Object.keys(errors).length === 0) {
-      const updatedData = editId
-        ? listViewData.map(item =>
-          item.id === editId ? { ...formData } : item
-        )
-        : [...listViewData, formData];
+      // No errors, proceed with the save
+      setIsLoading(true);
 
-      setListViewData(updatedData);
-      showToast('success', 'Data saved successfully!');
-      handleClear();
+      const saveData = {
+        ...(editId && { id: editId }), // Include id if editing
+        active: formData.active,
+        groupName: formData.groupName,
+        gstTaxFlag: formData.gstTaxFlag,
+        coaList: formData.coaList,
+        accountGroupName: formData.accountGroupName,
+        type: formData.type,
+        interBranchAc: formData.interBranchAc,
+        controllAc: formData.controllAc,
+        category: formData.category,
+        branch: formData.branch,
+        currency: 'INR',
+        orgId: orgId,
+        createdBy: loginUserName
+      };
+
+      console.log('DATA TO SAVE', saveData); // Add this line to log the save data
+
+      try {
+        const response = await apiCalls('put', `master/updateCreateGroupLedger`, saveData);
+        if (response.status === true) {
+          showToast('success', editId ? 'Group updated successfully' : 'Group created successfully');
+          getGroup();
+          handleClear();
+        } else {
+          showToast('error', editId ? 'Group updation failed' : 'Group creation failed');
+        }
+        // Handle response (success, errors, etc.)
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false); // Stop the loader after the operation
+      }
+    } else {
+      // Handle validation errors (e.g., show error messages)
+      console.log('Validation Errors:', errors);
+      setFieldErrors(errors); // Set errors to display in the UI if needed
     }
-  };
-
-  const handleEditClick = (row) => {
-    setEditId(row.id);
-    setFormData({ elevateLedgers: row.elevateLedgers, active: row.active });
-  };
-
-  const handleSaveEdit = () => {
-    const updatedData = listViewData.map((item) =>
-      item.id === editId ? { ...item, ...formData } : item
-    );
-    setListViewData(updatedData);
-    showToast('success', 'Data updated successfully!');
-    setEditId(null);
-    setFormData({ elevateLedgers: '', active: true });
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, active: e.target.checked });
   };
 
   const handleClear = () => {
-    setFormData({ elevateLedgers: '', active: true });
-    setEditId(null);
+    setFormData({
+      groupName: '',
+      gstTaxFlag: '',
+      accountCode: '',
+      coaList: '',
+      accountGroupName: '',
+      type: '',
+      interBranchAc: false,
+      controllAc: false,
+      category: '',
+      branch: '',
+      // currency: '',
+      active: false
+    });
+    setFieldErrors({
+      groupName: false,
+      gstTaxFlag: false,
+      accountCode: false,
+      coaList: false,
+      accountGroupName: false,
+      type: false,
+      interBranchAc: false,
+      controllAc: false,
+      category: false,
+      branch: false,
+      // currency: false,
+      active: false
+    });
+    setEditId('');
   };
 
-  const handleNextPage = () => {
-    setCurrentPage(prevPage => prevPage + 1);
+  const handleListView = () => {
+    setShowForm(!showForm);
+    setFieldErrors({
+      groupName: false,
+      gstTaxFlag: false,
+      accountCode: false,
+      coaList: false,
+      accountGroupName: false,
+      type: false,
+      interBranchAc: false,
+      controllAc: false,
+      category: false,
+      branch: false,
+      active: false
+    });
   };
 
-  const handlePreviousPage = () => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+  const columns = [
+    { accessorKey: 'groupName', header: 'Group Name', size: 140 },
+    { accessorKey: 'id', header: 'Account Code', size: 140 },
+    { accessorKey: 'coaList', header: 'COA List', size: 100 },
+    { accessorKey: 'accountGroupName', header: 'Account/Groupname', size: 100 },
+    { accessorKey: 'type', header: 'type', size: 100 },
+    { accessorKey: 'currency', header: 'Currency', size: 100 },
+    { accessorKey: 'active', header: 'Active', size: 100 }
+  ];
+
+  const getGruopById = async (row) => {
+    console.log('Editing Exchange Rate:', row.original.id);
+    setEditId(row.original.id);
+    setShowForm(true);
+    try {
+      const result = await apiCalls('get', `/master/getAllGroupLedgerById?id=${row.original.id}`);
+
+      if (result) {
+        const exRate = result.paramObjectsMap.groupLedgerVO[0];
+        setEditMode(true);
+
+        setFormData({
+          orgId: orgId,
+          groupName: exRate.groupName,
+          gstTaxFlag: exRate.gstTaxFlag,
+          accountCode: exRate.id,
+          coaList: exRate.coaList,
+          accountGroupName: exRate.accountGroupName,
+          type: exRate.type,
+          interBranchAc: exRate.interBranchAc,
+          controllAc: exRate.controllAc,
+          category: exRate.category,
+          branch: exRate.branch,
+          id: exRate.id,
+          currency: 'INR',
+          active: exRate.active
+        });
+
+        console.log('DataToEdit', exRate);
+      } else {
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
-  // Get total rows and the range of rows displayed
-  const totalRows = listViewData.length;
-  const startRow = (currentPage - 1) * pageSize + 1;
-  const endRow = Math.min(currentPage * pageSize, totalRows);
+  const getAllGroupName = async () => {
+    try {
+      const response = await apiCalls('get', `/master/getGroupNameByOrgId?orgId=${orgId}`);
+      console.log('API Response:', response);
+
+      if (response.status === true) {
+        setGroupList(response.paramObjectsMap.groupNameDetails);
+      } else {
+        console.error('API Error:', response);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   return (
     <>
-      <ToastContainer />
-      <ActionButton icon={SearchIcon} title='Search' />
-      <ActionButton icon={ClearIcon} title='Clear' onClick={handleClear} />
-      <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
+      <div>
+        <ToastContainer />
+      </div>
+      <div className="card w-full p-6 bg-base-100 shadow-xl" style={{ padding: '20px' }}>
+        <div className="d-flex flex-wrap justify-content-start mb-4">
+          <ActionButton title="Search" icon={SearchIcon} onClick={() => console.log('Search Clicked')} />
+          <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
+          <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
+          <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
 
-      {uploadOpen && (
-        <CommonBulkUpload
-          open={uploadOpen}
-          handleClose={handleBulkUploadClose}
-          title="Upload Files"
-          uploadText="Upload file"
-          downloadText="Sample File"
-          onSubmit={handleSubmit}
-          handleFileUpload={handleFileUpload}
-          screen="PutAway"
-        />
-      )}
+          {uploadOpen && (
+            <CommonBulkUpload
+              open={uploadOpen}
+              handleClose={handleBulkUploadClose}
+              title="Upload Files"
+              uploadText="Upload file"
+              downloadText="Sample File"
+              onSubmit={handleSubmit}
+              handleFileUpload={handleFileUpload}
+              screen="PutAway"
+            />
+          )}
 
-      <div className="row mt-2">
-        <Box sx={{ padding: 2 }}>
-          <div className="row d-flex ml">
-            <div className="row mt-2">
-              <div className="col-lg-12">
-                <div className="table-responsive border">
-                  <table className="table table-bordered">
-                    <thead>
-                      <tr style={{ backgroundColor: '#673AB7' }}>
-                        <th className="px-2 py-3 text-white text-center" style={{ width: '100px' }}>
-                          Action
-                        </th>
-                        <th className="px-2 py-3 text-white text-center" style={{ width: '100px' }}>
-                          S.No
-                        </th>
-                        <th className="px-2 py-3 text-white text-center">Elevate Ledgers</th>
-                        <th className="px-2 py-3 text-white text-center" style={{ width: '300px' }}>Active</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getCurrentPageData().map((row, index) => (
-                        <tr key={row.id}>
-                          <td className="border px-2 py-2 text-center">
-                            {editId === row.id ? (
-                              <ActionButton title="Save" icon={SaveIcon} onClick={handleSaveEdit} />
-                            ) : (
-                              <ActionButton title="Edit" icon={EditIcon} onClick={() => handleEditClick(row)} />
-                            )}
-                          </td>
-                          <td className="border px-2 py-2 text-center">{startRow + index}</td>
-                          <td className="border px-2 py-2">
-                            {editId === row.id ? (
-                              <input
-                                type="text"
-                                name="elevateLedgers"
-                                value={formData.elevateLedgers}
-                                onChange={handleInputChange}
-                                className="form-control"
-                              />
-                            ) : (
-                              row.elevateLedgers
-                            )}
-                          </td>
-                          <td className="border px-2 py-2" style={{ textAlign: 'center' }}>
-                            {editId === row.id ? (
-                              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <Checkbox
-                                  checked={formData.active}
-                                  onChange={handleCheckboxChange}
-                                  sx={{
-                                    color: formData.active ? 'green' : 'red', // Checkbox color green when active, red when inactive
-                                    '&.Mui-checked': {
-                                      color: 'green', // Checkbox color green when checked
-                                    },
-                                  }}
-                                />
-                                <span style={{ marginLeft: '8px', color: formData.active ? 'green' : 'red' }}>
-                                  {formData.active ? 'Active' : 'InActive'}
-                                </span>
-                              </div>
-                            ) : (
-                              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <Checkbox
-                                  checked={row.active}
-                                  disabled
-                                  sx={{
-                                    color: row.active ? 'green' : 'red', // Checkbox color green when active, red when inactive
-                                    '&.Mui-checked': {
-                                      color: 'green', // Checkbox color green when checked
-                                    },
-                                  }}
-                                />
-                                <span style={{ marginLeft: '8px', color: row.active ? 'green' : 'red' }}>
-                                  {row.active ? 'Active' : 'InActive'}
-                                </span>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+          <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} margin="0 10px 0 10px" />
+        </div>
+        {/* <div className="d-flex justify-content-between">
+          <h1 className="text-xl font-semibold mb-3">Group / Ledger</h1>
+        </div> */}
+        {showForm ? (
+          <div className="row d-flex ">
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth size="small">
+                <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Type"
+                  onChange={handleInputChange}
+                  name="type"
+                  value={formData.type}
+                >
+                  <MenuItem value="ACCOUNT">Account</MenuItem>
+                  <MenuItem value="GROUP">Group</MenuItem>
+                </Select>
+                {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+              </FormControl>
+            </div>
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth size="small">
+                <InputLabel id="demo-simple-select-label">Group Name</InputLabel>
+                <Select
+                  labelId="groupName"
+                  id="groupName"
+                  label="Group Name"
+                  onChange={handleInputChange}
+                  name="groupName"
+                  value={formData.groupName}
+                >
+                  {groupList.length > 0 &&
+                    groupList.map((gro, index) => (
+                      <MenuItem key={index} value={gro.groupName}>
+                        {gro.groupName} {/* Display employee code */}
+                      </MenuItem>
+                    ))}
+                </Select>
+                {fieldErrors.groupName && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+              </FormControl>
+            </div>
+            {/* <div className="col-md-3 mb-2">
+              <FormControl fullWidth size="small">
+                <InputLabel id="gstTaxFlag">GST Tax Flag</InputLabel>
+                <Select
+                  labelId="gstTaxFlag"
+                  id="gstTaxFlag"
+                  label="GST Tax Flag"
+                  onChange={handleInputChange}
+                  name="gstTaxFlag"
+                  value={formData.gstTaxFlag}
+                >
+                  <MenuItem value="INPUT TAX">Input Tax</MenuItem>
+                  <MenuItem value="OUTPUT TAX">Output Tax</MenuItem>
+                  <MenuItem value="NA">NA</MenuItem>
+                </Select>
+                {fieldErrors.gstTaxFlag && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+              </FormControl>
+            </div> */}
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth variant="filled">
+                <TextField
+                  id="account"
+                  label="Account Code"
+                  size="small"
+                  required
+                  disabled
+                  placeholder="40003600104"
+                  inputProps={{ maxLength: 30 }}
+                  onChange={handleInputChange}
+                  name="accountCode"
+                  value={formData.accountCode}
+                />
+              </FormControl>
+            </div>
+
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth size="small">
+                <InputLabel id="demo-simple-select-label">COA List</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="COA List"
+                  onChange={handleInputChange}
+                  name="coaList"
+                  value={formData.coaList}
+                >
+                  <MenuItem value="ASSET">Asset</MenuItem>
+                  <MenuItem value="LIABILITY">Liability</MenuItem>
+                  <MenuItem value="INCOME">Income</MenuItem>
+                  <MenuItem value="EXPENCE">Expense</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth variant="filled">
+                <TextField
+                  id="accountGroupName"
+                  label="Account/Group Name"
+                  size="small"
+                  required
+                  placeholder="Enter Group Name"
+                  inputProps={{ maxLength: 30 }}
+                  onChange={handleInputChange}
+                  name="accountGroupName"
+                  value={formData.accountGroupName}
+                  helperText={<span style={{ color: 'red' }}>{fieldErrors.accountGroupName ? fieldErrors.accountGroupName : ''}</span>}
+                />
+              </FormControl>
+            </div>
+
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth size="small">
+                <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Category"
+                  onChange={handleInputChange}
+                  name="category"
+                  value={formData.category}
+                >
+                  <MenuItem value="RECEIVABLE A/C">RECEIVABLE A/C</MenuItem>
+                  <MenuItem value="PAYABLE A/C">PAYABLE A/C</MenuItem>
+                  <MenuItem value="OTHERS">OTHERS</MenuItem>
+                  <MenuItem value="BANK">BANK</MenuItem>
+                </Select>
+                {fieldErrors.category && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+              </FormControl>
+            </div>
+
+            <div className="col-md-3 mb-2">
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.interBranchAc}
+                      onChange={handleInputChange}
+                      name="interBranchAc"
+                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
+                    />
+                  }
+                  label="Interbranch A/c"
+                />
+              </FormGroup>
+            </div>
+            <div className="col-md-3 mb-2">
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.controllAc}
+                      onChange={handleInputChange}
+                      name="controllAc"
+                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
+                    />
+                  }
+                  label="Control A/c"
+                />
+              </FormGroup>
+            </div>
+
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth size="small">
+                <TextField
+                  id="currency"
+                  label="Currency"
+                  size="small"
+                  disabled
+                  inputProps={{ maxLength: 30 }}
+                  onChange={handleInputChange}
+                  name="currency"
+                  value={formData.currency}
+                  helperText={<span style={{ color: 'red' }}>{fieldErrors.currency ? fieldErrors.currency : ''}</span>}
+                />
+              </FormControl>
+            </div>
+
+            <div className="col-md-3 mb-3">
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.active}
+                      name="active"
+                      onChange={handleInputChange}
+                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
+                    />
+                  }
+                  label="Active"
+                />
+              </FormGroup>
             </div>
           </div>
-        </Box>
+        ) : (
+          <CommonTable columns={columns} data={data} blockEdit={true} toEdit={getGruopById} />
+        )}
       </div>
-
-      {/* Pagination Information */}
-      <div className='d-flex align-items-end justify-content-end'>
-        <div className='pe-4'>
-          Rows per page
-        </div>
-        <div className="pagination-info pe-4">
-          <span>{`${startRow}-${endRow} of ${totalRows}`}</span>
-        </div>
-        {/* Pagination Controls with Icons */}
-        <div className="pagination-controls">
-          <button
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            style={{ backgroundColor: 'transparent', border: 'none' }}>
-            <ArrowBackIosIcon sx={{ fontSize: 18 }} /> {/* Adjust size here */}
-          </button>
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage * pageSize >= totalRows}
-            style={{ backgroundColor: 'transparent', border: 'none' }}>
-            <ArrowForwardIosIcon sx={{ fontSize: 18 }} /> {/* Adjust size here */}
-          </button>
-        </div>
-      </div>
-
-
-
-
-
-      <ToastComponent />
     </>
   );
 };
 
-export default ElevateLedgers;
+export default CustomerCOA;
+

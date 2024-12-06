@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Routes from 'routes';
 import themes from 'themes';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import SessionExpiredPopup from 'utils/SessionExpiredPopup';
 import ToastComponent from './utils/toast-component';
@@ -28,16 +30,19 @@ const App = () => {
   }, []);
 
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={themes(customization)}>
-        <CssBaseline />
-        <NavigationScroll>
-          <Routes />
-          <ToastComponent />
-          <SessionExpiredPopup open={sessionExpired} />
-        </NavigationScroll>
-      </ThemeProvider>
-    </StyledEngineProvider>
+    <>
+      <ToastContainer />
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={themes(customization)}>
+          <CssBaseline />
+          <NavigationScroll>
+            <Routes />
+            <ToastComponent />
+            <SessionExpiredPopup open={sessionExpired} />
+          </NavigationScroll>
+        </ThemeProvider>
+      </StyledEngineProvider>
+    </>
   );
 };
 
