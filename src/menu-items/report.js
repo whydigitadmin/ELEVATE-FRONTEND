@@ -17,39 +17,32 @@ const icons2 = {
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 const ledgers = {
-    id: 'ledgers',
-    title: 'Business Master', 
+    id: 'report',
+    title: 'Report', 
     //   caption: 'Pages Caption',
     type: 'group',
     children: [
       {
-        id: 'ledgers',
-        title: 'Business Master', 
+        id: 'report',
+        title: 'Report',
         type: 'collapse',
         icon: icons.IconCopyright,
   
         children: [
           {
-            id: 'elevateLedgers',
-            title: 'COA',
+            id: 'clientTBReport',
+            title: 'Client TB-Report',
             type: 'item',
-            url: '/ledgers/elevateLedgers',
+            url: '/report/clientTBReport',
             icon: icons1.IconSquareRoundedPlus
           },
           {
-            id: 'cutomerCOA',
-            title: 'Cutomer COA',
+            id: 'elTBReport',
+            title: 'EL TB-Report',
             type: 'item',
-            url: '/ledgers/customerCOA',
+            url: '/report/elTBReport',
             icon: icons1.IconSquareRoundedPlus
-          },
-          {
-            id: 'ledgersMapping',
-            title: 'Ledgers Mapping',
-            type: 'item',
-            url: '/ledgers/ledgersMapping',
-            icon: icons1.IconSquareRoundedPlus
-          },
+          }
         ]
       }
     ]

@@ -18,13 +18,13 @@ const icons2 = {
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 const eltCompany = {
     id: 'elevateCompany',
-    title: 'Elevate',
+    title: 'El-User',
     //   caption: 'Pages Caption',
     type: 'group',
     children: [
       {
         id: 'elevateCompany',
-        title: 'Elevate',
+        title: 'El-User',
         type: 'collapse',
         icon: icons.IconCopyright,
   

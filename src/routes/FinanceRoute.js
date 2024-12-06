@@ -77,8 +77,13 @@ const ClientCompany = Loadable(lazy(() => import('views/elevateCompany/ClientCom
 const CreateClient = Loadable(lazy(() => import('views/elevateCompany/CreateClient')));
 const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/CreateCompanyEmploye')));
 const ElevateLedgers = Loadable(lazy(() => import('views/Ledgers/elevateLedgers')));
-const ClientLedgers = Loadable(lazy(() => import('views/Ledgers/clientLedgers')));
+const CustomerCOA = Loadable(lazy(() => import('views/Ledgers/customerCOA')));
 const LedgersMapping = Loadable(lazy(() => import('views/Ledgers/ledgersMapping')));
+const CLientTBReport = Loadable(lazy(() => import('views/Report/clientTBReport')));
+const ElTBReport = Loadable(lazy(() => import('views/Report/elTBReport')));
+
+
+
 
 
 
@@ -347,7 +352,7 @@ const FinanceRoute = {
     {
       path: '/elevateCompany/createCompanyEmployee',
       element: <CreateCompanyEmployee />
-    },{
+    }, {
       path: '/elevateCompany/admin/user-creation/userCreation',
       element: <UserCreation />
     },
@@ -356,12 +361,20 @@ const FinanceRoute = {
       element: <ElevateLedgers />
     },
     {
-      path: '/ledgers/clientLedgers',
-      element: <ClientLedgers />
+      path: '/ledgers/customerCOA',
+      element: <CustomerCOA />
     },
     {
       path: '/ledgers/ledgersMapping',
       element: <LedgersMapping />
+    },
+    {
+      path: '/report/clientTBReport',
+      element: <CLientTBReport />
+    },
+    {
+      path: '/report/elTBReport',
+      element: <ElTBReport />
     }
   ]
 };
