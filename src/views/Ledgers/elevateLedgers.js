@@ -25,7 +25,7 @@ import { toast } from 'react-toastify';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
 
-const CustomerCOA = () => {
+const ElevateLedgers = () => {
   const theme = useTheme();
   const anchorRef = useRef(null);
   const [data, setData] = useState([]);
@@ -574,5 +574,5 @@ const CustomerCOA = () => {
   );
 };
 
-export default CustomerCOA;
+export default ElevateLedgers;
 
