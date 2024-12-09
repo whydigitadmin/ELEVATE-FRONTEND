@@ -2,7 +2,7 @@
 import basicMaster from './basicMaster';
 import companySetup from './companySetup';
 import dashboard from './dashboard';
-import finance from './finance';
+// import finance from './finance';
 import RolesAndResponsibilities from './RolesAndResponsibilities';
 import eltCompany from './eltCompany';
 import Ledgers from './ledgers';
@@ -16,7 +16,7 @@ const getMenuItems = () => {
 
   // Define default menu items
   const defaultMenuItems = {
-    items: [dashboard, basicMaster, finance, eltCompany,Ledgers,Report]
+    items: [dashboard, basicMaster, eltCompany,Ledgers,Report]
   };
 
   // Define menu items based on localStorage value
@@ -27,7 +27,7 @@ const getMenuItems = () => {
       };
     case 'ROLE_ADMIN':
       return {
-        items: [dashboard, companySetup, RolesAndResponsibilities, basicMaster, finance, eltCompany,Ledgers,Report]
+        items: [dashboard, companySetup, RolesAndResponsibilities, basicMaster, eltCompany,Ledgers,Report]
       };
     // Add more cases as needed
     default:
