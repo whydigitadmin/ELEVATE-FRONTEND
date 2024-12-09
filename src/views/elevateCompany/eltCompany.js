@@ -74,7 +74,7 @@ const EltCompany = () => {
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setListViewData(response.paramObjectsMap.eltCompanyVOs);
+        setListViewData(response.paramObjectsMap.eltCompanyVOs.reverse());
       } else {
         console.error('API Error:', response);
       }

@@ -63,7 +63,7 @@ const CreateClientEmploye = () => {
     const getCompanyEmployeeById = async () => {
         try {
             const result = await apiCalls('get', `companycontroller/getAllCompanyEmployeeByOrgId?orgId=${orgId}`);
-            setListViewData(result.paramObjectsMap.companyEmployeeVO);
+            setListViewData(result.paramObjectsMap.companyEmployeeVO.reverse());
             console.log('Test', result);
         } catch (err) {
             console.log('error', err);

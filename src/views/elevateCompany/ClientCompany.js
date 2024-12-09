@@ -65,7 +65,7 @@ const ClientCompany = () => {
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setListViewData(response.paramObjectsMap.clientCompanyVO);
+        setListViewData(response.paramObjectsMap.clientCompanyVO.reverse());
       } else {
         console.error('API Error:', response);
       }

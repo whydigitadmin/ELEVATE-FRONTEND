@@ -52,7 +52,7 @@ const CreateClient = () => {
             console.log('API Response:', response);
 
             if (response.status === true) {
-                setListViewData(response.paramObjectsMap.clientVOs);
+                setListViewData(response.paramObjectsMap.clientVOs.reverse());
             } else {
                 console.error('API Error:', response);
             }

@@ -6,7 +6,7 @@ import { FormHelperText } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
+import FormCOA from '@mui/material/FormGroup';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -36,14 +36,14 @@ const LedgersMapping = () => {
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [currencies, setCurrencies] = useState([]);
   const [editId, setEditId] = useState('');
-  const [groupList, setGroupList] = useState([]);
+  const [COAList, setCOAList] = useState([]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [formData, setFormData] = useState({
-    groupName: '',
+    COAName: '',
     gstTaxFlag: '',
     accountCode: '',
     coaList: '',
-    accountGroupName: '',
+    accountCOAName: '',
     type: '',
     interBranchAc: false,
     controllAc: false,
@@ -53,11 +53,11 @@ const LedgersMapping = () => {
   });
 
   const [fieldErrors, setFieldErrors] = useState({
-    groupName: false,
+    COAName: false,
     gstTaxFlag: false,
     accountCode: false,
     coaList: false,
-    accountGroupName: false,
+    accountCOAName: false,
     type: false,
     interBranchAc: false,
     controllAc: false,
@@ -81,8 +81,8 @@ const LedgersMapping = () => {
     };
 
     fetchData();
-    getGroup();
-    getAllGroupName();
+    getCOA();
+    getAllCOAName();
   }, []);
 
   // const handleInputChange = (e) => {
@@ -109,7 +109,7 @@ const LedgersMapping = () => {
       }
     }
 
-    // Validation for accountGroupName (alphabets only)
+    // Validation for accountCOAName (alphabets only)
 
     // Update the form data with the valid input value
     setFormData({ ...formData, [name]: validInputValue });
@@ -118,11 +118,11 @@ const LedgersMapping = () => {
     setFieldErrors({ ...fieldErrors, [name]: errorMessage });
   };
 
-  const getGroup = async () => {
+  const getCOA = async () => {
     try {
-      const result = await apiCalls('get', `/master/getAllGroupLedgerByOrgId?orgId=${orgId}`);
+      const result = await apiCalls('get', `/master/getAllCOALedgerByOrgId?orgId=${orgId}`);
       if (result) {
-        setData(result.paramObjectsMap.groupLedgerVO.reverse());
+        setData(result.paramObjectsMap.COALedgerVO.reverse());
       } else {
         // Handle error
       }
@@ -134,8 +134,8 @@ const LedgersMapping = () => {
   const validateForm = (formData) => {
     let errors = {};
 
-    if (formData.type === 'ACCOUNT' ? !formData.groupName : '') {
-      errors.groupName = 'Group Name is required';
+    if (formData.type === 'ACCOUNT' ? !formData.COAName : '') {
+      errors.COAName = 'COA Name is required';
     }
 
     if (!formData.gstTaxFlag) {
@@ -146,8 +146,8 @@ const LedgersMapping = () => {
       errors.coaList = 'COA List is required';
     }
 
-    if (!formData.accountGroupName) {
-      errors.accountGroupName = 'Account Group Name is required';
+    if (!formData.accountCOAName) {
+      errors.accountCOAName = 'Account COA Name is required';
     }
 
     if (!formData.type) {
@@ -194,10 +194,10 @@ const LedgersMapping = () => {
       const saveData = {
         ...(editId && { id: editId }), // Include id if editing
         active: formData.active,
-        groupName: formData.groupName,
+        COAName: formData.COAName,
         gstTaxFlag: formData.gstTaxFlag,
         coaList: formData.coaList,
-        accountGroupName: formData.accountGroupName,
+        accountCOAName: formData.accountCOAName,
         type: formData.type,
         interBranchAc: formData.interBranchAc,
         controllAc: formData.controllAc,
@@ -211,13 +211,13 @@ const LedgersMapping = () => {
       console.log('DATA TO SAVE', saveData); // Add this line to log the save data
 
       try {
-        const response = await apiCalls('put', `master/updateCreateGroupLedger`, saveData);
+        const response = await apiCalls('put', `master/updateCreateCOALedger`, saveData);
         if (response.status === true) {
-          showToast('success', editId ? 'Group updated successfully' : 'Group created successfully');
-          getGroup();
+          showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
+          getCOA();
           handleClear();
         } else {
-          showToast('error', editId ? 'Group updation failed' : 'Group creation failed');
+          showToast('error', editId ? 'COA updation failed' : 'COA creation failed');
         }
         // Handle response (success, errors, etc.)
       } catch (error) {
@@ -234,11 +234,11 @@ const LedgersMapping = () => {
 
   const handleClear = () => {
     setFormData({
-      groupName: '',
+      COAName: '',
       gstTaxFlag: '',
       accountCode: '',
       coaList: '',
-      accountGroupName: '',
+      accountCOAName: '',
       type: '',
       interBranchAc: false,
       controllAc: false,
@@ -248,7 +248,7 @@ const LedgersMapping = () => {
       active: false
     });
     setFieldErrors({
-      groupName: false,
+      COAName: false,
       gstTaxFlag: false,
 
     });
@@ -258,15 +258,15 @@ const LedgersMapping = () => {
   const handleListView = () => {
     setShowForm(!showForm);
     setFieldErrors({
-      groupName: false,
+      COAName: false,
       gstTaxFlag: false,
       active: false
     });
   };
 
   const columns = [
-    { accessorKey: 'groupName', header: 'Account Code', size: 140 },
-    { accessorKey: 'id', header: 'Group', size: 140 },
+    { accessorKey: 'COAName', header: 'Customer COA', size: 140 },
+    { accessorKey: 'id', header: 'COA', size: 140 },
   ];
 
   const getGruopById = async (row) => {
@@ -274,19 +274,19 @@ const LedgersMapping = () => {
     setEditId(row.original.id);
     setShowForm(true);
     try {
-      const result = await apiCalls('get', `/master/getAllGroupLedgerById?id=${row.original.id}`);
+      const result = await apiCalls('get', `/master/getAllCOALedgerById?id=${row.original.id}`);
 
       if (result) {
-        const exRate = result.paramObjectsMap.groupLedgerVO[0];
+        const exRate = result.paramObjectsMap.COALedgerVO[0];
         setEditMode(true);
 
         setFormData({
           orgId: orgId,
-          groupName: exRate.groupName,
+          COAName: exRate.COAName,
           gstTaxFlag: exRate.gstTaxFlag,
           accountCode: exRate.id,
           coaList: exRate.coaList,
-          accountGroupName: exRate.accountGroupName,
+          accountCOAName: exRate.accountCOAName,
           type: exRate.type,
           interBranchAc: exRate.interBranchAc,
           controllAc: exRate.controllAc,
@@ -305,13 +305,13 @@ const LedgersMapping = () => {
     }
   };
 
-  const getAllGroupName = async () => {
+  const getAllCOAName = async () => {
     try {
-      const response = await apiCalls('get', `/master/getGroupNameByOrgId?orgId=${orgId}`);
+      const response = await apiCalls('get', `/master/getCOANameByOrgId?orgId=${orgId}`);
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setGroupList(response.paramObjectsMap.groupNameDetails);
+        setCOAList(response.paramObjectsMap.COANameDetails);
       } else {
         console.error('API Error:', response);
       }
@@ -358,7 +358,7 @@ const LedgersMapping = () => {
                 <FormControl fullWidth variant="filled">
                   <TextField
                     id="account"
-                    label="Account Code"
+                    label="Customer COA"
                     size="small"
                     required
                     disabled
@@ -373,7 +373,7 @@ const LedgersMapping = () => {
               </div>
               <div className="col-md-3 mb-3 custom-border">
                 <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">Group</InputLabel>
+                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -384,7 +384,7 @@ const LedgersMapping = () => {
                     className="custom-border"
                   >
                     <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="GROUP">Group</MenuItem>
+                    <MenuItem value="COA">COA</MenuItem>
                   </Select>
                   {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
                 </FormControl>
@@ -395,7 +395,7 @@ const LedgersMapping = () => {
                 <FormControl fullWidth variant="filled">
                   <TextField
                     id="account"
-                    label="Account Code"
+                    label="Customer COA"
                     size="small"
                     required
                     disabled
@@ -410,7 +410,7 @@ const LedgersMapping = () => {
               </div>
               <div className="col-md-3 mb-3 custom-border">
                 <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">Group</InputLabel>
+                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -421,7 +421,7 @@ const LedgersMapping = () => {
                     className="custom-border"
                   >
                     <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="GROUP">Group</MenuItem>
+                    <MenuItem value="COA">COA</MenuItem>
                   </Select>
                   {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
                 </FormControl>
@@ -432,7 +432,7 @@ const LedgersMapping = () => {
                 <FormControl fullWidth variant="filled">
                   <TextField
                     id="account"
-                    label="Account Code"
+                    label="Customer COA"
                     size="small"
                     required
                     disabled
@@ -447,7 +447,7 @@ const LedgersMapping = () => {
               </div>
               <div className="col-md-3 mb-3 custom-border">
                 <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">Group</InputLabel>
+                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -458,7 +458,7 @@ const LedgersMapping = () => {
                     className="custom-border"
                   >
                     <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="GROUP">Group</MenuItem>
+                    <MenuItem value="COA">COA</MenuItem>
                   </Select>
                   {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
                 </FormControl>
@@ -469,7 +469,7 @@ const LedgersMapping = () => {
                 <FormControl fullWidth variant="filled">
                   <TextField
                     id="account"
-                    label="Account Code"
+                    label="Customer COA"
                     size="small"
                     required
                     disabled
@@ -484,7 +484,7 @@ const LedgersMapping = () => {
               </div>
               <div className="col-md-3 mb-3 custom-border">
                 <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">Group</InputLabel>
+                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -495,7 +495,7 @@ const LedgersMapping = () => {
                     className="custom-border"
                   >
                     <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="GROUP">Group</MenuItem>
+                    <MenuItem value="COA">COA</MenuItem>
                   </Select>
                   {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
                 </FormControl>
@@ -506,7 +506,7 @@ const LedgersMapping = () => {
                 <FormControl fullWidth variant="filled">
                   <TextField
                     id="account"
-                    label="Account Code"
+                    label="Customer COA"
                     size="small"
                     required
                     disabled
@@ -521,7 +521,7 @@ const LedgersMapping = () => {
               </div>
               <div className="col-md-3 mb-3 custom-border">
                 <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">Group</InputLabel>
+                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -529,10 +529,10 @@ const LedgersMapping = () => {
                     onChange={handleInputChange}
                     name="type"
                     value={formData.type}
-                    className="custom-border"
+                    className="custom-border" 
                   >
-                    <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="GROUP">Group</MenuItem>
+                    <MenuItem value="ACCOUNT">Customer COA</MenuItem>
+                    <MenuItem value="COA">COA</MenuItem>
                   </Select>
                   {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
                 </FormControl>
@@ -550,4 +550,5 @@ const LedgersMapping = () => {
 
 
 export default LedgersMapping;
+
 

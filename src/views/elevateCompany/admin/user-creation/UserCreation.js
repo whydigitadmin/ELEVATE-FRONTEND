@@ -279,7 +279,7 @@ const UserCreation = () => {
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setListViewData(response.paramObjectsMap.userVO);
+        setListViewData(response.paramObjectsMap.userVO.reverse());
       } else {
         console.error('API Error:', response);
       }
