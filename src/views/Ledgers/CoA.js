@@ -2,7 +2,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import { FormHelperText } from '@mui/material';
+import { Autocomplete, FormHelperText } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -25,7 +25,7 @@ import { toast } from 'react-toastify';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
 
-const CustomerCOA = () => {
+const CoA = () => {
   const theme = useTheme();
   const anchorRef = useRef(null);
   const [data, setData] = useState([]);
@@ -38,16 +38,16 @@ const CustomerCOA = () => {
   const [editId, setEditId] = useState('');
   const [groupList, setGroupList] = useState([]);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [allGroupName, setAllGroupName] = useState([]);
   const [formData, setFormData] = useState({
     groupName: '',
     gstTaxFlag: '',
     accountCode: '',
-    coaList: '',
+    natureOfAccount: '',
     accountGroupName: '',
     type: '',
     interBranchAc: false,
     controllAc: false,
-    category: '',
     currency: 'INR',
     active: false
   });
@@ -56,13 +56,11 @@ const CustomerCOA = () => {
     groupName: false,
     gstTaxFlag: false,
     accountCode: false,
-    coaList: false,
+    natureOfAccount: false,
     accountGroupName: false,
     type: false,
     interBranchAc: false,
     controllAc: false,
-    category: false,
-
     currency: false,
     active: false
   });
@@ -134,16 +132,12 @@ const CustomerCOA = () => {
   const validateForm = (formData) => {
     let errors = {};
 
-    if (formData.type === 'ACCOUNT' ? !formData.groupName : '') {
+    if (formData.type === 'Account' && !formData.groupName) {
       errors.groupName = 'Group Name is required';
     }
 
-    if (!formData.gstTaxFlag) {
-      errors.gstTaxFlag = 'GST Tax Flag is required';
-    }
-
-    if (!formData.coaList || formData.coaList.length === 0) {
-      errors.coaList = 'COA List is required';
+    if (!formData.natureOfAccount || formData.natureOfAccount.length === 0) {
+      errors.natureOfAccount = 'Nature of Account is required';
     }
 
     if (!formData.accountGroupName) {
@@ -154,13 +148,9 @@ const CustomerCOA = () => {
       errors.type = 'Type is required';
     }
 
-    if (!formData.category) {
-      errors.category = 'Category is required';
+    if (!formData.accountCode) {
+      errors.accountCode = 'Account Code is required';
     }
-
-    // if (!formData.currency) {
-    //   errors.currency = 'Currency is required';
-    // }
 
     return errors;
   };
@@ -185,23 +175,22 @@ const CustomerCOA = () => {
   };
 
   const handleSave = async () => {
-    const errors = validateForm(formData); // Validate the form data
+    const errors = validateForm(formData);
 
     if (Object.keys(errors).length === 0) {
-      // No errors, proceed with the save
       setIsLoading(true);
 
       const saveData = {
-        ...(editId && { id: editId }), // Include id if editing
+        ...(editId && { id: editId }),
         active: formData.active,
         groupName: formData.groupName,
         gstTaxFlag: formData.gstTaxFlag,
-        coaList: formData.coaList,
+        natureOfAccount: formData.natureOfAccount,
         accountGroupName: formData.accountGroupName,
         type: formData.type,
         interBranchAc: formData.interBranchAc,
         controllAc: formData.controllAc,
-        category: formData.category,
+        accountCode: formData.accountCode,
         branch: formData.branch,
         currency: 'INR',
         orgId: orgId,
@@ -237,28 +226,27 @@ const CustomerCOA = () => {
       groupName: '',
       gstTaxFlag: '',
       accountCode: '',
-      coaList: '',
+      natureOfAccount: '',
       accountGroupName: '',
       type: '',
       interBranchAc: false,
       controllAc: false,
-      category: '',
+      accountCode: '',
+      currency: 'INR',
       branch: '',
-      // currency: '',
       active: false
     });
     setFieldErrors({
       groupName: false,
       gstTaxFlag: false,
       accountCode: false,
-      coaList: false,
+      natureOfAccount: false,
       accountGroupName: false,
       type: false,
       interBranchAc: false,
       controllAc: false,
-      category: false,
+      accountCode: false,
       branch: false,
-      // currency: false,
       active: false
     });
     setEditId('');
@@ -270,24 +258,24 @@ const CustomerCOA = () => {
       groupName: false,
       gstTaxFlag: false,
       accountCode: false,
-      coaList: false,
+      natureOfAccount: false,
       accountGroupName: false,
       type: false,
       interBranchAc: false,
       controllAc: false,
-      category: false,
+      accountCode: false,
       branch: false,
       active: false
     });
   };
 
   const columns = [
+    { accessorKey: 'type', header: 'Type', size: 100 },
     { accessorKey: 'groupName', header: 'Group Name', size: 140 },
     { accessorKey: 'id', header: 'Account Code', size: 140 },
-    { accessorKey: 'coaList', header: 'COA List', size: 100 },
     { accessorKey: 'accountGroupName', header: 'Account/Groupname', size: 100 },
-    { accessorKey: 'type', header: 'type', size: 100 },
-    { accessorKey: 'currency', header: 'Currency', size: 100 },
+    { accessorKey: 'natureOfAccount', header: 'Nature of Account', size: 100 },
+    // { accessorKey: 'currency', header: 'Currency', size: 100 },
     { accessorKey: 'active', header: 'Active', size: 100 }
   ];
 
@@ -307,12 +295,12 @@ const CustomerCOA = () => {
           groupName: exRate.groupName,
           gstTaxFlag: exRate.gstTaxFlag,
           accountCode: exRate.id,
-          coaList: exRate.coaList,
+          natureOfAccount: exRate.natureOfAccount,
           accountGroupName: exRate.accountGroupName,
           type: exRate.type,
           interBranchAc: exRate.interBranchAc,
           controllAc: exRate.controllAc,
-          category: exRate.category,
+          accountCode: exRate.accountCode,
           branch: exRate.branch,
           id: exRate.id,
           currency: 'INR',
@@ -375,61 +363,54 @@ const CustomerCOA = () => {
         {showForm ? (
           <div className="row d-flex ">
             <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">Type</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  label="Type"
-                  onChange={handleInputChange}
-                  name="type"
-                  value={formData.type}
-                >
-                  <MenuItem value="ACCOUNT">Account</MenuItem>
-                  <MenuItem value="GROUP">Group</MenuItem>
-                </Select>
-                {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-              </FormControl>
+              <Autocomplete
+                options={[
+                  { type: 'Group' },
+                  { type: 'Account' },
+                ]}
+                getOptionLabel={(option) => option.type || ''}
+                value={formData.type ? { type: formData.type } : null}
+                onChange={(event, newValue) => {
+                  const value = newValue ? newValue.type : '';
+                  setFormData((prev) => ({ ...prev, type: value }));
+                }}
+                size="small"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Type"
+                    variant="outlined"
+                    error={!!fieldErrors.type}
+                    helperText={fieldErrors.type || ''}
+                  />
+                )}
+                clearOnEscape
+              />
             </div>
+
             <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">Group Name</InputLabel>
-                <Select
-                  labelId="groupName"
-                  id="groupName"
-                  label="Group Name"
-                  onChange={handleInputChange}
-                  name="groupName"
-                  value={formData.groupName}
-                >
-                  {groupList.length > 0 &&
-                    groupList.map((gro, index) => (
-                      <MenuItem key={index} value={gro.groupName}>
-                        {gro.groupName} {/* Display employee code */}
-                      </MenuItem>
-                    ))}
-                </Select>
-                {fieldErrors.groupName && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-              </FormControl>
+              <Autocomplete
+                options={allGroupName}
+                getOptionLabel={(option) => option.groupName || ''}
+                value={formData.groupName ? { allGroupName: formData.groupName } : null}
+                onChange={(event, newValue) => {
+                  const value = newValue ? newValue.groupName : '';
+                  setFormData((prev) => ({ ...prev, groupName: value }));
+                }}
+                size="small"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Group Name"
+                    variant="outlined"
+                    error={!!fieldErrors.groupName}
+                    helperText={fieldErrors.groupName || ''}
+                  />
+                )}
+                clearOnEscape
+              />
             </div>
-            {/* <div className="col-md-3 mb-2">
-              <FormControl fullWidth size="small">
-                <InputLabel id="gstTaxFlag">GST Tax Flag</InputLabel>
-                <Select
-                  labelId="gstTaxFlag"
-                  id="gstTaxFlag"
-                  label="GST Tax Flag"
-                  onChange={handleInputChange}
-                  name="gstTaxFlag"
-                  value={formData.gstTaxFlag}
-                >
-                  <MenuItem value="INPUT TAX">Input Tax</MenuItem>
-                  <MenuItem value="OUTPUT TAX">Output Tax</MenuItem>
-                  <MenuItem value="NA">NA</MenuItem>
-                </Select>
-                {fieldErrors.gstTaxFlag && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-              </FormControl>
-            </div> */}
+
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
                 <TextField
@@ -437,32 +418,15 @@ const CustomerCOA = () => {
                   label="Account Code"
                   size="small"
                   required
-                  disabled
+                  // disabled
                   placeholder="40003600104"
                   inputProps={{ maxLength: 30 }}
                   onChange={handleInputChange}
                   name="accountCode"
                   value={formData.accountCode}
+                  error={!!fieldErrors.accountCode}
+                  helperText={fieldErrors.accountCode || ''}
                 />
-              </FormControl>
-            </div>
-
-            <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">COA List</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  label="COA List"
-                  onChange={handleInputChange}
-                  name="coaList"
-                  value={formData.coaList}
-                >
-                  <MenuItem value="ASSET">Asset</MenuItem>
-                  <MenuItem value="LIABILITY">Liability</MenuItem>
-                  <MenuItem value="INCOME">Income</MenuItem>
-                  <MenuItem value="EXPENCE">Expense</MenuItem>
-                </Select>
               </FormControl>
             </div>
 
@@ -483,23 +447,46 @@ const CustomerCOA = () => {
               </FormControl>
             </div>
 
+
+            <div className="col-md-3 mb-3">
+              <Autocomplete
+                options={[
+                  { type: 'Db' },
+                  { type: 'Cr' },
+                ]}
+                getOptionLabel={(option) => option.type || ''}
+                value={formData.natureOfAccount ? { type: formData.natureOfAccount } : null}
+                onChange={(event, newValue) => {
+                  const value = newValue ? newValue.type : '';
+                  setFormData((prev) => ({ ...prev, natureOfAccount: value }));
+                }}
+                size="small"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Nature of Account"
+                    variant="outlined"
+                    error={!!fieldErrors.natureOfAccount}
+                    helperText={fieldErrors.natureOfAccount || ''}
+                  />
+                )}
+                clearOnEscape
+              />
+            </div>
+
             <div className="col-md-3 mb-3">
               <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  label="Category"
+                <TextField
+                  id="currency"
+                  label="Currency"
+                  size="small"
+                  disabled
+                  inputProps={{ maxLength: 30 }}
                   onChange={handleInputChange}
-                  name="category"
-                  value={formData.category}
-                >
-                  <MenuItem value="RECEIVABLE A/C">RECEIVABLE A/C</MenuItem>
-                  <MenuItem value="PAYABLE A/C">PAYABLE A/C</MenuItem>
-                  <MenuItem value="OTHERS">OTHERS</MenuItem>
-                  <MenuItem value="BANK">BANK</MenuItem>
-                </Select>
-                {fieldErrors.category && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+                  name="currency"
+                  value={formData.currency}
+                  // helperText={<span style={{ color: 'red' }}>{fieldErrors.currency ? fieldErrors.currency : ''}</span>}
+                />
               </FormControl>
             </div>
 
@@ -535,22 +522,6 @@ const CustomerCOA = () => {
             </div>
 
             <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <TextField
-                  id="currency"
-                  label="Currency"
-                  size="small"
-                  disabled
-                  inputProps={{ maxLength: 30 }}
-                  onChange={handleInputChange}
-                  name="currency"
-                  value={formData.currency}
-                  helperText={<span style={{ color: 'red' }}>{fieldErrors.currency ? fieldErrors.currency : ''}</span>}
-                />
-              </FormControl>
-            </div>
-
-            <div className="col-md-3 mb-3">
               <FormGroup>
                 <FormControlLabel
                   control={
@@ -574,5 +545,5 @@ const CustomerCOA = () => {
   );
 };
 
-export default CustomerCOA;
+export default CoA;
 

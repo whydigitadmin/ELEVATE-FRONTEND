@@ -33,14 +33,14 @@ const ledgers = {
             id: 'elevateLedgers',
             title: 'COA',
             type: 'item',
-            url: '/ledgers/elevateLedgers',
+            url: '/ledgers/CoA',
             icon: icons1.IconSquareRoundedPlus
           },
           {
-            id: 'cutomerCOA',
-            title: 'Cutomer COA',
+            id: 'clientCOA',
+            title: 'Client COA',
             type: 'item',
-            url: '/ledgers/customerCOA',
+            url: '/ledgers/ClientCOA',
             icon: icons1.IconSquareRoundedPlus
           },
           {

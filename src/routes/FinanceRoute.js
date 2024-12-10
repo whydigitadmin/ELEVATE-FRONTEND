@@ -7,6 +7,7 @@ import DocumentTypeMaster from 'views/Finance/DocumentType/documentType';
 import DocumentTypeMappingMaster from 'views/Finance/DocumentType/documentTypeMapping';
 import ReconcileCash from 'views/Finance/Reconcile/ReconcileCash';
 import ReconcileCorp from 'views/Finance/Reconcile/ReconcileCorp';
+// import CoA from 'views/Ledgers/CoA';
 // import CreateClient from 'views/basicMaster/CreateClient';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
@@ -76,8 +77,8 @@ const EltCompany = Loadable(lazy(() => import('views/elevateCompany/eltCompany')
 const ClientCompany = Loadable(lazy(() => import('views/elevateCompany/ClientCompany')));
 const CreateClient = Loadable(lazy(() => import('views/elevateCompany/CreateClient')));
 const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/CreateCompanyEmploye')));
-const ElevateLedgers = Loadable(lazy(() => import('views/Ledgers/elevateLedgers')));
-const CustomerCOA = Loadable(lazy(() => import('views/Ledgers/customerCOA')));
+const CoA = Loadable(lazy(() => import('views/Ledgers/CoA')));
+const ClientCOA = Loadable(lazy(() => import('views/Ledgers/ClientCOA')));
 const LedgersMapping = Loadable(lazy(() => import('views/Ledgers/ledgersMapping')));
 const CLientTBReport = Loadable(lazy(() => import('views/Report/clientTBReport')));
 const ElTBReport = Loadable(lazy(() => import('views/Report/elTBReport')));
@@ -357,12 +358,12 @@ const FinanceRoute = {
       element: <UserCreation />
     },
     {
-      path: '/ledgers/elevateLedgers',
-      element: <ElevateLedgers />
+      path: '/ledgers/CoA',
+      element: <CoA />
     },
     {
-      path: '/ledgers/customerCOA',
-      element: <CustomerCOA />
+      path: '/ledgers/ClientCOA',
+      element: <ClientCOA />
     },
     {
       path: '/ledgers/ledgersMapping',
