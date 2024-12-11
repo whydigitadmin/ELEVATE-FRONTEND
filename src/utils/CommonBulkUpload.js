@@ -16,6 +16,7 @@ const CommonBulkUpload = ({
   downloadText,
   onSubmit,
   sampleFileDownload,
+  fileName,
   handleFileUpload,
   onOpenClick,
   apiUrl,
@@ -149,17 +150,19 @@ const CommonBulkUpload = ({
               size="small"
               component="a"
               href={sampleFileDownload}
+              download={fileName}
               variant="outlined"
               color="secondary"
               startIcon={<FiDownload />}
               style={{
                 textTransform: 'none',
                 padding: '4px 8px',
-                color: '#9CA4AF'
+                color: '#9CA4AF',
               }}
             >
               {downloadText}
             </Button>
+
           </div>
         </DialogContent>
         <DialogActions className="d-flex justify-content-between p-2">

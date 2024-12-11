@@ -7,9 +7,6 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
 import apiCalls from 'apicall';
@@ -24,28 +21,26 @@ import CommonTable from 'views/basicMaster/CommonTable';
 import { toast } from 'react-toastify';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
+import SampleFile from '../../assets/sample-files/SampleFormat.xlsx';
 
 const CoA = () => {
-  const theme = useTheme();
-  const anchorRef = useRef(null);
   const [data, setData] = useState([]);
   const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
+  // const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
-  const [currencies, setCurrencies] = useState([]);
   const [editId, setEditId] = useState('');
-  const [groupList, setGroupList] = useState([]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [allGroupName, setAllGroupName] = useState([]);
   const [formData, setFormData] = useState({
     groupName: '',
-    gstTaxFlag: '',
     accountCode: '',
     natureOfAccount: '',
     accountGroupName: '',
     type: '',
+    commonDate: '',
+    branch: '',
     interBranchAc: false,
     controllAc: false,
     currency: 'INR',
@@ -54,7 +49,6 @@ const CoA = () => {
 
   const [fieldErrors, setFieldErrors] = useState({
     groupName: false,
-    gstTaxFlag: false,
     accountCode: false,
     natureOfAccount: false,
     accountGroupName: false,
@@ -66,61 +60,36 @@ const CoA = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Replace with your orgId or fetch it from somewhere
-        const currencyData = await getAllActiveCurrency(orgId);
-        setCurrencies(currencyData);
-
-        console.log('currency', currencyData);
-      } catch (error) {
-        console.error('Error fetching country data:', error);
-      }
-    };
-
-    fetchData();
     getGroup();
     getAllGroupName();
   }, []);
 
-  // const handleInputChange = (e) => {
-  //   const { name, value, type, checked } = e.target;
-  //   const inputValue = type === 'checkbox' ? checked : value;
-  //   setFormData({ ...formData, [name]: inputValue });
-  //   setFieldErrors({ ...fieldErrors, [name]: false });
-  // };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     const inputValue = type === 'checkbox' ? checked : value;
 
     let errorMessage = '';
-    let validInputValue = inputValue; // Initialize valid input value
+    let validInputValue = inputValue;
 
-    // Validation for accountCode (alphanumeric only)
     if (name === 'accountCode') {
-      const alphanumericPattern = /^[a-zA-Z0-9]*$/; // Pattern for alphanumeric
+      const alphanumericPattern = /^[a-zA-Z0-9]*$/;
       if (!alphanumericPattern.test(inputValue)) {
         errorMessage = 'Only alphabets and numbers are allowed.';
-        // Set validInputValue to prevent invalid character input
         validInputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
       }
     }
 
-    // Validation for accountGroupName (alphabets only)
-
-    // Update the form data with the valid input value
     setFormData({ ...formData, [name]: validInputValue });
 
-    // Update the error messages
     setFieldErrors({ ...fieldErrors, [name]: errorMessage });
   };
 
   const getGroup = async () => {
     try {
-      const result = await apiCalls('get', `/master/getAllGroupLedgerByOrgId?orgId=${orgId}`);
+      const result = await apiCalls('get', `/businesscontroller/getAllCao`);
       if (result) {
-        setData(result.paramObjectsMap.groupLedgerVO.reverse());
+        setData(result.paramObjectsMap.coaVO.reverse());
       } else {
         // Handle error
       }
@@ -183,24 +152,24 @@ const CoA = () => {
       const saveData = {
         ...(editId && { id: editId }),
         active: formData.active,
-        groupName: formData.groupName,
-        gstTaxFlag: formData.gstTaxFlag,
+        groupName: formData.groupName !== null && formData.groupName !== '' ? formData.groupName : null,
         natureOfAccount: formData.natureOfAccount,
         accountGroupName: formData.accountGroupName,
+        parentId: formData.parentId,
+        parentCode: formData.parentCode,
         type: formData.type,
         interBranchAc: formData.interBranchAc,
         controllAc: formData.controllAc,
         accountCode: formData.accountCode,
-        branch: formData.branch,
         currency: 'INR',
-        orgId: orgId,
-        createdBy: loginUserName
+        createdBy: loginUserName,
+        updatedBy: loginUserName
       };
 
-      console.log('DATA TO SAVE', saveData); // Add this line to log the save data
+      console.log('DATA TO SAVE', saveData);
 
       try {
-        const response = await apiCalls('put', `master/updateCreateGroupLedger`, saveData);
+        const response = await apiCalls('put', `businesscontroller/createUpdateCoa`, saveData);
         if (response.status === true) {
           showToast('success', editId ? 'Group updated successfully' : 'Group created successfully');
           getGroup();
@@ -208,23 +177,20 @@ const CoA = () => {
         } else {
           showToast('error', editId ? 'Group updation failed' : 'Group creation failed');
         }
-        // Handle response (success, errors, etc.)
       } catch (error) {
         console.error('Error:', error);
       } finally {
-        setIsLoading(false); // Stop the loader after the operation
+        setIsLoading(false);
       }
     } else {
-      // Handle validation errors (e.g., show error messages)
       console.log('Validation Errors:', errors);
-      setFieldErrors(errors); // Set errors to display in the UI if needed
+      setFieldErrors(errors);
     }
   };
 
   const handleClear = () => {
     setFormData({
       groupName: '',
-      gstTaxFlag: '',
       accountCode: '',
       natureOfAccount: '',
       accountGroupName: '',
@@ -238,7 +204,6 @@ const CoA = () => {
     });
     setFieldErrors({
       groupName: false,
-      gstTaxFlag: false,
       accountCode: false,
       natureOfAccount: false,
       accountGroupName: false,
@@ -256,7 +221,6 @@ const CoA = () => {
     setShowForm(!showForm);
     setFieldErrors({
       groupName: false,
-      gstTaxFlag: false,
       accountCode: false,
       natureOfAccount: false,
       accountGroupName: false,
@@ -270,12 +234,12 @@ const CoA = () => {
   };
 
   const columns = [
-    { accessorKey: 'type', header: 'Type', size: 100 },
-    { accessorKey: 'groupName', header: 'Group Name', size: 140 },
-    { accessorKey: 'id', header: 'Account Code', size: 140 },
+    { accessorKey: 'accountCode', header: 'Account Code', size: 140 },
     { accessorKey: 'accountGroupName', header: 'Account/Groupname', size: 100 },
+    { accessorKey: 'groupName', header: 'Group Name', size: 140 },
+    { accessorKey: 'parentCode', header: 'Parent Code', size: 100 },
     { accessorKey: 'natureOfAccount', header: 'Nature of Account', size: 100 },
-    // { accessorKey: 'currency', header: 'Currency', size: 100 },
+    { accessorKey: 'type', header: 'Type', size: 100 },
     { accessorKey: 'active', header: 'Active', size: 100 }
   ];
 
@@ -284,30 +248,25 @@ const CoA = () => {
     setEditId(row.original.id);
     setShowForm(true);
     try {
-      const result = await apiCalls('get', `/master/getAllGroupLedgerById?id=${row.original.id}`);
+      const result = await apiCalls('get', `/businesscontroller/getCaoById?id=${row.original.id}`);
 
       if (result) {
-        const exRate = result.paramObjectsMap.groupLedgerVO[0];
+        const cao = result.paramObjectsMap.coaVO;
         setEditMode(true);
 
         setFormData({
-          orgId: orgId,
-          groupName: exRate.groupName,
-          gstTaxFlag: exRate.gstTaxFlag,
-          accountCode: exRate.id,
-          natureOfAccount: exRate.natureOfAccount,
-          accountGroupName: exRate.accountGroupName,
-          type: exRate.type,
-          interBranchAc: exRate.interBranchAc,
-          controllAc: exRate.controllAc,
-          accountCode: exRate.accountCode,
-          branch: exRate.branch,
-          id: exRate.id,
+          type: cao.type,
+          groupName: cao.groupName,
+          accountGroupName: cao.accountGroupName,
+          accountCode: cao.accountCode,
+          natureOfAccount: cao.natureOfAccount,
+          interBranchAc: cao.interBranchAc,
+          controllAc: cao.controllAc,
           currency: 'INR',
-          active: exRate.active
+          active: cao.active
         });
 
-        console.log('DataToEdit', exRate);
+        console.log('DataToEdit', cao);
       } else {
       }
     } catch (error) {
@@ -317,11 +276,11 @@ const CoA = () => {
 
   const getAllGroupName = async () => {
     try {
-      const response = await apiCalls('get', `/master/getGroupNameByOrgId?orgId=${orgId}`);
+      const response = await apiCalls('get', `/businesscontroller/getGroupName`);
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setGroupList(response.paramObjectsMap.groupNameDetails);
+        setAllGroupName(response.paramObjectsMap.coaVO);
       } else {
         console.error('API Error:', response);
       }
@@ -329,6 +288,7 @@ const CoA = () => {
       console.error('Error fetching data:', error);
     }
   };
+
 
   return (
     <>
@@ -349,7 +309,9 @@ const CoA = () => {
               title="Upload Files"
               uploadText="Upload file"
               downloadText="Sample File"
+              fileName="sampleFile.xlsx"
               onSubmit={handleSubmit}
+              sampleFileDownload={SampleFile}
               handleFileUpload={handleFileUpload}
               screen="PutAway"
             />
@@ -357,9 +319,7 @@ const CoA = () => {
 
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} margin="0 10px 0 10px" />
         </div>
-        {/* <div className="d-flex justify-content-between">
-          <h1 className="text-xl font-semibold mb-3">Group / Ledger</h1>
-        </div> */}
+
         {showForm ? (
           <div className="row d-flex ">
             <div className="col-md-3 mb-3">
@@ -378,7 +338,11 @@ const CoA = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Type"
+                    label={
+                      <span>
+                        Type<span style={{ color: 'red' }}> *</span>
+                      </span>
+                    }
                     variant="outlined"
                     error={!!fieldErrors.type}
                     helperText={fieldErrors.type || ''}
@@ -391,10 +355,14 @@ const CoA = () => {
             <div className="col-md-3 mb-3">
               <Autocomplete
                 options={allGroupName}
-                getOptionLabel={(option) => option.groupName || ''}
-                value={formData.groupName ? { allGroupName: formData.groupName } : null}
+                getOptionLabel={(option) => option.group || ''}
+                value={
+                  formData.groupName
+                    ? allGroupName.find((item) => item.group === formData.groupName)
+                    : null
+                }
                 onChange={(event, newValue) => {
-                  const value = newValue ? newValue.groupName : '';
+                  const value = newValue ? newValue.group : '';
                   setFormData((prev) => ({ ...prev, groupName: value }));
                 }}
                 size="small"
@@ -410,6 +378,28 @@ const CoA = () => {
                 clearOnEscape
               />
             </div>
+
+            {/* <div className="col-md-3 mb-3">
+              <FormControl fullWidth size="small">
+                <InputLabel id="demo-simple-select-label">Group Name</InputLabel>
+                <Select
+                  labelId="groupName"
+                  id="groupName"
+                  label="Group Name"
+                  onChange={handleInputChange}
+                  name="groupName"
+                  value={formData.groupName}
+                >
+                  {groupList.length > 0 &&
+                    groupList.map((gro, index) => (
+                      <MenuItem key={index} value={gro.group}>
+                        {gro.group}
+                      </MenuItem>
+                    ))}
+                </Select>
+                {fieldErrors.groupName && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+              </FormControl>
+            </div> */}
 
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
@@ -464,7 +454,11 @@ const CoA = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Nature of Account"
+                    label={
+                      <span>
+                        Nature of Account<span style={{ color: 'red' }}> *</span>
+                      </span>
+                    }
                     variant="outlined"
                     error={!!fieldErrors.natureOfAccount}
                     helperText={fieldErrors.natureOfAccount || ''}
@@ -485,7 +479,6 @@ const CoA = () => {
                   onChange={handleInputChange}
                   name="currency"
                   value={formData.currency}
-                  // helperText={<span style={{ color: 'red' }}>{fieldErrors.currency ? fieldErrors.currency : ''}</span>}
                 />
               </FormControl>
             </div>
