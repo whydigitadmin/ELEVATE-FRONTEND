@@ -171,11 +171,11 @@ const CoA = () => {
       try {
         const response = await apiCalls('put', `businesscontroller/createUpdateCoa`, saveData);
         if (response.status === true) {
-          showToast('success', editId ? 'Group updated successfully' : 'Group created successfully');
+          showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
           getGroup();
           handleClear();
         } else {
-          showToast('error', editId ? 'Group updation failed' : 'Group creation failed');
+          showToast('error', editId ? 'COA updation failed' : 'COA creation failed');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -378,28 +378,6 @@ const CoA = () => {
                 clearOnEscape
               />
             </div>
-
-            {/* <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">Group Name</InputLabel>
-                <Select
-                  labelId="groupName"
-                  id="groupName"
-                  label="Group Name"
-                  onChange={handleInputChange}
-                  name="groupName"
-                  value={formData.groupName}
-                >
-                  {groupList.length > 0 &&
-                    groupList.map((gro, index) => (
-                      <MenuItem key={index} value={gro.group}>
-                        {gro.group}
-                      </MenuItem>
-                    ))}
-                </Select>
-                {fieldErrors.groupName && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-              </FormControl>
-            </div> */}
 
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">

@@ -2,11 +2,12 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import { FormHelperText } from '@mui/material';
+import { Autocomplete, FormHelperText } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
+import GridOnIcon from '@mui/icons-material/GridOn';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import FormCOA from '@mui/material/FormGroup';
+import FormGroup from '@mui/material/FormGroup';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -24,6 +25,7 @@ import CommonTable from 'views/basicMaster/CommonTable';
 import { toast } from 'react-toastify';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
+import { format } from 'date-fns';
 
 const LedgersMapping = () => {
   const theme = useTheme();
@@ -36,35 +38,19 @@ const LedgersMapping = () => {
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [currencies, setCurrencies] = useState([]);
   const [editId, setEditId] = useState('');
-  const [COAList, setCOAList] = useState([]);
+  const [groupList, setGroupList] = useState([]);
+  // const [page, setPage] = useState(0);  // Pagination: Track the current page
+  // const [itemsPerPage] = useState(5);   // Number of items per page
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [allcoa, setAllcoa] = useState([]);
   const [formData, setFormData] = useState({
-    COAName: '',
-    gstTaxFlag: '',
-    accountCode: '',
-    coaList: '',
-    accountCOAName: '',
-    type: '',
-    interBranchAc: false,
-    controllAc: false,
-    category: '',
-    currency: 'INR',
-    active: false
+    coa: '',
+    ccoa: '',
   });
 
   const [fieldErrors, setFieldErrors] = useState({
-    COAName: false,
-    gstTaxFlag: false,
-    accountCode: false,
-    coaList: false,
-    accountCOAName: false,
-    type: false,
-    interBranchAc: false,
-    controllAc: false,
-    category: false,
-
-    currency: false,
-    active: false
+    coa: false,
+    ccoa: false,
   });
 
   useEffect(() => {
@@ -81,16 +67,9 @@ const LedgersMapping = () => {
     };
 
     fetchData();
-    getCOA();
-    getAllCOAName();
+    getGroup();
+    getAllcoa();
   }, []);
-
-  // const handleInputChange = (e) => {
-  //   const { name, value, type, checked } = e.target;
-  //   const inputValue = type === 'checkbox' ? checked : value;
-  //   setFormData({ ...formData, [name]: inputValue });
-  //   setFieldErrors({ ...fieldErrors, [name]: false });
-  // };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -99,8 +78,8 @@ const LedgersMapping = () => {
     let errorMessage = '';
     let validInputValue = inputValue; // Initialize valid input value
 
-    // Validation for accountCode (alphanumeric only)
-    if (name === 'accountCode') {
+    // Validation for ccoa (alphanumeric only)
+    if (name === 'ccoa') {
       const alphanumericPattern = /^[a-zA-Z0-9]*$/; // Pattern for alphanumeric
       if (!alphanumericPattern.test(inputValue)) {
         errorMessage = 'Only alphabets and numbers are allowed.';
@@ -109,7 +88,6 @@ const LedgersMapping = () => {
       }
     }
 
-    // Validation for accountCOAName (alphabets only)
 
     // Update the form data with the valid input value
     setFormData({ ...formData, [name]: validInputValue });
@@ -118,11 +96,12 @@ const LedgersMapping = () => {
     setFieldErrors({ ...fieldErrors, [name]: errorMessage });
   };
 
-  const getCOA = async () => {
+  // list Api
+  const getGroup = async () => {
     try {
-      const result = await apiCalls('get', `/master/getAllCOALedgerByOrgId?orgId=${orgId}`);
+      const result = await apiCalls('get', ``);
       if (result) {
-        setData(result.paramObjectsMap.COALedgerVO.reverse());
+        setData(result.paramObjectsMap.cCoaVO.reverse());
       } else {
         // Handle error
       }
@@ -133,34 +112,13 @@ const LedgersMapping = () => {
 
   const validateForm = (formData) => {
     let errors = {};
-
-    if (formData.type === 'ACCOUNT' ? !formData.COAName : '') {
-      errors.COAName = 'COA Name is required';
+    if (!formData.ccoa) {
+      errors.ccoa = 'Client COA is required';
+    }
+    if (!formData.coa) {
+      errors.coa = 'COA is required';
     }
 
-    if (!formData.gstTaxFlag) {
-      errors.gstTaxFlag = 'GST Tax Flag is required';
-    }
-
-    if (!formData.coaList || formData.coaList.length === 0) {
-      errors.coaList = 'COA List is required';
-    }
-
-    if (!formData.accountCOAName) {
-      errors.accountCOAName = 'Account COA Name is required';
-    }
-
-    if (!formData.type) {
-      errors.type = 'Type is required';
-    }
-
-    if (!formData.category) {
-      errors.category = 'Category is required';
-    }
-
-    // if (!formData.currency) {
-    //   errors.currency = 'Currency is required';
-    // }
 
     return errors;
   };
@@ -185,39 +143,32 @@ const LedgersMapping = () => {
   };
 
   const handleSave = async () => {
-    const errors = validateForm(formData); // Validate the form data
+    const errors = validateForm(formData);
 
     if (Object.keys(errors).length === 0) {
-      // No errors, proceed with the save
       setIsLoading(true);
 
       const saveData = {
-        ...(editId && { id: editId }), // Include id if editing
+        ...(editId && { id: editId }),
         active: formData.active,
-        COAName: formData.COAName,
-        gstTaxFlag: formData.gstTaxFlag,
-        coaList: formData.coaList,
-        accountCOAName: formData.accountCOAName,
-        type: formData.type,
-        interBranchAc: formData.interBranchAc,
-        controllAc: formData.controllAc,
-        category: formData.category,
-        branch: formData.branch,
-        currency: 'INR',
-        orgId: orgId,
-        createdBy: loginUserName
+        coa: formData.coa,
+        ccoa: format.ccoa,
+        cancelRemarks: formData.cancelRemarks,
+        cancel: false,
+        createdBy: loginUserName,
+        updatedBy: loginUserName
       };
 
       console.log('DATA TO SAVE', saveData); // Add this line to log the save data
-
+      // Save API
       try {
-        const response = await apiCalls('put', `master/updateCreateCOALedger`, saveData);
+        const response = await apiCalls('put', `/businesscontroller/createUpdateCCoa`, saveData);
         if (response.status === true) {
-          showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
-          getCOA();
+          showToast('success', editId ? 'Client COA updated successfully' : 'Client COA created successfully');
+          getGroup();
           handleClear();
         } else {
-          showToast('error', editId ? 'COA updation failed' : 'COA creation failed');
+          showToast('error', editId ? 'Client COA updation failed' : 'Client COA creation failed');
         }
         // Handle response (success, errors, etc.)
       } catch (error) {
@@ -234,23 +185,12 @@ const LedgersMapping = () => {
 
   const handleClear = () => {
     setFormData({
-      COAName: '',
-      gstTaxFlag: '',
-      accountCode: '',
-      coaList: '',
-      accountCOAName: '',
-      type: '',
-      interBranchAc: false,
-      controllAc: false,
-      category: '',
-      branch: '',
-      // currency: '',
-      active: false
+      coa: '',
+      ccoa: '',
     });
     setFieldErrors({
-      COAName: false,
-      gstTaxFlag: false,
-
+      coa: false,
+      ccoa: false,
     });
     setEditId('');
   };
@@ -258,46 +198,34 @@ const LedgersMapping = () => {
   const handleListView = () => {
     setShowForm(!showForm);
     setFieldErrors({
-      COAName: false,
-      gstTaxFlag: false,
-      active: false
+      coa: false,
+      ccoa: false,
     });
   };
 
   const columns = [
-    { accessorKey: 'COAName', header: 'Customer COA', size: 140 },
-    { accessorKey: 'id', header: 'COA', size: 140 },
+    { accessorKey: 'ccoa', header: 'Client COA', size: 140 },
+    { accessorKey: 'coa', header: 'COA', size: 140 },
   ];
 
   const getGruopById = async (row) => {
     console.log('Editing Exchange Rate:', row.original.id);
     setEditId(row.original.id);
     setShowForm(true);
+    // Edit API
     try {
-      const result = await apiCalls('get', `/master/getAllCOALedgerById?id=${row.original.id}`);
+      const result = await apiCalls('get', `/businesscontroller/getCCeoById?id=${row.original.id}`);
 
       if (result) {
-        const exRate = result.paramObjectsMap.COALedgerVO[0];
+        const cao = result.paramObjectsMap.cCoaVO;
         setEditMode(true);
 
         setFormData({
-          orgId: orgId,
-          COAName: exRate.COAName,
-          gstTaxFlag: exRate.gstTaxFlag,
-          accountCode: exRate.id,
-          coaList: exRate.coaList,
-          accountCOAName: exRate.accountCOAName,
-          type: exRate.type,
-          interBranchAc: exRate.interBranchAc,
-          controllAc: exRate.controllAc,
-          category: exRate.category,
-          branch: exRate.branch,
-          id: exRate.id,
-          currency: 'INR',
-          active: exRate.active
+          coa: cao.coa,
+          ccoa: cao.ccoa,
         });
 
-        console.log('DataToEdit', exRate);
+        console.log('DataToEdit', cao);
       } else {
       }
     } catch (error) {
@@ -305,13 +233,14 @@ const LedgersMapping = () => {
     }
   };
 
-  const getAllCOAName = async () => {
+  // COA ApI 
+  const getAllcoa = async () => {
     try {
-      const response = await apiCalls('get', `/master/getCOANameByOrgId?orgId=${orgId}`);
+      const response = await apiCalls('get', ``);
       console.log('API Response:', response);
 
       if (response.status === true) {
-        setCOAList(response.paramObjectsMap.COANameDetails);
+        setGroupList(response.paramObjectsMap.cCoaVO);
       } else {
         console.error('API Error:', response);
       }
@@ -320,235 +249,123 @@ const LedgersMapping = () => {
     }
   };
 
+  // FillGrid
+  const handleFillGrid = async () => {
+    try {
+      const response = await apiCalls('get', `/businesscontroller/getAllClientCoa`);
+      console.log('Fill Grid Data:', response);
+
+      if (response && response.status === true) {
+        const clientCoaData = response.paramObjectsMap.cCoaVO.reverse(); // Adjust as per API response
+        setData(clientCoaData);
+        setShowForm(false); // Switch to table view
+        showToast('success', 'Grid populated with Client COA data.');
+      } else {
+        showToast('error', 'Failed to load Client COA data.');
+      }
+    } catch (error) {
+      console.error('Error loading grid data:', error);
+      showToast('error', 'An error occurred while loading the grid data.');
+    }
+  };
+
+  // Get paginated data
+  // const paginatedData = data.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+  // const handlePageChange = (newPage) => {
+  //   // Ensure newPage is within the valid range
+  //   if (newPage >= 0 && newPage * itemsPerPage < data.length) {
+  //     setPage(newPage);  // Update the page state
+  //   }
+  // };
+
+
+
+
   return (
     <>
       <div>
         <ToastContainer />
       </div>
-      <div
-        className="card w-full p-6 bg-base-100 shadow-xl custom-card-border" // Add custom class for border
-        style={{ padding: '20px' }}
-      >
+      <div className="card w-full p-6 bg-base-100 shadow-xl" style={{ padding: '20px' }}>
         <div className="d-flex flex-wrap justify-content-start mb-4">
           <ActionButton title="Search" icon={SearchIcon} onClick={() => console.log('Search Clicked')} />
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
-          <ActionButton icon={UploadIcon} title="Upload" onClick={handleBulkUploadOpen} />
+          <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} />
+          <ActionButton title="Fill Grid" icon={GridOnIcon} onClick={handleFillGrid} />
 
-          {uploadOpen && (
-            <CommonBulkUpload
-              open={uploadOpen}
-              handleClose={handleBulkUploadClose}
-              title="Upload Files"
-              uploadText="Upload file"
-              downloadText="Sample File"
-              onSubmit={handleSubmit}
-              handleFileUpload={handleFileUpload}
-              screen="PutAway"
-            />
-          )}
 
-          <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} margin="0 10px 0 10px" />
         </div>
-
         {showForm ? (
-          <div className="row d-flex justify-content-center">
-            <div className="d-flex justify-content-center" style={{ gap: '20px' }}> {/* Adding gap between fields */}
-              <div className="col-md-3 mb-3 custom-border">
+          <div className="row d-flex ">
+            <div className='d-flex justify-content-center align-items-center' style={{ gap: '20px' }}>
+              {/* Client COA */}
+              <div className="col-md-3 mb-3 ">
                 <FormControl fullWidth variant="filled">
                   <TextField
-                    id="account"
-                    label="Customer COA"
+                    id="ccoa"
+                    label="Client COA"
                     size="small"
                     required
                     disabled
-                    placeholder="40003600104"
                     inputProps={{ maxLength: 30 }}
                     onChange={handleInputChange}
-                    name="accountCode"
-                    value={formData.accountCode}
-                    className="custom-border"
+                    name="ccoa"
+                    value={formData.ccoa}
+                    error={!!fieldErrors.ccoa}
+                    helperText={fieldErrors.ccoa || ''}
                   />
                 </FormControl>
               </div>
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth size="small">
+              {/* COA */}
+              <div className="col-md-3 mb-3">
+                <FormControl fullWidth size="small" error={!!fieldErrors.coa}>
                   <InputLabel id="demo-simple-select-label">COA</InputLabel>
                   <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Type"
+                    labelId="coa"
+                    id="coa"
+                    label="COA"
                     onChange={handleInputChange}
-                    name="type"
-                    value={formData.type}
-                    className="custom-border"
+                    name="coa"
+                    value={formData.coa}
+                    error={!!fieldErrors.coa}  // Set the error prop here
                   >
-                    <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="COA">COA</MenuItem>
+                    {groupList.length > 0 &&
+                      groupList.map((gro, index) => (
+                        <MenuItem key={index} value={gro.group}>
+                          {gro.group}
+                        </MenuItem>
+                      ))}
                   </Select>
-                  {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-                </FormControl>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center" style={{ gap: '20px' }}> {/* Adding gap between fields */}
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth variant="filled">
-                  <TextField
-                    id="account"
-                    label="Customer COA"
-                    size="small"
-                    required
-                    disabled
-                    placeholder="40003600104"
-                    inputProps={{ maxLength: 30 }}
-                    onChange={handleInputChange}
-                    name="accountCode"
-                    value={formData.accountCode}
-                    className="custom-border"
-                  />
-                </FormControl>
-              </div>
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Type"
-                    onChange={handleInputChange}
-                    name="type"
-                    value={formData.type}
-                    className="custom-border"
-                  >
-                    <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="COA">COA</MenuItem>
-                  </Select>
-                  {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-                </FormControl>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center" style={{ gap: '20px' }}> {/* Adding gap between fields */}
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth variant="filled">
-                  <TextField
-                    id="account"
-                    label="Customer COA"
-                    size="small"
-                    required
-                    disabled
-                    placeholder="40003600104"
-                    inputProps={{ maxLength: 30 }}
-                    onChange={handleInputChange}
-                    name="accountCode"
-                    value={formData.accountCode}
-                    className="custom-border"
-                  />
-                </FormControl>
-              </div>
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Type"
-                    onChange={handleInputChange}
-                    name="type"
-                    value={formData.type}
-                    className="custom-border"
-                  >
-                    <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="COA">COA</MenuItem>
-                  </Select>
-                  {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-                </FormControl>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center" style={{ gap: '20px' }}> {/* Adding gap between fields */}
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth variant="filled">
-                  <TextField
-                    id="account"
-                    label="Customer COA"
-                    size="small"
-                    required
-                    disabled
-                    placeholder="40003600104"
-                    inputProps={{ maxLength: 30 }}
-                    onChange={handleInputChange}
-                    name="accountCode"
-                    value={formData.accountCode}
-                    className="custom-border"
-                  />
-                </FormControl>
-              </div>
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Type"
-                    onChange={handleInputChange}
-                    name="type"
-                    value={formData.type}
-                    className="custom-border"
-                  >
-                    <MenuItem value="ACCOUNT">Account</MenuItem>
-                    <MenuItem value="COA">COA</MenuItem>
-                  </Select>
-                  {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-                </FormControl>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center" style={{ gap: '20px' }}> {/* Adding gap between fields */}
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth variant="filled">
-                  <TextField
-                    id="account"
-                    label="Customer COA"
-                    size="small"
-                    required
-                    disabled
-                    placeholder="40003600104"
-                    inputProps={{ maxLength: 30 }}
-                    onChange={handleInputChange}
-                    name="accountCode"
-                    value={formData.accountCode}
-                    className="custom-border"
-                  />
-                </FormControl>
-              </div>
-              <div className="col-md-3 mb-3 custom-border">
-                <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">COA</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="Type"
-                    onChange={handleInputChange}
-                    name="type"
-                    value={formData.type}
-                    className="custom-border" 
-                  >
-                    <MenuItem value="ACCOUNT">Customer COA</MenuItem>
-                    <MenuItem value="COA">COA</MenuItem>
-                  </Select>
-                  {fieldErrors.type && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
+                  {fieldErrors.coa && (
+                    <FormHelperText style={{ color: 'red' }}>
+                      COA This field is required
+                    </FormHelperText>
+                  )}
                 </FormControl>
               </div>
             </div>
           </div>
-
         ) : (
           <CommonTable columns={columns} data={data} blockEdit={true} toEdit={getGruopById} />
         )}
+
+        {/* Pagination Controls */}
+        {/* <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+          <button onClick={() => handlePageChange(page - 1)} disabled={page === 0}>
+            Previous
+          </button>
+          <span>{`Page ${page + 1}`}</span>
+          <button
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page * itemsPerPage + itemsPerPage >= data.length}
+          >
+            Next
+          </button>
+        </div> */}
       </div>
     </>
   );
 };
 
-
 export default LedgersMapping;
-
-
