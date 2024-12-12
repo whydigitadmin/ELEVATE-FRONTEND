@@ -136,10 +136,31 @@ const CoA = () => {
     console.log(event.target.files[0]);
   };
 
-  const handleSubmit = () => {
-    toast.success("File uploaded successfully");
+  const handleSubmit = async () => {
+    // toast.success("File uploaded successfully");
     console.log('Submit clicked');
     handleBulkUploadClose();
+
+    // const saveExcelData = {
+    //   createdBy: loginUserName
+    // };
+
+    // try {
+    //   const response = await apiCalls('post', `businesscontroller/excelUploadForCoa`, saveExcelData);
+    //   if (response.status === true) {
+    //     toast.success("File uploaded successfully");
+    //     // showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
+    //     getGroup();
+    //     // handleClear();
+    //   } else {
+    //     showToast('File uploded failed');
+    //   }
+    // } catch (error) {
+    //   console.error('Error:', error);
+    // } finally {
+    //   setIsLoading(false);
+    // }
+    // getGroup();
     // getAllData();
   };
 
@@ -306,15 +327,19 @@ const CoA = () => {
             <CommonBulkUpload
               open={uploadOpen}
               handleClose={handleBulkUploadClose}
-              title="Upload Files"
-              uploadText="Upload file"
+              dialogTitle="Upload Files"
+              uploadText="Upload File"
               downloadText="Sample File"
               fileName="sampleFile.xlsx"
               onSubmit={handleSubmit}
               sampleFileDownload={SampleFile}
               handleFileUpload={handleFileUpload}
+              apiUrl="businesscontroller/excelUploadForCoa"
               screen="PutAway"
+              loginUser={loginUserName}
+              // loginUser={localStorage.getItem('loginUserName')} // Pass the loginUserName here
             />
+
           )}
 
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} margin="0 10px 0 10px" />

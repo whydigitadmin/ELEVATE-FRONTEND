@@ -1,9 +1,19 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Slide, Typography } from '@mui/material';
-import apiCalls from 'apicall';
 import React, { useState } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Slide,
+  Typography,
+} from '@mui/material';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
 import { IoMdClose } from 'react-icons/io';
+import apiCalls from 'apicall';
 import { showToast } from './toast-component';
 
 const VisuallyHiddenInput = ({ ...props }) => <input type="file" style={{ display: 'none' }} {...props} />;
@@ -18,12 +28,12 @@ const CommonBulkUpload = ({
   sampleFileDownload,
   fileName,
   handleFileUpload,
-  onOpenClick,
   apiUrl,
-  screen
+  loginUser, // Accept loginUserName as a prop
+  clientCode,
+  screen,
 }) => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -53,43 +63,47 @@ const CommonBulkUpload = ({
 
   const handleSubmit = async () => {
     if (selectedFile) {
+      const createdBy = loginUser || 'default_user';
+      // const clientCode = loginUser || 'default_user';
       const formData = new FormData();
       formData.append('files', selectedFile);
+      formData.append('createdBy', createdBy);
+      formData.append('clientCode', clientCode);
+
       try {
         const headers = {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
         };
-        const response = await apiCalls('post', `${apiUrl}`, formData, {}, headers);
+        const response = await apiCalls('post', apiUrl, formData, {}, headers);
+
         if (response.status === true) {
-          console.log('File uploaded successfully:', response);
-          const message = response.paramObjectsMap.paramObjectsMap.message;
-          const successfulUploads = response.paramObjectsMap.successfulUploads;
+          const message = response.paramObjectsMap.message || 'Upload successful';
+          const uploadsCount = response.paramObjectsMap.successfulUploads || 0;
           setSuccessMessage(message);
-          setSuccessfulUploads(successfulUploads);
+          setSuccessfulUploads(uploadsCount);
           setSuccessDialogOpen(true);
           setSelectedFile(null);
           showToast('success', message);
         } else {
           showToast('error', response.paramObjectsMap.errorMessage || `${screen} Bulk Uploaded failed`);
-          // showToast('error', response.paramObjectsMap.errorMessage || 'Buyer Order Bulk Uploaded failed');
-          setErrorMessage(response.paramObjectsMap.errorMessage);
+          showToast('error', response.paramObjectsMap.errorMessage || 'Buyer Order Bulk Uploaded failed');
+          const errorMessage = response.paramObjectsMap.errorMessage || 'Upload failed';
+          setErrorMessage(errorMessage);
           setErrorDialogOpen(true);
         }
       } catch (error) {
         console.error('Error:', error);
         showToast('error', ' failed');
-        setErrorMessage(errorMessage);
+        setErrorMessage('An unexpected error occurred during the upload.');
         setErrorDialogOpen(true);
       }
 
       handleClose();
-      onSubmit();
+      if (onSubmit) onSubmit();
     }
   };
 
-  const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
+  const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
   return (
     <>
