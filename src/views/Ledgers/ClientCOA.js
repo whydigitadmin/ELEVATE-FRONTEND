@@ -8,14 +8,12 @@ import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import TextField from '@mui/material/TextField';
-import { useTheme } from '@mui/material/styles';
 import apiCalls from 'apicall';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
-import { getAllActiveCurrency } from 'utils/CommonFunctions';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
 import { toast } from 'react-toastify';
@@ -28,7 +26,6 @@ const ClientCOA = () => {
   const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  // const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -328,6 +325,7 @@ const ClientCOA = () => {
 
         {showForm ? (
           <div className="row d-flex ">
+            {/* type */}
             <div className="col-md-3 mb-3">
               <Autocomplete
                 options={[
@@ -357,7 +355,7 @@ const ClientCOA = () => {
                 clearOnEscape
               />
             </div>
-
+            {/* groupName */}
             <div className="col-md-3 mb-3">
               <Autocomplete
                 options={allGroupName}
@@ -384,29 +382,7 @@ const ClientCOA = () => {
                 clearOnEscape
               />
             </div>
-
-            {/* <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">Group Name</InputLabel>
-                <Select
-                  labelId="groupName"
-                  id="groupName"
-                  label="Group Name"
-                  onChange={handleInputChange}
-                  name="groupName"
-                  value={formData.groupName}
-                >
-                  {groupList.length > 0 &&
-                    groupList.map((gro, index) => (
-                      <MenuItem key={index} value={gro.group}>
-                        {gro.group}
-                      </MenuItem>
-                    ))}
-                </Select>
-                {fieldErrors.groupName && <FormHelperText style={{ color: 'red' }}>This field is required</FormHelperText>}
-              </FormControl>
-            </div> */}
-
+            {/* Account Code */}
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
                 <TextField
@@ -425,7 +401,7 @@ const ClientCOA = () => {
                 />
               </FormControl>
             </div>
-
+            {/* Account/Group Name */}
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
                 <TextField
@@ -442,8 +418,7 @@ const ClientCOA = () => {
                 />
               </FormControl>
             </div>
-
-
+            {/* natureOfAccount */}
             <div className="col-md-3 mb-3">
               <Autocomplete
                 options={[
@@ -473,7 +448,7 @@ const ClientCOA = () => {
                 clearOnEscape
               />
             </div>
-
+            {/* Currency */}
             <div className="col-md-3 mb-3">
               <FormControl fullWidth size="small">
                 <TextField
@@ -488,7 +463,7 @@ const ClientCOA = () => {
                 />
               </FormControl>
             </div>
-
+            {/* interBranchAc */}
             <div className="col-md-3 mb-2">
               <FormGroup>
                 <FormControlLabel
@@ -504,6 +479,7 @@ const ClientCOA = () => {
                 />
               </FormGroup>
             </div>
+            {/* controllAc */}
             <div className="col-md-3 mb-2">
               <FormGroup>
                 <FormControlLabel
@@ -519,7 +495,7 @@ const ClientCOA = () => {
                 />
               </FormGroup>
             </div>
-
+            {/* active */}
             <div className="col-md-3 mb-3">
               <FormGroup>
                 <FormControlLabel

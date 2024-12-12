@@ -18,8 +18,6 @@ import { getAllActiveCurrency } from 'utils/CommonFunctions';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
 import { toast } from 'react-toastify';
-import UploadIcon from '@mui/icons-material/Upload';
-import CommonBulkUpload from 'utils/CommonBulkUpload';
 import { format } from 'date-fns';
 
 const LedgersMapping = () => {
@@ -31,83 +29,131 @@ const LedgersMapping = () => {
   const [editMode, setEditMode] = useState(false);
   const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
-  const [rows, setRows] = useState([{
-    // id: 1,
-    // ccoa: 'ABC123', // Example initial data
-    // coa: 'COA_001',
-  }]); // Starts with one row
+  const [rows, setRows] = useState([{}]);
   const [currencies, setCurrencies] = useState([]);
   const [editId, setEditId] = useState('');
   const [groupList, setGroupList] = useState([]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [allcoa, setAllcoa] = useState([]);
   const [formData, setFormData] = useState({
-    coa: '',
-    ccoa: '',
+    groupName: '',
+    accountCode: '',
+    natureOfAccount: '',
+    accountGroupName: '',
+    type: '',
+    commonDate: '',
+    branch: '',
+    interBranchAc: false,
+    controllAc: false,
+    currency: 'INR',
+    active: false
   });
 
   const [fieldErrors, setFieldErrors] = useState({
-    coa: false,
-    ccoa: false,
+    groupName: false,
+    accountCode: false,
+    natureOfAccount: false,
+    accountGroupName: false,
+    type: false,
+    interBranchAc: false,
+    controllAc: false,
+    currency: false,
+    active: false
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const currencyData = await getAllActiveCurrency(orgId);
-        setCurrencies(currencyData);
-      } catch (error) {
-        console.error('Error fetching country data:', error);
-      }
-    };
-
-    fetchData();
     getGroup();
-    getAllcoa();
+    // getAllGroupName();
   }, []);
 
-  const addRow = () => {
-    const dummyData = [
-      // { id: rows, ccoa: 'XYZ456', coa: 'COA_002' },
-      { id: rows.length + 1, ccoa: 'XYZ456', coa: 'COA_002' },
-      { id: rows.length + 2, ccoa: 'DEF789', coa: 'COA_003' },
-    ];
-    setRows([...dummyData]);
+  // list Api
+  const getGroup = async () => {
+    try {
+      const result = await apiCalls('get', ``);
+      if (result) {
+        setData(result.paramObjectsMap.cCoaVO.reverse());
+      } else {
+        // Handle error
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  const handleListView = () => {
+    setShowForm(!showForm);
+    setFieldErrors({
+      clientCOA: false,
+      ccoaCode: false,
+      coa: false,
+      coaCode: false,
+    });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const inputValue = type === 'checkbox' ? checked : value;
+  const columns = [
+    { accessorKey: 'clientCOA', header: 'Client COA', size: 140 },
+    { accessorKey: 'ccoaCode', header: 'CCOA Code', size: 100 },
+    { accessorKey: 'coa', header: 'COA', size: 140 },
+    { accessorKey: 'coaCode', header: 'COA Code', size: 100 }
+  ];
 
-    let errorMessage = '';
-    let validInputValue = inputValue;
 
-    if (name === 'ccoa') {
-      const alphanumericPattern = /^[a-zA-Z0-9]*$/;
-      if (!alphanumericPattern.test(inputValue)) {
-        errorMessage = 'Only alphabets and numbers are allowed.';
-        validInputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
-      }
+
+  const validateForm = (formData) => {
+    let errors = {};
+
+    if (formData.type === 'Account' && !formData.groupName) {
+      errors.groupName = 'Group Name is required';
     }
 
-    setFormData({ ...formData, [name]: validInputValue });
-    setFieldErrors({ ...fieldErrors, [name]: errorMessage });
+    if (!formData.natureOfAccount || formData.natureOfAccount.length === 0) {
+      errors.natureOfAccount = 'Nature of Account is required';
+    }
+
+    if (!formData.accountGroupName) {
+      errors.accountGroupName = 'Account Group Name is required';
+    }
+
+    if (!formData.type) {
+      errors.type = 'Type is required';
+    }
+
+    if (!formData.accountCode) {
+      errors.accountCode = 'Account Code is required';
+    }
+    return errors;
+  };
+  const handleSubmit = () => {
+    toast.success("File uploaded successfully");
+    console.log('Submit clicked');
+    // handleBulkUploadClose();
+    // getGroup();
+    // getAllData();
   };
 
   const handleSave = async () => {
     const errors = validateForm(formData);
+
     if (Object.keys(errors).length === 0) {
       setIsLoading(true);
+
       const saveData = {
         ...(editId && { id: editId }),
         active: formData.active,
-        coa: formData.coa,
-        ccoa: formData.ccoa,
-        cancelRemarks: formData.cancelRemarks,
-        cancel: false,
+        groupName: formData.groupName !== null && formData.groupName !== '' ? formData.groupName : null,
+        natureOfAccount: formData.natureOfAccount,
+        accountGroupName: formData.accountGroupName,
+        parentId: formData.parentId,
+        parentCode: formData.parentCode,
+        type: formData.type,
+        interBranchAc: formData.interBranchAc,
+        controllAc: formData.controllAc,
+        accountCode: formData.accountCode,
+        currency: 'INR',
         createdBy: loginUserName,
-        updatedBy: loginUserName,
+        updatedBy: loginUserName
       };
+
+      console.log('DATA TO SAVE', saveData);
 
       try {
         const response = await apiCalls('put', `/businesscontroller/createUpdateCCoa`, saveData);
@@ -124,82 +170,99 @@ const LedgersMapping = () => {
         setIsLoading(false);
       }
     } else {
+      console.log('Validation Errors:', errors);
       setFieldErrors(errors);
     }
   };
 
+
+  // handleInputChange
+  const handleInputChange = (index, eventOrObject) => {
+    let name, value, type, checked;
+
+    if (eventOrObject.target) {
+      // Handle event from standard input
+      ({ name, value, type, checked } = eventOrObject.target);
+    } else {
+      // Handle object directly passed (e.g., from Autocomplete)
+      ({ name, value } = eventOrObject);
+      type = 'text'; // Default type for non-event inputs
+      checked = false;
+    }
+
+    const inputValue = type === 'checkbox' ? checked : value;
+
+    let errorMessage = '';
+    let validInputValue = inputValue;
+
+    if (name === 'ccoa') {
+      const alphanumericPattern = /^[a-zA-Z0-9]*$/;
+      if (!alphanumericPattern.test(inputValue)) {
+        errorMessage = 'Only alphabets and numbers are allowed.';
+        validInputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
+      }
+    }
+
+    const updatedRows = [...rows];
+    updatedRows[index] = { ...updatedRows[index], [name]: validInputValue };
+
+    setRows(updatedRows);
+    setFieldErrors({ ...fieldErrors, [`${name}-${index}`]: errorMessage });
+  };
+
+  // handleClear
   const handleClear = () => {
     // Reset form data and field errors
     setFormData({ coa: '', ccoa: '' });
     setFieldErrors({ coa: '', ccoa: '' });
-  
+
     // Reset rows to their initial state
     setRows([{ id: 1, ccoa: '', coa: '' }]);
-  
+
     // Reset edit ID and other states if necessary
     setEditId('');
   };
-  
-  
 
-  const handleListView = () => {
-    setShowForm(!showForm);
-    setFieldErrors({ coa: false, ccoa: false });
-  };
+  // addRow
+  const addRow = () => {
+    const dummyData = [
+      // { id: rows, ccoa: 'XYZ456', coa: 'COA_002' },
+      { id: rows.length + 1, ccoa: 'XYZ456', coa: 'COA_001' },
+      { id: rows.length + 2, ccoa: 'DEF789', coa: 'COA_002' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
 
-  const columns = [
-    { accessorKey: 'ccoa', header: 'Client COA', size: 140 },
-    { accessorKey: 'coa', header: 'COA', size: 140 },
-  ];
 
-  const getGruopById = async (row) => {
-    setEditId(row.original.id);
-    setShowForm(true);
-    try {
-      const result = await apiCalls('get', `/businesscontroller/getCCeoById?id=${row.original.id}`);
-      if (result) {
-        const cao = result.paramObjectsMap.cCoaVO;
-        setEditMode(true);
-        setFormData({ coa: cao.coa, ccoa: cao.ccoa });
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  const getGroup = async () => {
-    try {
-      const result = await apiCalls('get', ``);
-      if (result) {
-        setData(result.paramObjectsMap.cCoaVO.reverse());
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  const getAllcoa = async () => {
-    try {
-      const response = await apiCalls('get', ``);
-      if (response.status === true) {
-        setGroupList(response.paramObjectsMap.cCoaVO);
-      } else {
-        console.error('API Error:', response);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  const validateForm = (formData) => {
-    let errors = {};
-    if (!formData.ccoa) {
-      errors.ccoa = 'Client COA is required';
-    }
-    if (!formData.coa) {
-      errors.coa = 'COA is required';
-    }
-    return errors;
+    ];
+    setRows([...dummyData]);
   };
 
   return (
@@ -235,8 +298,8 @@ const LedgersMapping = () => {
                     helperText={fieldErrors[`ccoa-${index}`] || ''}
                   />
                 </div>
-                 {/* CCOA Code */}
-                 <div className="col-3 mb-3">
+                {/* CCOA Code */}
+                <div className="col-3 mb-3">
                   <TextField
                     name="ccoa"
                     value={row.ccoa || ''}
@@ -279,8 +342,8 @@ const LedgersMapping = () => {
                   />
                 </div>
 
-                 {/* COA Code */}
-                 <div className="col-3 mb-3">
+                {/* COA Code */}
+                <div className="col-3 mb-3">
                   <TextField
                     name="ccoa"
                     value={row.ccoa || ''}
@@ -298,7 +361,7 @@ const LedgersMapping = () => {
           </div>
 
         ) : (
-          <CommonTable columns={columns} data={data} blockEdit={true} toEdit={getGruopById} />
+          <CommonTable columns={columns} data={data} blockEdit={true} toEdit={''} />
         )}
       </div>
     </>
