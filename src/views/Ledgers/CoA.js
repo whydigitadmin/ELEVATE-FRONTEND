@@ -2,23 +2,20 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import { Autocomplete, FormHelperText } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import TextField from '@mui/material/TextField';
-import { useTheme } from '@mui/material/styles';
 import apiCalls from 'apicall';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
-import { getAllActiveCurrency } from 'utils/CommonFunctions';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
-import { toast } from 'react-toastify';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
 import SampleFile from '../../assets/sample-files/SampleFormat.xlsx';
@@ -28,11 +25,11 @@ const CoA = () => {
   const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  // const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [allGroupName, setAllGroupName] = useState([]);
+  const [createdBy, setCreatedBy] = useState(null);
   const [formData, setFormData] = useState({
     groupName: '',
     accountCode: '',
@@ -125,10 +122,14 @@ const CoA = () => {
   };
 
   const handleBulkUploadOpen = () => {
+    // const createdByUser = loginUser || 'default_user';
+    // setCreatedBy(createdByUser);
     setUploadOpen(true);
   };
 
   const handleBulkUploadClose = () => {
+    // const createdByValue = loginUser || 'default_user';
+    // setCreatedBy(createdByValue);
     setUploadOpen(false);
   };
 
@@ -137,31 +138,8 @@ const CoA = () => {
   };
 
   const handleSubmit = async () => {
-    // toast.success("File uploaded successfully");
     console.log('Submit clicked');
     handleBulkUploadClose();
-
-    // const saveExcelData = {
-    //   createdBy: loginUserName
-    // };
-
-    // try {
-    //   const response = await apiCalls('post', `businesscontroller/excelUploadForCoa`, saveExcelData);
-    //   if (response.status === true) {
-    //     toast.success("File uploaded successfully");
-    //     // showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
-    //     getGroup();
-    //     // handleClear();
-    //   } else {
-    //     showToast('File uploded failed');
-    //   }
-    // } catch (error) {
-    //   console.error('Error:', error);
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    // getGroup();
-    // getAllData();
   };
 
   const handleSave = async () => {
@@ -338,7 +316,8 @@ const CoA = () => {
               apiUrl="businesscontroller/excelUploadForCoa"
               screen="PutAway"
               loginUser={loginUserName}
-              // loginUser={localStorage.getItem('loginUserName')} // Pass the loginUserName here
+              // createdBy={loginUserName}
+            // loginUser={localStorage.getItem('loginUserName')} // Pass the loginUserName here
             />
 
           )}
@@ -440,7 +419,6 @@ const CoA = () => {
                 />
               </FormControl>
             </div>
-
 
             <div className="col-md-3 mb-3">
               <Autocomplete
