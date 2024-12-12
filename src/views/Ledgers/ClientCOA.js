@@ -141,6 +141,7 @@ const ClientCOA = () => {
     toast.success("File uploaded successfully");
     console.log('Submit clicked');
     handleBulkUploadClose();
+    // getGroup();
     // getAllData();
   };
 
@@ -314,7 +315,10 @@ const ClientCOA = () => {
               onSubmit={handleSubmit}
               sampleFileDownload={SampleFile}
               handleFileUpload={handleFileUpload}
+              apiUrl={`/businesscontroller/excelUploadForCCoa`}
               screen="PutAway"
+              loginUser={loginUserName}
+              clientCode={loginUserName}
             />
           )}
 
