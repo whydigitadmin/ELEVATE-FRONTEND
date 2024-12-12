@@ -194,6 +194,7 @@ const CoA = () => {
         if (response.status === true) {
           showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
           getGroup();
+          getAllGroupName();
           handleClear();
         } else {
           showToast('error', editId ? 'COA updation failed' : 'COA creation failed');

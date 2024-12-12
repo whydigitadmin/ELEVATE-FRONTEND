@@ -175,6 +175,7 @@ const ClientCOA = () => {
         if (response.status === true) {
           showToast('success', editId ? 'Client COA updated successfully' : 'Client COA created successfully');
           getGroup();
+          getAllGroupName();
           handleClear();
         } else {
           showToast('error', editId ? 'Client COA updation failed' : 'Client COA creation failed');
