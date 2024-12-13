@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
+import GridOnIcon from '@mui/icons-material/GridOn';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import GridOnIcon from '@mui/icons-material/GridOn';
 import { Autocomplete, FormControl, TextField } from '@mui/material';
-import ActionButton from 'utils/ActionButton';
 import apiCalls from 'apicall';
+import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import CommonTable from 'views/basicMaster/CommonTable';
+import ActionButton from 'utils/ActionButton';
 import { showToast } from 'utils/toast-component';
+import CommonTable from 'views/basicMaster/CommonTable';
 
 const LedgersMapping = () => {
   const [data, setData] = useState([]);
@@ -25,9 +25,9 @@ const LedgersMapping = () => {
         coa: '',
         coaCode: '',
         active: true,
-        clientCode: '',
-      },
-    ],
+        clientCode: ''
+      }
+    ]
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
@@ -41,8 +41,8 @@ const LedgersMapping = () => {
         ...prevFormData,
         rows: prevFormData.rows.map((row) => ({
           ...row,
-          clientCode: loginUserName,
-        })),
+          clientCode: loginUserName
+        }))
       }));
     }
 
@@ -92,9 +92,9 @@ const LedgersMapping = () => {
               coa: ledgers.coa || '',
               coaCode: ledgers.coaCode || '',
               active: true,
-              clientCode: ledgers.clientCode || '',
-            },
-          ],
+              clientCode: ledgers.clientCode || ''
+            }
+          ]
         });
 
         console.log('DataToEdit', ledgers);
@@ -137,7 +137,7 @@ const LedgersMapping = () => {
         clientCode: loginUserName,
         coa: rows.coa,
         coaCode: rows.coaCode,
-        createdBy: loginUserName,
+        createdBy: loginUserName
       }));
 
       try {
@@ -164,12 +164,12 @@ const LedgersMapping = () => {
     const updatedRows = [...formData.rows];
     updatedRows[index] = {
       ...updatedRows[index],
-      [name]: value,
+      [name]: value
     };
 
     setFormData({
       ...formData,
-      rows: updatedRows,
+      rows: updatedRows
     });
   };
 
@@ -182,9 +182,9 @@ const LedgersMapping = () => {
           coa: '',
           coaCode: '',
           active: true,
-          clientCode: '',
-        },
-      ],
+          clientCode: ''
+        }
+      ]
     });
     setFieldErrors({});
   };
@@ -205,15 +205,14 @@ const LedgersMapping = () => {
 
         setFormData((prevFormData) => ({
           ...prevFormData,
-          rows: [
-            {
-              ...prevFormData.rows[0],
-              clientCoa: fillGrid.clientCoa || '',
-              clientCoaCode: fillGrid.clientCoaCode || '',
-              coa: fillGrid.coa || '',
-              coaCode: fillGrid.coaCode || '',
-            },
-          ],
+          rows: fillGrid.map((grid) => ({
+            clientCoa: grid.clientCOA || '',
+            clientCoaCode: grid.clientCoaCode || '',
+            coa: grid.coa || '',
+            coaCode: grid.coaCode || '',
+            active: true,
+            clientCode: clientCode
+          }))
         }));
 
         console.log('DataToEdit:', fillGrid);
@@ -224,7 +223,6 @@ const LedgersMapping = () => {
       console.error('Error fetching data:', error);
     }
   };
-
 
   return (
     <>
@@ -243,7 +241,6 @@ const LedgersMapping = () => {
           <div className="row d-flex">
             {formData.rows.map((row, index) => (
               <div key={index} className="row d-flex">
-
                 <div className="col-md-3 mb-3">
                   <FormControl fullWidth variant="filled">
                     <TextField
@@ -275,26 +272,29 @@ const LedgersMapping = () => {
                 </div>
 
                 <div className="col-md-3 mb-3">
-                  <Autocomplete
-                    options={allCOA}
-                    getOptionLabel={(option) => option.accountGroupName || ''}
-                    value={allCOA.find((item) => item.accountGroupName === row.coa) || null}
-                    onChange={(event, newValue) => {
-                      const updatedRows = [...formData.rows];
-                      updatedRows[index].coa = newValue ? newValue.accountGroupName : '';
-                      setFormData({ ...formData, rows: updatedRows });
-                    }}
-                    size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="COA"
-                        variant="outlined"
-                        error={!!fieldErrors.coa}
-                        helperText={fieldErrors.coa || ''}
-                      />
-                    )}
-                  />
+                  <FormControl fullWidth variant="filled">
+                    <Autocomplete
+                      options={allCOA}
+                      getOptionLabel={(option) => (option ? option.accountGroupName : '')} // Handles undefined option
+                      value={allCOA.find((item) => item.accountGroupName === row.coa) || null} // Finds matching option or sets null
+                      onChange={(event, newValue) => {
+                        const updatedRows = [...formData.rows];
+                        updatedRows[index].coa = newValue ? newValue.accountGroupName : ''; // Update COA
+                        updatedRows[index].coaCode = newValue ? newValue.accountCode : ''; // Set COA Code
+                        setFormData({ ...formData, rows: updatedRows });
+                      }}
+                      size="small"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="COA"
+                          variant="outlined"
+                          error={!!fieldErrors.coa}
+                          helperText={fieldErrors.coa || ''}
+                        />
+                      )}
+                    />
+                  </FormControl>
                 </div>
 
                 <div className="col-md-3 mb-3">
@@ -315,7 +315,7 @@ const LedgersMapping = () => {
             ))}
           </div>
         ) : (
-          <CommonTable columns={columns} data={data} blockEdit={true} toEdit={getLedgersMappingById} />
+          <CommonTable columns={columns} data={data} />
         )}
       </div>
     </>
