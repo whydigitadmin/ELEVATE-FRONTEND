@@ -121,29 +121,34 @@ const LedgersMapping = () => {
   const handleSave = async () => {
     const errors = {};
 
-    formData.rows.forEach((rows, index) => {
-      if (!rows.coa) {
+    formData.rows.forEach((row, index) => {
+      if (!row.coa) {
         errors[`coa-${index}`] = 'COA is required';
       }
     });
 
+    setFieldErrors(errors);
+
     if (Object.keys(errors).length === 0) {
       setIsLoading(true);
-      const saveData = formData.rows.map((rows) => ({
-        id: rows.id || editId,
-        active: rows.active,
-        clientCoa: rows.clientCoa,
-        clientCoaCode: rows.clientCoaCode,
+      const saveData = formData.rows.map((row) => ({
+        // id: row.id || editId,
+        active: row.active,
+        clientCoa: row.clientCoa,
+        clientCoaCode: row.clientCoaCode,
         clientCode: loginUserName,
-        coa: rows.coa,
-        coaCode: rows.coaCode,
-        createdBy: loginUserName
+        coa: row.coa,
+        coaCode: row.coaCode,
+        createdBy: loginUserName,
       }));
 
       try {
         const response = await apiCalls('put', '/businesscontroller/createUpdateLedgerMapping', saveData);
         if (response.status === true) {
-          showToast('success', editId ? 'Ledgers Mapping updated successfully' : 'Ledgers Mapping created successfully');
+          showToast(
+            'success',
+            editId ? 'Ledgers Mapping updated successfully' : 'Ledgers Mapping created successfully'
+          );
           getAllLedgerMapping();
           handleClear();
         } else {
@@ -154,8 +159,6 @@ const LedgersMapping = () => {
       } finally {
         setIsLoading(false);
       }
-    } else {
-      setFieldErrors(errors);
     }
   };
 
@@ -166,6 +169,9 @@ const LedgersMapping = () => {
       ...updatedRows[index],
       [name]: value
     };
+
+    const updatedErrors = { ...fieldErrors };
+    delete updatedErrors[`${name}-${index}`];
 
     setFormData({
       ...formData,
@@ -191,15 +197,18 @@ const LedgersMapping = () => {
 
   const handleFillGrid = async () => {
     console.log('Editing Exchange Rate:', loginUserName);
+    setIsLoading(true);
 
     const clientCode = loginUserName;
     setEditId(clientCode);
     setShowForm(true);
 
+
     try {
       const result = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=${clientCode}`);
 
       if (result && result.paramObjectsMap && result.paramObjectsMap.COA) {
+        
         const fillGrid = result.paramObjectsMap.COA;
         setEditMode(true);
 
@@ -221,6 +230,8 @@ const LedgersMapping = () => {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -235,7 +246,7 @@ const LedgersMapping = () => {
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} />
-          <ActionButton title="Fill Grid" icon={GridOnIcon} onClick={handleFillGrid} />
+          <ActionButton title="Fill Grid" icon={GridOnIcon} isLoading={isLoading} onClick={handleFillGrid} />
         </div>
         {showForm ? (
           <div className="row d-flex">
@@ -275,13 +286,18 @@ const LedgersMapping = () => {
                   <FormControl fullWidth variant="filled">
                     <Autocomplete
                       options={allCOA}
-                      getOptionLabel={(option) => (option ? option.accountGroupName : '')} // Handles undefined option
-                      value={allCOA.find((item) => item.accountGroupName === row.coa) || null} // Finds matching option or sets null
+                      getOptionLabel={(option) => (option ? option.accountGroupName : '')}
+                      value={allCOA.find((item) => item.accountGroupName === row.coa) || null}
                       onChange={(event, newValue) => {
                         const updatedRows = [...formData.rows];
-                        updatedRows[index].coa = newValue ? newValue.accountGroupName : ''; // Update COA
-                        updatedRows[index].coaCode = newValue ? newValue.accountCode : ''; // Set COA Code
+                        updatedRows[index].coa = newValue ? newValue.accountGroupName : '';
+                        updatedRows[index].coaCode = newValue ? newValue.accountCode : '';
+
+                        const updatedErrors = { ...fieldErrors };
+                        delete updatedErrors[`coa-${index}`];
+
                         setFormData({ ...formData, rows: updatedRows });
+                        setFieldErrors(updatedErrors);
                       }}
                       size="small"
                       renderInput={(params) => (
@@ -289,8 +305,8 @@ const LedgersMapping = () => {
                           {...params}
                           label="COA"
                           variant="outlined"
-                          error={!!fieldErrors.coa}
-                          helperText={fieldErrors.coa || ''}
+                          error={!!fieldErrors[`coa-${index}`]}
+                          helperText={fieldErrors[`coa-${index}`] || ''}
                         />
                       )}
                     />
@@ -303,14 +319,24 @@ const LedgersMapping = () => {
                       label="COA Code"
                       size="small"
                       required
-                      onChange={(e) => handleInputChange(index, e)}
+                      onChange={(e) => {
+                        handleInputChange(index, e);
+
+                        const updatedErrors = { ...fieldErrors };
+                        if (e.target.value) {
+                          delete updatedErrors[`coaCode-${index}`];
+                        }
+                        setFieldErrors(updatedErrors);
+                      }}
                       name="coaCode"
                       value={row.coaCode}
                       error={!!fieldErrors[`coaCode-${index}`]}
                       helperText={fieldErrors[`coaCode-${index}`] || ''}
                     />
+
                   </FormControl>
                 </div>
+
               </div>
             ))}
           </div>
