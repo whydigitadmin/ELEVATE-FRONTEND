@@ -1,168 +1,153 @@
+import React, { useEffect, useRef, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import { Autocomplete, FormHelperText } from '@mui/material';
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
 import GridOnIcon from '@mui/icons-material/GridOn';
-import TextField from '@mui/material/TextField';
-import { useTheme } from '@mui/material/styles';
+import { Autocomplete, FormControl, TextField } from '@mui/material';
+import ActionButton from 'utils/ActionButton';
 import apiCalls from 'apicall';
-import { useEffect, useRef, useState } from 'react';
-import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ActionButton from 'utils/ActionButton';
-import { getAllActiveCurrency } from 'utils/CommonFunctions';
-import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
-import { toast } from 'react-toastify';
-import { format } from 'date-fns';
+import { showToast } from 'utils/toast-component';
 
 const LedgersMapping = () => {
-  const theme = useTheme();
-  const anchorRef = useRef(null);
-  const [data, setData] = useState([]); // For group data to display in table
-  const [showForm, setShowForm] = useState(true); // Toggle between form and table view
+  const [data, setData] = useState([]);
+  const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
-  const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
-  const [rows, setRows] = useState([{}]);
-  const [currencies, setCurrencies] = useState([]);
-  const [editId, setEditId] = useState('');
-  const [groupList, setGroupList] = useState([]);
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [allcoa, setAllcoa] = useState([]);
   const [formData, setFormData] = useState({
-    groupName: '',
-    accountCode: '',
-    natureOfAccount: '',
-    accountGroupName: '',
-    type: '',
-    commonDate: '',
-    branch: '',
-    interBranchAc: false,
-    controllAc: false,
-    currency: 'INR',
-    active: false
+    rows: [
+      {
+        clientCoa: '',
+        clientCoaCode: '',
+        coa: '',
+        coaCode: '',
+        active: true,
+        clientCode: '',
+      },
+    ],
   });
 
-  const [fieldErrors, setFieldErrors] = useState({
-    groupName: false,
-    accountCode: false,
-    natureOfAccount: false,
-    accountGroupName: false,
-    type: false,
-    interBranchAc: false,
-    controllAc: false,
-    currency: false,
-    active: false
-  });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [allCOA, setAllCOA] = useState([]);
+  const [editId, setEditId] = useState('');
+  const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
 
   useEffect(() => {
-    getGroup();
-    // getAllGroupName();
-  }, []);
+    if (loginUserName) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        rows: prevFormData.rows.map((row) => ({
+          ...row,
+          clientCode: loginUserName,
+        })),
+      }));
+    }
 
-  // list Api
-  const getGroup = async () => {
+    getAllLedgerMapping();
+    getCOALedgersMapping();
+  }, [loginUserName]);
+
+  const getAllLedgerMapping = async () => {
     try {
-      const result = await apiCalls('get', ``);
+      const result = await apiCalls('get', `businesscontroller/getAllLedgerMapping`);
       if (result) {
-        setData(result.paramObjectsMap.cCoaVO.reverse());
-      } else {
-        // Handle error
+        setData(result.paramObjectsMap.ledgerMappingVO.reverse());
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
+  const getCOALedgersMapping = async () => {
+    try {
+      const response = await apiCalls('get', `/businesscontroller/getCOAForLedgerMapping`);
+      if (response.status === true) {
+        setAllCOA(response.paramObjectsMap.ledgerMappingVO);
+      } else {
+        console.error('API Error:', response);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const getLedgersMappingById = async (row) => {
+    console.log('Editing Exchange Rate:', row.original.id);
+    setEditId(row.original.id);
+    setShowForm(true);
+    try {
+      const result = await apiCalls('get', `/businesscontroller/getLedgerMappingbyId?id=${row.original.id}`);
+      if (result) {
+        const ledgers = result.paramObjectsMap.ledgerMappingVO;
+        setEditMode(true);
+
+        setFormData({
+          rows: [
+            {
+              clientCoa: ledgers.clientCoa || '',
+              clientCoaCode: ledgers.clientCoaCode || '',
+              coa: ledgers.coa || '',
+              coaCode: ledgers.coaCode || '',
+              active: true,
+              clientCode: ledgers.clientCode || '',
+            },
+          ],
+        });
+
+        console.log('DataToEdit', ledgers);
+      } else {
+        console.error('No data found for the given ID');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
   const handleListView = () => {
     setShowForm(!showForm);
-    setFieldErrors({
-      clientCOA: false,
-      ccoaCode: false,
-      coa: false,
-      coaCode: false,
-    });
+    setFieldErrors({});
   };
 
   const columns = [
-    { accessorKey: 'clientCOA', header: 'Client COA', size: 140 },
-    { accessorKey: 'ccoaCode', header: 'CCOA Code', size: 100 },
+    { accessorKey: 'clientCoa', header: 'Client COA', size: 140 },
+    { accessorKey: 'clientCoaCode', header: 'CCOA Code', size: 100 },
     { accessorKey: 'coa', header: 'COA', size: 140 },
     { accessorKey: 'coaCode', header: 'COA Code', size: 100 }
   ];
 
-
-
-  const validateForm = (formData) => {
-    let errors = {};
-
-    if (formData.type === 'Account' && !formData.groupName) {
-      errors.groupName = 'Group Name is required';
-    }
-
-    if (!formData.natureOfAccount || formData.natureOfAccount.length === 0) {
-      errors.natureOfAccount = 'Nature of Account is required';
-    }
-
-    if (!formData.accountGroupName) {
-      errors.accountGroupName = 'Account Group Name is required';
-    }
-
-    if (!formData.type) {
-      errors.type = 'Type is required';
-    }
-
-    if (!formData.accountCode) {
-      errors.accountCode = 'Account Code is required';
-    }
-    return errors;
-  };
-  const handleSubmit = () => {
-    toast.success("File uploaded successfully");
-    console.log('Submit clicked');
-    // handleBulkUploadClose();
-    // getGroup();
-    // getAllData();
-  };
-
   const handleSave = async () => {
-    const errors = validateForm(formData);
+    const errors = {};
+
+    formData.rows.forEach((rows, index) => {
+      if (!rows.coa) {
+        errors[`coa-${index}`] = 'COA is required';
+      }
+    });
 
     if (Object.keys(errors).length === 0) {
       setIsLoading(true);
-
-      const saveData = {
-        ...(editId && { id: editId }),
-        active: formData.active,
-        groupName: formData.groupName !== null && formData.groupName !== '' ? formData.groupName : null,
-        natureOfAccount: formData.natureOfAccount,
-        accountGroupName: formData.accountGroupName,
-        parentId: formData.parentId,
-        parentCode: formData.parentCode,
-        type: formData.type,
-        interBranchAc: formData.interBranchAc,
-        controllAc: formData.controllAc,
-        accountCode: formData.accountCode,
-        currency: 'INR',
+      const saveData = formData.rows.map((rows) => ({
+        id: rows.id || editId,
+        active: rows.active,
+        clientCoa: rows.clientCoa,
+        clientCoaCode: rows.clientCoaCode,
+        clientCode: loginUserName,
+        coa: rows.coa,
+        coaCode: rows.coaCode,
         createdBy: loginUserName,
-        updatedBy: loginUserName
-      };
-
-      console.log('DATA TO SAVE', saveData);
+      }));
 
       try {
-        const response = await apiCalls('put', `/businesscontroller/createUpdateCCoa`, saveData);
+        const response = await apiCalls('put', '/businesscontroller/createUpdateLedgerMapping', saveData);
         if (response.status === true) {
-          showToast('success', editId ? 'Client COA updated successfully' : 'Client COA created successfully');
-          getGroup();
+          showToast('success', editId ? 'Ledgers Mapping updated successfully' : 'Ledgers Mapping created successfully');
+          getAllLedgerMapping();
           handleClear();
         } else {
-          showToast('error', editId ? 'Client COA updation failed' : 'Client COA creation failed');
+          showToast('error', 'Ledgers Mapping creation failed');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -170,100 +155,76 @@ const LedgersMapping = () => {
         setIsLoading(false);
       }
     } else {
-      console.log('Validation Errors:', errors);
       setFieldErrors(errors);
     }
   };
 
+  const handleInputChange = (index, event) => {
+    const { name, value } = event.target;
+    const updatedRows = [...formData.rows];
+    updatedRows[index] = {
+      ...updatedRows[index],
+      [name]: value,
+    };
 
-  // handleInputChange
-  const handleInputChange = (index, eventOrObject) => {
-    let name, value, type, checked;
-
-    if (eventOrObject.target) {
-      // Handle event from standard input
-      ({ name, value, type, checked } = eventOrObject.target);
-    } else {
-      // Handle object directly passed (e.g., from Autocomplete)
-      ({ name, value } = eventOrObject);
-      type = 'text'; // Default type for non-event inputs
-      checked = false;
-    }
-
-    const inputValue = type === 'checkbox' ? checked : value;
-
-    let errorMessage = '';
-    let validInputValue = inputValue;
-
-    if (name === 'ccoa') {
-      const alphanumericPattern = /^[a-zA-Z0-9]*$/;
-      if (!alphanumericPattern.test(inputValue)) {
-        errorMessage = 'Only alphabets and numbers are allowed.';
-        validInputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
-      }
-    }
-
-    const updatedRows = [...rows];
-    updatedRows[index] = { ...updatedRows[index], [name]: validInputValue };
-
-    setRows(updatedRows);
-    setFieldErrors({ ...fieldErrors, [`${name}-${index}`]: errorMessage });
+    setFormData({
+      ...formData,
+      rows: updatedRows,
+    });
   };
 
-  // handleClear
   const handleClear = () => {
-    // Reset form data and field errors
-    setFormData({ coa: '', ccoa: '' });
-    setFieldErrors({ coa: '', ccoa: '' });
-
-    // Reset rows to their initial state
-    setRows([{ id: 1, ccoa: '', coa: '' }]);
-
-    // Reset edit ID and other states if necessary
-    setEditId('');
+    setFormData({
+      rows: [
+        {
+          clientCoa: '',
+          clientCoaCode: '',
+          coa: '',
+          coaCode: '',
+          active: true,
+          clientCode: '',
+        },
+      ],
+    });
+    setFieldErrors({});
   };
 
-  // addRow
-  const addRow = () => {
-    const dummyData = [
-      // { id: rows, ccoa: 'XYZ456', coa: 'COA_002' },
-      { id: rows.length + 1, ccoa: 'XYZ456', coa: 'COA_001' },
-      { id: rows.length + 2, ccoa: 'DEF789', coa: 'COA_002' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
-      { id: rows.length + 3, ccoa: 'DEF562', coa: 'COA_003' },
+  const handleFillGrid = async () => {
+    console.log('Editing Exchange Rate:', loginUserName);
 
+    const clientCode = loginUserName;
+    setEditId(clientCode);
+    setShowForm(true);
 
-    ];
-    setRows([...dummyData]);
+    try {
+      const result = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=${clientCode}`);
+
+      if (result && result.paramObjectsMap && result.paramObjectsMap.COA) {
+        const fillGrid = result.paramObjectsMap.COA;
+        setEditMode(true);
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          rows: [
+            {
+              ...prevFormData.rows[0],
+              clientCoa: fillGrid.clientCoa || '',
+              clientCoaCode: fillGrid.clientCoaCode || '',
+              coa: fillGrid.coa || '',
+              coaCode: fillGrid.coaCode || '',
+            },
+          ],
+        }));
+
+        console.log('DataToEdit:', fillGrid);
+      } else {
+        console.error('No valid data received from the API');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
+
 
   return (
     <>
@@ -276,57 +237,52 @@ const LedgersMapping = () => {
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} />
-          <ActionButton title="Fill Grid" icon={GridOnIcon} onClick={addRow} />
+          <ActionButton title="Fill Grid" icon={GridOnIcon} onClick={handleFillGrid} />
         </div>
-
         {showForm ? (
-          <div className="row d-flex ">
-            {rows.map((row, index) => (
+          <div className="row d-flex">
+            {formData.rows.map((row, index) => (
               <div key={index} className="row d-flex">
-                {/* Client COA input */}
-                <div className="col-3 mb-3">
-                  <TextField
-                    name="ccoa"
-                    value={row.ccoa || ''}
-                    label="Client COA"
-                    onChange={(event) => handleInputChange(index, event)}
-                    fullWidth
-                    variant="outlined"
-                    disabled
-                    size="small"
-                    error={!!fieldErrors[`ccoa-${index}`]}
-                    helperText={fieldErrors[`ccoa-${index}`] || ''}
-                  />
-                </div>
-                {/* CCOA Code */}
-                <div className="col-3 mb-3">
-                  <TextField
-                    name="ccoa"
-                    value={row.ccoa || ''}
-                    label="CCOA Code"
-                    onChange={(event) => handleInputChange(index, event)}
-                    fullWidth
-                    variant="outlined"
-                    disabled
-                    size="small"
-                    error={!!fieldErrors[`ccoa-${index}`]}
-                    helperText={fieldErrors[`ccoa-${index}`] || ''}
-                  />
+
+                <div className="col-md-3 mb-3">
+                  <FormControl fullWidth variant="filled">
+                    <TextField
+                      label="Client COA"
+                      size="small"
+                      required
+                      onChange={(e) => handleInputChange(index, e)}
+                      name="clientCoa"
+                      value={row.clientCoa}
+                      error={!!fieldErrors[`clientCoa-${index}`]}
+                      helperText={fieldErrors[`clientCoa-${index}`] || ''}
+                    />
+                  </FormControl>
                 </div>
 
-                {/* COA select */}
+                <div className="col-md-3 mb-3">
+                  <FormControl fullWidth variant="filled">
+                    <TextField
+                      label="Client COA Code"
+                      size="small"
+                      required
+                      onChange={(e) => handleInputChange(index, e)}
+                      name="clientCoaCode"
+                      value={row.clientCoaCode}
+                      error={!!fieldErrors[`clientCoaCode-${index}`]}
+                      helperText={fieldErrors[`clientCoaCode-${index}`] || ''}
+                    />
+                  </FormControl>
+                </div>
+
                 <div className="col-md-3 mb-3">
                   <Autocomplete
-                    options={groupList}
-                    getOptionLabel={(option) => option.group || ''}
-                    value={
-                      row.coa
-                        ? groupList.find((item) => item.group === row.coa)
-                        : null
-                    }
+                    options={allCOA}
+                    getOptionLabel={(option) => option.accountGroupName || ''}
+                    value={allCOA.find((item) => item.accountGroupName === row.coa) || null}
                     onChange={(event, newValue) => {
-                      const value = newValue ? newValue.group : ''; // Update the value based on the selected option
-                      handleInputChange(index, { target: { name: 'coa', value } }); // Update the value in your form data
+                      const updatedRows = [...formData.rows];
+                      updatedRows[index].coa = newValue ? newValue.accountGroupName : '';
+                      setFormData({ ...formData, rows: updatedRows });
                     }}
                     size="small"
                     renderInput={(params) => (
@@ -334,34 +290,32 @@ const LedgersMapping = () => {
                         {...params}
                         label="COA"
                         variant="outlined"
-                        error={!!fieldErrors[`coa-${index}`]}
-                        helperText={fieldErrors[`coa-${index}`] || ''}
+                        error={!!fieldErrors.coa}
+                        helperText={fieldErrors.coa || ''}
                       />
                     )}
-                    clearOnEscape
                   />
                 </div>
 
-                {/* COA Code */}
-                <div className="col-3 mb-3">
-                  <TextField
-                    name="ccoa"
-                    value={row.ccoa || ''}
-                    label="COA Code"
-                    onChange={(event) => handleInputChange(index, event)}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    error={!!fieldErrors[`ccoa-${index}`]}
-                    helperText={fieldErrors[`ccoa-${index}`] || ''}
-                  />
+                <div className="col-md-3 mb-3">
+                  <FormControl fullWidth variant="filled">
+                    <TextField
+                      label="COA Code"
+                      size="small"
+                      required
+                      onChange={(e) => handleInputChange(index, e)}
+                      name="coaCode"
+                      value={row.coaCode}
+                      error={!!fieldErrors[`coaCode-${index}`]}
+                      helperText={fieldErrors[`coaCode-${index}`] || ''}
+                    />
+                  </FormControl>
                 </div>
               </div>
             ))}
           </div>
-
         ) : (
-          <CommonTable columns={columns} data={data} blockEdit={true} toEdit={''} />
+          <CommonTable columns={columns} data={data} blockEdit={true} toEdit={getLedgersMappingById} />
         )}
       </div>
     </>
