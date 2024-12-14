@@ -43,7 +43,8 @@ const GlobalSection = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const [finYearValue, setFinYearValue] = useState('');
-  const [monthValue, setMonthValue] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [month, setMonth] = useState('');
   const [companyValue, setCompanyValue] = useState('');
   const [customerValue, setCustomerValue] = useState('');
   // const [warehouseValue, setWarehouseValue] = useState('');
@@ -54,11 +55,13 @@ const GlobalSection = () => {
   const [userName, setUserName] = useState(localStorage.getItem('userName'));
   const [branchVO, setBranchVO] = useState([]);
   const [finVO, setFinVO] = useState([]);
+  const [clientCodeVO, setClienCodetVO] = useState([]);
   const [warehouseVO, setWarehouseVO] = useState([]);
   const [customerVO, setCustomerVO] = useState([]);
   const [clientVO, setClientVO] = useState([]);
   const [globalParameter, setGlobalParameter] = useState([]);
   const [branchName, setBranchName] = useState('');
+  const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
 
   /**
    * anchorRef is used on different componets and specifying one type leads to other components throwing an error
@@ -69,6 +72,7 @@ const GlobalSection = () => {
     getGlobalParameter();
     getAccessBranch();
     getFinYear();
+    getClientCode();
   }, []);
 
   const handleToggle = () => {
@@ -106,7 +110,7 @@ const GlobalSection = () => {
       console.log('error', err);
     }
   };
-
+  // getFinYear
   const getFinYear = async () => {
     try {
       const result = await apiCalls('get', `/commonmaster/getAllAciveFInYear?orgId=${orgId}`);
@@ -116,6 +120,19 @@ const GlobalSection = () => {
       console.log('error', err);
     }
   };
+  // getClientName
+
+  const getClientCode = async () => {
+    const userName = loginUserName;
+    try {
+      const result = await apiCalls('get', `GlobalParam/getClientCodeForGlopalParam?userName=${userName}`);
+      setClienCodetVO(result.paramObjectsMap.clientDetails);
+      console.log('result.paramObjectsMap.clientDetails', result.paramObjectsMap.clientDetails);
+    } catch (err) {
+      console.log('error', err);
+    }
+  };
+
 
   const getCustomer = async (branchcode) => {
     const formData = {
@@ -156,12 +173,14 @@ const GlobalSection = () => {
 
   const getGlobalParameter = async () => {
     try {
-      const result = await apiCalls('get', `GlobalParam/globalparam/username?orgid=${orgId}&userId=${userId}`);
-      const globalParameterVO = result.paramObjectsMap.globalParam;
+      const result = await apiCalls('get', `GlobalParam/getGlobalparamByUserId?orgid=${orgId}&userId=${userId}`);
+      const globalParameterVO = result.paramObjectsMap.globalParameterVO;
       setGlobalParameter(globalParameterVO);
       // setCustomerValue(globalParameterVO.customer);
       setClientValue(globalParameterVO.client);
       setFinYearValue(globalParameterVO.finYear);
+      setClienCodetVO(globalParameterVO.clientCode);
+      setMonth(globalParameterVO.month);
       // setWarehouseValue(globalParameterVO.warehouse);
       setBranchValue(globalParameterVO.branchcode);
       setBranchName(globalParameterVO.branch);
@@ -170,6 +189,9 @@ const GlobalSection = () => {
       localStorage.setItem('customer', globalParameterVO.customer);
       localStorage.setItem('client', globalParameterVO.client);
       localStorage.setItem('finYear', globalParameterVO.finYear);
+      localStorage.setItem('clientCode', globalParameterVO.clientCode);
+      localStorage.setItem('finYear', globalParameterVO.finYear);
+      localStorage.setItem('month', globalParameterVO.month);
       localStorage.setItem('warehouse', globalParameterVO.warehouse);
       localStorage.setItem('branchcode', globalParameterVO.branchcode);
       localStorage.setItem('branch', globalParameterVO.branch);
@@ -184,15 +206,15 @@ const GlobalSection = () => {
 
   const handleSubmit = async () => {
     const formData = {
-      branch: branchName,
-      branchcode: branchValue,
       finYear: finYearValue,
-      // warehouse: warehouseValue,
-      userid: userId,
+      clientCode: clientValue,
+      month: month,
+      userId: userId,
       orgId
     };
+   
     try {
-      const result = await apiCalls('put', `GlobalParam/globalparam`, formData);
+      const result = await apiCalls('put', `/GlobalParam/updateCreateGlobalparam`, formData);
       showToast('success', 'Global Parameter updated succesfully');
       // setOpen(false);
       console.log('Test', result);
@@ -216,8 +238,11 @@ const GlobalSection = () => {
   const handleFinYearChange = (event) => {
     setFinYearValue(event.target.value);
   };
+  const handleClientCodeChange = (event) => {
+    setClientValue(event.target.value);
+  };
   const handleMonthChange = (value) => {
-    setMonthValue(value); // Update state with the selected value
+    setMonth(value); // Update state with the selected value
   };
 
   const handleClientChange = (event) => {
@@ -306,6 +331,7 @@ const GlobalSection = () => {
 
                     <Grid item xs={12}>
                       <Grid container direction="column" spacing={2}>
+                        {/* Fin Year */}
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
                             <TextField
@@ -328,12 +354,10 @@ const GlobalSection = () => {
                                   {option.finYear}
                                 </option>
                               ))}
-                              <option value="2023-24">2023-24</option>
-                              <option value="2024-25">2024-25</option>
                             </TextField>
                           </Box>
                         </Grid>
-
+                        {/* Month */}
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
                             <TextField
@@ -341,18 +365,26 @@ const GlobalSection = () => {
                               select
                               fullWidth
                               label="Month"
-                              value={monthValue} // Ensure monthValue reflects the selected value
+                              value={month} // Ensure monthValue reflects the selected value
                               onChange={(e) => handleMonthChange(e.target.value)} // Update value on change
                               SelectProps={{
                                 native: true
                               }}
                               size="small"
                             >
-                              <option value="" disabled>
-                                
-                              </option>
+                              <option value="" disabled></option>
+                              <option value="January">January</option>
+                              <option value="February">February</option>
+                              <option value="March">March</option>
                               <option value="April">April</option>
                               <option value="May">May</option>
+                              <option value="June">June</option>
+                              <option value="July">July</option>
+                              <option value="August">August</option>
+                              <option value="September">September</option>
+                              <option value="October">October</option>
+                              <option value="November">November</option>
+                              <option value="December">December</option>
                               {finVO?.map((option) => (
                                 <option key={option.id} value={option.month}>
                                   {option.month}
@@ -361,37 +393,30 @@ const GlobalSection = () => {
                             </TextField>
                           </Box>
                         </Grid>
-
-
+                        {/* Client */}
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
                             <TextField
                               id="outlined-select-currency-native"
                               select
-                              small
                               fullWidth
-                              label="Client"
-                              value={branchValue}
-                              onChange={handleBranchChange}
+                              label="client"
+                              value={clientValue}
+                              onChange={handleClientCodeChange}
                               SelectProps={{
                                 native: true
                               }}
                               size="small"
                             >
-                              <option value="" disabled>
-                                {/* Select Branch */}
-                              </option>
-                              {branchVO.map((option) => (
-                                <option key={option.branchcode} value={option.branchcode}>
-                                  {option.branch}
+                              <option value="" disabled></option>
+                              {clientCodeVO?.map((option) => (
+                                <option key={option.clientCode} value={option.clientCode}>
+                                  {option.clientCode}
                                 </option>
                               ))}
-                              <option value="Client 1">Client-1</option>
-                              <option value="Client 2">Client-2</option>
                             </TextField>
                           </Box>
                         </Grid>
-
                         {/* 
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
