@@ -179,7 +179,7 @@ const GlobalSection = () => {
       // setCustomerValue(globalParameterVO.customer);
       setClientValue(globalParameterVO.client);
       setFinYearValue(globalParameterVO.finYear);
-      setClienCodetVO(globalParameterVO.clientCode);
+      setClientValue(globalParameterVO.clientCode);
       setMonth(globalParameterVO.month);
       // setWarehouseValue(globalParameterVO.warehouse);
       setBranchValue(globalParameterVO.branchcode);
