@@ -7,6 +7,7 @@ import DocumentTypeMaster from 'views/Finance/DocumentType/documentType';
 import DocumentTypeMappingMaster from 'views/Finance/DocumentType/documentTypeMapping';
 import ReconcileCash from 'views/Finance/Reconcile/ReconcileCash';
 import ReconcileCorp from 'views/Finance/Reconcile/ReconcileCorp';
+// import ElDemoReport from 'views/demoReport/elDemoReport';
 // import CoA from 'views/Ledgers/CoA';
 // import CreateClient from 'views/basicMaster/CreateClient';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -80,6 +81,7 @@ const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/C
 const CoA = Loadable(lazy(() => import('views/Ledgers/CoA')));
 const ClientCOA = Loadable(lazy(() => import('views/Ledgers/ClientCOA')));
 const LedgersMapping = Loadable(lazy(() => import('views/Ledgers/ledgersMapping')));
+const ElDemoReport = Loadable(lazy(() => import('views/demoReport/elDemoReport')));
 const CLientTBReport = Loadable(lazy(() => import('views/Report/clientTBReport')));
 const ElTBReport = Loadable(lazy(() => import('views/Report/elTBReport')));
 
@@ -368,6 +370,10 @@ const FinanceRoute = {
     {
       path: '/ledgers/ledgersMapping',
       element: <LedgersMapping />
+    },
+    {
+      path: '/demoReport/elDemoReport',
+      element: <ElDemoReport />
     },
     {
       path: '/report/clientTBReport',

@@ -7,6 +7,7 @@ import RolesAndResponsibilities from './RolesAndResponsibilities';
 import eltCompany from './eltCompany';
 import Ledgers from './ledgers';
 import Report from './report';
+import elReport from './elReport';
 
 
 
@@ -16,18 +17,18 @@ const getMenuItems = () => {
 
   // Define default menu items
   const defaultMenuItems = {
-    items: [dashboard, basicMaster, eltCompany,Ledgers,Report]
+    items: [dashboard, basicMaster, eltCompany,Ledgers,elReport,Report]
   };
 
   // Define menu items based on localStorage value
   switch (localStorageValue) {
     case 'ROLE_SUPER_ADMIN':
       return {
-        items: [dashboard, companySetup, basicMaster,eltCompany,Ledgers,Report]
+        items: [dashboard, companySetup, basicMaster,eltCompany,Ledgers,elReport,Report]
       };
     case 'ROLE_ADMIN':
       return {
-        items: [dashboard, companySetup, RolesAndResponsibilities, basicMaster, eltCompany,Ledgers,Report]
+        items: [dashboard, companySetup, RolesAndResponsibilities, basicMaster, eltCompany,Ledgers,elReport,Report]
       };
     // Add more cases as needed
     default:
