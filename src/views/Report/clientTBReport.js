@@ -14,6 +14,9 @@ import {
 } from '@mui/material';
 import apiCalls from 'apicall';
 
+import ClearIcon from '@mui/icons-material/Clear';
+import { InputAdornment } from '@mui/material';
+
 import { useEffect, useState } from 'react';
 
 const ClientTBReport = () => {
@@ -105,9 +108,28 @@ const ClientTBReport = () => {
           variant="outlined"
           placeholder="Search..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setIsCollapsed(false); // Set collapse state to false when typing
+          }}
+          InputProps={{
+            endAdornment: searchTerm && (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="clear search"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setIsCollapsed(true); // Reset collapse state when clearing search
+                  }}
+                >
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            )
+          }}
           sx={{ flexGrow: 1, mr: 2 }}
         />
+
         <Box display="flex" alignItems="center">
           <Typography variant="body2" mr={1}>
             {isCollapsed ? 'Expand All' : 'Collapse All'}
