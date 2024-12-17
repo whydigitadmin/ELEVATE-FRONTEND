@@ -50,13 +50,13 @@ const eltCompany = {
             url: '/elevateCompany/createCompanyEmployee',
             icon: icons1.IconSquareRoundedPlus
           },
-          {
-            id: 'createClient',
-            title: 'Client Employee',
-            type: 'item',
-            url: '/elevateCompany/createClient',
-            icon: icons1.IconSquareRoundedPlus
-          },
+          // {
+          //   id: 'createClient',
+          //   title: 'Client Employee',
+          //   type: 'item',
+          //   url: '/elevateCompany/createClient',
+          //   icon: icons1.IconSquareRoundedPlus
+          // },
           {
             id: 'admin',
             title: 'Company User Creation',
