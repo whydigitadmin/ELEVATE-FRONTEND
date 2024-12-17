@@ -15,9 +15,10 @@ import {
 import apiCalls from 'apicall';
 
 import ClearIcon from '@mui/icons-material/Clear';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { InputAdornment } from '@mui/material';
-
 import { useEffect, useState } from 'react';
+import NoDataAvailable from 'utils/NoData';
 
 const ClientTBReport = () => {
   const [treeData, setTreeData] = useState([]);
@@ -92,27 +93,33 @@ const ClientTBReport = () => {
     <Box
       sx={{
         padding: 3,
-        maxWidth: 500,
+        maxWidth: 550,
         backgroundColor: '#ffffff',
         borderRadius: 2,
         borderColor: '#90caf975'
       }}
     >
-      <Typography variant="h5" fontWeight="bold" mb={2}>
+      {/* <Typography variant="h5" fontWeight="bold" mb={2}>
         COA Ledgers
-      </Typography>
+      </Typography> */}
 
       {/* Header with Search Bar and Toggle Switch */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <TextField
           variant="outlined"
           placeholder="Search..."
+          size="small"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
             setIsCollapsed(false); // Set collapse state to false when typing
           }}
           InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchRoundedIcon color="action" />
+              </InputAdornment>
+            ),
             endAdornment: searchTerm && (
               <InputAdornment position="end">
                 <IconButton
@@ -122,7 +129,7 @@ const ClientTBReport = () => {
                     setIsCollapsed(true); // Reset collapse state when clearing search
                   }}
                 >
-                  <ClearIcon />
+                  <ClearIcon color="error" />
                 </IconButton>
               </InputAdornment>
             )
@@ -166,7 +173,7 @@ const ClientTBReport = () => {
 
 const TreeView = ({ data, searchTerm, isCollapsed }) => {
   if (!data.length) {
-    return <Typography color="textSecondary">No data available</Typography>;
+    return <NoDataAvailable />;
   }
 
   return (

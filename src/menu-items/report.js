@@ -31,7 +31,7 @@ const ledgers = {
       children: [
         {
           id: 'clientTBReport',
-          title: 'Client TB-Report',
+          title: 'COA Ledger',
           type: 'item',
           url: '/report/clientTBReport',
           icon: icons1.IconSquareRoundedPlus
