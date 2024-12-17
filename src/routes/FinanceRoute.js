@@ -7,7 +7,6 @@ import DocumentTypeMaster from 'views/Finance/DocumentType/documentType';
 import DocumentTypeMappingMaster from 'views/Finance/DocumentType/documentTypeMapping';
 import ReconcileCash from 'views/Finance/Reconcile/ReconcileCash';
 import ReconcileCorp from 'views/Finance/Reconcile/ReconcileCorp';
-import SalesReport from 'views/demoReport/salesReport';
 // import ElDemoReport from 'views/demoReport/elDemoReport';
 // import CoA from 'views/Ledgers/CoA';
 // import CreateClient from 'views/basicMaster/CreateClient';
@@ -82,7 +81,7 @@ const CreateCompanyEmployee = Loadable(lazy(() => import('views/elevateCompany/C
 const CoA = Loadable(lazy(() => import('views/Ledgers/CoA')));
 const ClientCOA = Loadable(lazy(() => import('views/Ledgers/ClientCOA')));
 const LedgersMapping = Loadable(lazy(() => import('views/Ledgers/ledgersMapping')));
-const salesReport = Loadable(lazy(() => import('views/demoReport/salesReport')));
+const SalesReport = Loadable(lazy(() => import('views/Report/salesReport')));
 const CLientTBReport = Loadable(lazy(() => import('views/Report/clientTBReport')));
 const ElTBReport = Loadable(lazy(() => import('views/Report/elTBReport')));
 const ClientTB = Loadable(lazy(() => import('views/transaction/clientTB')));
