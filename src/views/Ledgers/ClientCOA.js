@@ -27,6 +27,7 @@ const ClientCOA = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
+  const [clientCode, setClientCode] = useState(localStorage.getItem('clientCode'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [allGroupName, setAllGroupName] = useState([]);
@@ -316,7 +317,7 @@ const ClientCOA = () => {
               apiUrl={`/businesscontroller/excelUploadForCCoa`}
               screen="PutAway"
               loginUser={loginUserName}
-              clientCode={loginUserName}
+              clientCode={clientCode}
             />
           )}
 

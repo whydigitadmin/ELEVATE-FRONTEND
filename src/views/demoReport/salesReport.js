@@ -13,19 +13,19 @@ import CommonListViewTable from 'views/basicMaster/CommonListViewTable';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
 
-const ElDemoReport = () => {
+const SalesReport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [editId, setEditId] = useState('');
   const [formData, setFormData] = useState([{
     id: 1,
-    group: '',
-    budget: '',
-    actuals: '',
-    lastYear: '',
-    ytd: '',
-    eltReport: ''
+    group: 'Group A',
+    budget: '1000',
+    actuals: '800',
+    lastYear: '950',
+    ytd: '700',
+    eltReport: 'Report A',
   }]);
   const [fieldErrors, setFieldErrors] = useState({
     group: '',
@@ -38,8 +38,24 @@ const ElDemoReport = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [listView, setListView] = useState(false);
 
+  const addDummyRow = () => {
+    setFormData((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        group: `Group ${String.fromCharCode(65 + prev.length)}`, // Group A, B, C, etc.
+        budget: `${1000 + prev.length * 200}`,
+        actuals: `${800 + prev.length * 200}`,
+        lastYear: `${950 + prev.length * 100}`,
+        ytd: `${700 + prev.length * 150}`,
+        eltReport: `Report ${prev.length + 1}`,
+      },
+    ]);
+  };
+  
+
   const listViewColumns = [
-    { accessorKey: 'description', header: 'Description', size: 140 },
+    { accessorKey: 'Ledger', header: 'Ledger', size: 140 }, 
     { accessorKey: 'budget', header: 'Budget', size: 140 },
     {
       accessorKey: 'actuals',
@@ -165,6 +181,7 @@ const ElDemoReport = () => {
   const handleView = () => {
     setListView(!listView);
   };
+  
 
   return (
     <>
@@ -219,7 +236,7 @@ const ElDemoReport = () => {
                           S.No
                         </th>
                         <th className="px-2 py-2 text-white text-center" style={{ width: '150px' }}>
-                          Description
+                          Ledger
                         </th>
                         <th className="px-2 py-2 text-white text-center" style={{ width: '150px' }}>
                           Budget
@@ -245,14 +262,30 @@ const ElDemoReport = () => {
                             <div className="pt-2">{index + 1}</div>
                           </td>
                           <td className="text-center">
-                            <div className="pt-2"></div>
+                            <div className="pt-2">Sales</div>
                           </td>
-                          <td className="border px-2 py-2">
+                          <td className="text-center">
+                            <div className="pt-2">1000</div>
+                          </td>
+                          <td className="text-center">
+                            <div className="pt-2">800</div>
+                          </td>
+                          <td className="text-center">
+                            <div className="pt-2">950</div>
+                          </td>
+                          <td className="text-center">
+                            <div className="pt-2">700</div>
+                          </td>
+                          <td className="text-center">
+                            <div className="pt-2">Report A</div>
+                          </td>
+                          {/* <td className="border px-2 py-2">
                             <input
                               type="text"
                               value={row.budget}
                               onChange={(e) => handleInputChange(index, 'budget', e.target.value)}
                               className={fieldErrors[index]?.budget ? 'error form-control' : 'form-control'}
+                              disabled={true}
                             />
                             {fieldErrors[index]?.budget && (
                               <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
@@ -266,6 +299,7 @@ const ElDemoReport = () => {
                               value={row.actuals}
                               onChange={(e) => handleInputChange(index, 'actuals', e.target.value)}
                               className={fieldErrors[index]?.actuals ? 'error form-control' : 'form-control'}
+                              disabled={true}
                             />
                             {fieldErrors[index]?.actuals && (
                               <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
@@ -279,6 +313,7 @@ const ElDemoReport = () => {
                               value={row.lastYear}
                               onChange={(e) => handleInputChange(index, 'lastYear', e.target.value)}
                               className={fieldErrors[index]?.lastYear ? 'error form-control' : 'form-control'}
+                              disabled={true}
                             />
                             {fieldErrors[index]?.lastYear && (
                               <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
@@ -292,6 +327,7 @@ const ElDemoReport = () => {
                               value={row.ytd}
                               onChange={(e) => handleInputChange(index, 'ytd', e.target.value)}
                               className={fieldErrors[index]?.ytd ? 'error form-control' : 'form-control'}
+                              disabled={true}
                             />
                             {fieldErrors[index]?.ytd && (
                               <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
@@ -305,17 +341,17 @@ const ElDemoReport = () => {
                               value={row.eltReport}
                               onChange={(e) => handleInputChange(index, 'eltReport', e.target.value)}
                               className={fieldErrors[index]?.eltReport ? 'error form-control' : 'form-control'}
+                              disabled={true}
                             />
                             {fieldErrors[index]?.eltReport && (
                               <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
                                 {fieldErrors[index].eltReport}
                               </div>
                             )}
-                          </td>
+                          </td> */}
                         </tr>
                       ))}
                     </tbody>
-
                   </table>
                 </div>
               </div>
@@ -328,4 +364,4 @@ const ElDemoReport = () => {
   );
 };
 
-export default ElDemoReport;
+export default SalesReport;

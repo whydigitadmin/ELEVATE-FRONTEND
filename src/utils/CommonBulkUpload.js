@@ -31,6 +31,8 @@ const CommonBulkUpload = ({
   apiUrl,
   loginUser, // Accept loginUserName as a prop
   clientCode,
+  finYear,
+  month,
   screen,
 }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -64,11 +66,12 @@ const CommonBulkUpload = ({
   const handleSubmit = async () => {
     if (selectedFile) {
       const createdBy = loginUser || 'default_user';
-      // const clientCode = loginUser || 'default_user';
       const formData = new FormData();
       formData.append('files', selectedFile);
       formData.append('createdBy', createdBy);
       formData.append('clientCode', clientCode);
+      formData.append('finYear', finYear);
+      formData.append('month', month);
 
       try {
         const headers = {
