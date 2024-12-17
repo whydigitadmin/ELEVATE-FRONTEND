@@ -19,8 +19,8 @@ import { useEffect, useState } from 'react';
 const ClientTBReport = () => {
   const [treeData, setTreeData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(''); // State for search term
-  const [isCollapsed, setIsCollapsed] = useState(true); // State for collapse/expand
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
     getMapData();
@@ -58,9 +58,32 @@ const ClientTBReport = () => {
     return coaData.map(transformNode);
   };
 
-  const handleToggleCollapse = () => {
-    setIsCollapsed((prev) => !prev); // Toggle collapse state
+  const filterTree = (nodes, term) => {
+    if (!term) return nodes;
+
+    return nodes
+      .map((node) => {
+        if (node.name.toLowerCase().includes(term.toLowerCase()) || node.code.toLowerCase().includes(term.toLowerCase())) {
+          return node;
+        }
+
+        if (node.children) {
+          const filteredChildren = filterTree(node.children, term);
+          if (filteredChildren.length) {
+            return { ...node, children: filteredChildren };
+          }
+        }
+
+        return null;
+      })
+      .filter(Boolean); // Remove null values
   };
+
+  const handleToggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
+  const filteredData = filterTree(treeData, searchTerm);
 
   return (
     <Box
@@ -113,7 +136,7 @@ const ClientTBReport = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <TreeView data={treeData} searchTerm={searchTerm} isCollapsed={isCollapsed} />
+        <TreeView data={filteredData} searchTerm={searchTerm} isCollapsed={isCollapsed} />
       )}
     </Box>
   );
@@ -137,10 +160,25 @@ const TreeItem = ({ node, level = 0, searchTerm, isCollapsed }) => {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    setExpanded(!isCollapsed); // Collapse or expand based on `isCollapsed`
+    setExpanded(!isCollapsed);
   }, [isCollapsed]);
 
   const toggleExpand = () => setExpanded(!expanded);
+
+  const highlightText = (text, term) => {
+    if (!term) return text;
+
+    const regex = new RegExp(`(${term})`, 'gi');
+    return text.split(regex).map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} style={{ backgroundColor: '#ffeb3b' }}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
 
   return (
     <>
@@ -168,7 +206,8 @@ const TreeItem = ({ node, level = 0, searchTerm, isCollapsed }) => {
         <ListItemText
           primary={
             <Box display="flex" alignItems="center">
-              <b>{node.code}</b>&nbsp; - &nbsp; {node.name}
+              <b>{highlightText(node.code, searchTerm)}</b>&nbsp; - &nbsp;
+              {highlightText(node.name, searchTerm)}
             </Box>
           }
         />
