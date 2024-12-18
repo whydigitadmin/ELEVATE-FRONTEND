@@ -109,17 +109,17 @@ const UserCreation = () => {
   const [clientTableData, setClientTableData] = useState([{ id: 1, client: '', clientCode: '' }]);
   const [clientTableDataErrors, setClientTableDataErrors] = useState([
     {
-      client: '',
+      clientName: '',
       clientCode: '',
     }
   ]);
   const getAllActiveClients = async (orgId) => {
     try {
-      const response = await apiCalls('get', `commonmaster/getAllClients?orgId=${orgId}`);
+      const response = await apiCalls('get', `clientcompanycontroller/getClientCompanyByOrgId?orgId=${orgId}`);
       if (response.status === true) {
-        const clientData = response.paramObjectsMap.clientVOs
+        const clientData = response.paramObjectsMap.clientCompanyVO
           .filter((row) => row.active === 'Active')
-          .map(({ id, client, clientCode }) => ({ id, client, clientCode }));
+          .map(({ id, clientName, clientCode }) => ({ id, clientName, clientCode }));
         return clientData;
       } else {
         console.error('API Error:');
@@ -436,7 +436,7 @@ const UserCreation = () => {
       const clientVo = clientTableData.map((row) => ({
         // ...(editId && { id: row.id }),
         clientCode: row.clientCode,
-        clientName: row.client
+        clientName: row.clientName
       }));
 
       const saveFormData = {
@@ -510,7 +510,7 @@ const UserCreation = () => {
     setRoleTableDataErrors('');
     setBranchTableData([{ id: 1, branchCode: '', branch: '' }]);
     setBranchTableErrors('');
-    setClientTableData([{ id: 1, clientCode: '', client: '' }]);
+    setClientTableData([{ id: 1, clientCode: '', clientName: '' }]);
     setClientTableDataErrors('');
     setEditId('');
   };
@@ -569,7 +569,7 @@ const UserCreation = () => {
     const newRow = {
       id: Date.now(),
       clientCode: '',
-      client: ''
+      clientName: ''
     };
     setClientTableData([...clientTableData, newRow]);
     setClientTableDataErrors([
@@ -610,7 +610,7 @@ const UserCreation = () => {
         const newErrors = [...prevErrors];
         newErrors[table.length - 1] = {
           ...newErrors[table.length - 1],
-          client: !table[table.length - 1].client ? 'client is required' : '',
+          clientName: !table[table.length - 1].clientName ? 'client is required' : '',
           clientCode: !table[table.length - 1].clientCode ? 'Client Code is required' : ''
         };
         return newErrors;
@@ -696,13 +696,13 @@ const UserCreation = () => {
 
   const getAvailableclientCodes = (currentRowId) => {
     const selectedclientCodes = clientTableData.filter((row) => row.id !== currentRowId).map((row) => row.clientCode);
-    return clientList.filter((client) => !selectedclientCodes.includes(client.clientCode));
+    return clientList.filter((clientName) => !selectedclientCodes.includes(clientName.clientCode));
   };
   const handleClientCodeChange = (row, index, event) => {
     const value = event.target.value;
-    const selectedclient = clientList.find((client) => client.clientCode === value);
+    const selectedclient = clientList.find((clientName) => clientName.clientCode === value);
     setClientTableData((prev) =>
-      prev.map((r) => (r.id === row.id ? { ...r, clientCode: value, client: selectedclient ? selectedclient.client : '' } : r))
+      prev.map((r) => (r.id === row.id ? { ...r, clientCode: value, clientName: selectedclient ? selectedclient.clientName : '' } : r))
     );
     setClientTableDataErrors((prev) => {
       const newErrors = [...prev];
@@ -1184,7 +1184,7 @@ const UserCreation = () => {
                                         )}
                                       </td>
 
-                                      <td className="border px-2 py-2 text-center pt-3">{row.client}</td>
+                                      <td className="border px-2 py-2 text-center pt-3">{row.clientName}</td>
                                     </tr>
                                   ))}
                                 </tbody>
