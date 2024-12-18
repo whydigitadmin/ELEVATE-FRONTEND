@@ -38,7 +38,7 @@ const ledgers = {
         },
         {
           id: 'elTBReport',
-          title: 'EL TB-Report',
+          title: 'EL - MFR',
           type: 'item',
           url: '/report/elTBReport',
           icon: icons1.IconSquareRoundedPlus

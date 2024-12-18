@@ -1,19 +1,9 @@
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Slide, Typography } from '@mui/material';
+import apiCalls from 'apicall';
 import React, { useState } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Slide,
-  Typography,
-} from '@mui/material';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
 import { IoMdClose } from 'react-icons/io';
-import apiCalls from 'apicall';
 import { showToast } from './toast-component';
 
 const VisuallyHiddenInput = ({ ...props }) => <input type="file" style={{ display: 'none' }} {...props} />;
@@ -34,6 +24,7 @@ const CommonBulkUpload = ({
   finYear,
   month,
   screen,
+  orgId
 }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -72,10 +63,11 @@ const CommonBulkUpload = ({
       formData.append('clientCode', clientCode);
       formData.append('finYear', finYear);
       formData.append('month', month);
+      formData.append('orgId', orgId);
 
       try {
         const headers = {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data'
         };
         const response = await apiCalls('post', apiUrl, formData, {}, headers);
 
@@ -89,7 +81,7 @@ const CommonBulkUpload = ({
           showToast('success', message);
         } else {
           showToast('error', response.paramObjectsMap.errorMessage || `${screen} Bulk Uploaded failed`);
-          showToast('error', response.paramObjectsMap.errorMessage || 'Buyer Order Bulk Uploaded failed');
+          showToast('error', response.paramObjectsMap.errorMessage || 'Bulk Uploaded failed');
           const errorMessage = response.paramObjectsMap.errorMessage || 'Upload failed';
           setErrorMessage(errorMessage);
           setErrorDialogOpen(true);
@@ -174,12 +166,11 @@ const CommonBulkUpload = ({
               style={{
                 textTransform: 'none',
                 padding: '4px 8px',
-                color: '#9CA4AF',
+                color: '#9CA4AF'
               }}
             >
               {downloadText}
             </Button>
-
           </div>
         </DialogContent>
         <DialogActions className="d-flex justify-content-between p-2">
