@@ -113,8 +113,8 @@ const GlobalSection = () => {
   // getFinYear
   const getFinYear = async () => {
     try {
-      const result = await apiCalls('get', `/commonmaster/getAllAciveFInYear?orgId=${orgId}`);
-      setFinVO(result.paramObjectsMap.financialYearVOs || []);
+      const result = await apiCalls('get', `/commonmaster/getAllAciveFInYear`);
+      setFinVO(result.paramObjectsMap.financialYearVOs);
       console.log('Test', result);
     } catch (err) {
       console.log('error', err);

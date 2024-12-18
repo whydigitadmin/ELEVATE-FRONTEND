@@ -62,19 +62,19 @@ const basicMaster = {
           title: 'Region',
           type: 'item',
           url: '/basicMaster/RegionMaster'
+        },
+        {
+          id: 'finYear',
+          title: 'FinYear',
+          type: 'item',
+          url: '/basicMaster/finYear'
+        },
+        {
+          id: 'roles',
+          title: 'Roles',
+          type: 'item',
+          url: '/basicMaster/roles'
         }
-        // {
-        //   id: 'finYear',
-        //   title: 'FinYear',
-        //   type: 'item',
-        //   url: '/basicMaster/finYear'
-        // },
-        // {
-        //   id: 'roles',
-        //   title: 'Roles',
-        //   type: 'item',
-        //   url: '/basicMaster/roles'
-        // }
       ]
     }
   ]

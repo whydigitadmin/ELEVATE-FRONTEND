@@ -2,7 +2,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import { Autocomplete, FormHelperText } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -30,36 +29,21 @@ const ClientCOA = () => {
   const [clientCode, setClientCode] = useState(localStorage.getItem('clientCode'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [allGroupName, setAllGroupName] = useState([]);
   const [formData, setFormData] = useState({
-    groupName: '',
     accountCode: '',
-    natureOfAccount: '',
-    accountGroupName: '',
-    type: '',
-    commonDate: '',
-    branch: '',
-    interBranchAc: false,
-    controllAc: false,
-    currency: 'INR',
+    accountName: '',
     active: false
   });
 
   const [fieldErrors, setFieldErrors] = useState({
-    groupName: false,
     accountCode: false,
-    natureOfAccount: false,
-    accountGroupName: false,
-    type: false,
-    interBranchAc: false,
-    controllAc: false,
-    currency: false,
+    accountName: false,
     active: false
   });
 
   useEffect(() => {
-    getGroup();
-    getAllGroupName();
+    getAllCCao();
+    // getAllGroupName();
   }, []);
 
 
@@ -70,21 +54,12 @@ const ClientCOA = () => {
     let errorMessage = '';
     let validInputValue = inputValue;
 
-    if (name === 'accountCode') {
-      const alphanumericPattern = /^[a-zA-Z0-9]*$/;
-      if (!alphanumericPattern.test(inputValue)) {
-        errorMessage = 'Only alphabets and numbers are allowed.';
-        validInputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
-      }
-    }
-
     setFormData({ ...formData, [name]: validInputValue });
 
     setFieldErrors({ ...fieldErrors, [name]: errorMessage });
   };
 
-  // list Api
-  const getGroup = async () => {
+  const getAllCCao = async () => {
     try {
       const result = await apiCalls('get', `/businesscontroller/getAllCCao`);
       if (result) {
@@ -100,20 +75,8 @@ const ClientCOA = () => {
   const validateForm = (formData) => {
     let errors = {};
 
-    if (formData.type === 'Account' && !formData.groupName) {
-      errors.groupName = 'Group Name is required';
-    }
-
-    if (!formData.natureOfAccount || formData.natureOfAccount.length === 0) {
-      errors.natureOfAccount = 'Nature of Account is required';
-    }
-
-    if (!formData.accountGroupName) {
-      errors.accountGroupName = 'Account Group Name is required';
-    }
-
-    if (!formData.type) {
-      errors.type = 'Type is required';
+    if (!formData.accountName) {
+      errors.accountName = 'Account Name is required';
     }
 
     if (!formData.accountCode) {
@@ -139,8 +102,6 @@ const ClientCOA = () => {
     toast.success("File uploaded successfully");
     console.log('Submit clicked');
     handleBulkUploadClose();
-    // getGroup();
-    // getAllData();
   };
 
   const handleSave = async () => {
@@ -152,18 +113,11 @@ const ClientCOA = () => {
       const saveData = {
         ...(editId && { id: editId }),
         active: formData.active,
-        groupName: formData.groupName !== null && formData.groupName !== '' ? formData.groupName : null,
-        natureOfAccount: formData.natureOfAccount,
-        accountGroupName: formData.accountGroupName,
-        parentId: formData.parentId,
-        parentCode: formData.parentCode,
-        type: formData.type,
-        interBranchAc: formData.interBranchAc,
-        controllAc: formData.controllAc,
         accountCode: formData.accountCode,
-        currency: 'INR',
+        accountName: formData.accountName,
         createdBy: loginUserName,
-        updatedBy: loginUserName
+        updatedBy: loginUserName,
+        currency: 'INR',
       };
 
       console.log('DATA TO SAVE', saveData);
@@ -172,8 +126,8 @@ const ClientCOA = () => {
         const response = await apiCalls('put', `/businesscontroller/createUpdateCCoa`, saveData);
         if (response.status === true) {
           showToast('success', editId ? 'Client COA updated successfully' : 'Client COA created successfully');
-          getGroup();
-          getAllGroupName();
+          getAllCCao();
+          // getAllGroupName();
           handleClear();
         } else {
           showToast('error', editId ? 'Client COA updation failed' : 'Client COA creation failed');
@@ -191,28 +145,13 @@ const ClientCOA = () => {
 
   const handleClear = () => {
     setFormData({
-      groupName: '',
       accountCode: '',
-      natureOfAccount: '',
-      accountGroupName: '',
-      type: '',
-      interBranchAc: false,
-      controllAc: false,
-      accountCode: '',
-      currency: 'INR',
-      branch: '',
+      accountName: '',
       active: false
     });
     setFieldErrors({
-      groupName: false,
       accountCode: false,
-      natureOfAccount: false,
-      accountGroupName: false,
-      type: false,
-      interBranchAc: false,
-      controllAc: false,
-      accountCode: false,
-      branch: false,
+      accountName: false,
       active: false
     });
     setEditId('');
@@ -221,26 +160,15 @@ const ClientCOA = () => {
   const handleListView = () => {
     setShowForm(!showForm);
     setFieldErrors({
-      groupName: false,
       accountCode: false,
-      natureOfAccount: false,
-      accountGroupName: false,
-      type: false,
-      interBranchAc: false,
-      controllAc: false,
-      accountCode: false,
-      branch: false,
+      accountName: false,
       active: false
     });
   };
 
   const columns = [
     { accessorKey: 'accountCode', header: 'Account Code', size: 140 },
-    { accessorKey: 'accountGroupName', header: 'Account/Groupname', size: 100 },
-    { accessorKey: 'groupName', header: 'Group Name', size: 140 },
-    { accessorKey: 'parentCode', header: 'Parent Code', size: 100 },
-    { accessorKey: 'natureOfAccount', header: 'Nature of Account', size: 100 },
-    { accessorKey: 'type', header: 'Type', size: 100 },
+    { accessorKey: 'accountName', header: 'Account Name', size: 100 },
     { accessorKey: 'active', header: 'Active', size: 100 }
   ];
 
@@ -256,35 +184,13 @@ const ClientCOA = () => {
         setEditMode(true);
 
         setFormData({
-          type: cao.type,
-          groupName: cao.groupName,
-          accountGroupName: cao.accountGroupName,
+          accountName: cao.accountName,
           accountCode: cao.accountCode,
-          natureOfAccount: cao.natureOfAccount,
-          interBranchAc: cao.interBranchAc,
-          controllAc: cao.controllAc,
-          currency: 'INR',
           active: cao.active
         });
 
         console.log('DataToEdit', cao);
       } else {
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  // Group name ApI 
-  const getAllGroupName = async () => {
-    try {
-      const response = await apiCalls('get', `/businesscontroller/getGroupNameForCCoa`);
-      console.log('API Response:', response);
-
-      if (response.status === true) {
-        setAllGroupName(response.paramObjectsMap.cCoaVO);
-      } else {
-        console.error('API Error:', response);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -325,194 +231,62 @@ const ClientCOA = () => {
         </div>
 
         {showForm ? (
-          <div className="row d-flex ">
-            {/* type */}
-            <div className="col-md-3 mb-3">
-              <Autocomplete
-                options={[
-                  { type: 'Group' },
-                  { type: 'Account' },
-                ]}
-                getOptionLabel={(option) => option.type || ''}
-                value={formData.type ? { type: formData.type } : null}
-                onChange={(event, newValue) => {
-                  const value = newValue ? newValue.type : '';
-                  setFormData((prev) => ({ ...prev, type: value }));
-                }}
-                size="small"
-                renderInput={(params) => (
+          <>
+            <div className="row d-flex ">
+              {/* Account Code */}
+              <div className="col-md-3 mb-3">
+                <FormControl fullWidth variant="filled">
                   <TextField
-                    {...params}
-                    label={
-                      <span>
-                        Type<span style={{ color: 'red' }}> *</span>
-                      </span>
+                    id="account"
+                    label="Account Code"
+                    size="small"
+                    required
+                    // disabled
+                    placeholder="40003600104"
+                    inputProps={{ maxLength: 30 }}
+                    onChange={handleInputChange}
+                    name="accountCode"
+                    value={formData.accountCode}
+                    error={!!fieldErrors.accountCode}
+                    helperText={fieldErrors.accountCode || ''}
+                  />
+                </FormControl>
+              </div>
+              {/* Account/Group Name */}
+              <div className="col-md-3 mb-3">
+                <FormControl fullWidth variant="filled">
+                  <TextField
+                    id="accountName"
+                    label="Account/Group Name"
+                    size="small"
+                    required
+                    placeholder="Enter Group Name"
+                    inputProps={{ maxLength: 30 }}
+                    onChange={handleInputChange}
+                    name="accountName"
+                    value={formData.accountName}
+                    helperText={<span style={{ color: 'red' }}>{fieldErrors.accountName ? fieldErrors.accountName : ''}</span>}
+                  />
+                </FormControl>
+              </div>
+              {/* active */}
+              <div className="col-md-3 mb-3">
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData.active}
+                        name="active"
+                        onChange={handleInputChange}
+                        sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
+                      />
                     }
-                    variant="outlined"
-                    error={!!fieldErrors.type}
-                    helperText={fieldErrors.type || ''}
+                    label="Active"
                   />
-                )}
-                clearOnEscape
-              />
+                </FormGroup>
+              </div>
             </div>
-            {/* groupName */}
-            <div className="col-md-3 mb-3">
-              <Autocomplete
-                options={allGroupName}
-                getOptionLabel={(option) => option.group || ''}
-                value={
-                  formData.groupName
-                    ? allGroupName.find((item) => item.group === formData.groupName)
-                    : null
-                }
-                onChange={(event, newValue) => {
-                  const value = newValue ? newValue.group : '';
-                  setFormData((prev) => ({ ...prev, groupName: value }));
-                }}
-                size="small"
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Group Name"
-                    variant="outlined"
-                    error={!!fieldErrors.groupName}
-                    helperText={fieldErrors.groupName || ''}
-                  />
-                )}
-                clearOnEscape
-              />
-            </div>
-            {/* Account Code */}
-            <div className="col-md-3 mb-3">
-              <FormControl fullWidth variant="filled">
-                <TextField
-                  id="account"
-                  label="Account Code"
-                  size="small"
-                  required
-                  // disabled
-                  placeholder="40003600104"
-                  inputProps={{ maxLength: 30 }}
-                  onChange={handleInputChange}
-                  name="accountCode"
-                  value={formData.accountCode}
-                  error={!!fieldErrors.accountCode}
-                  helperText={fieldErrors.accountCode || ''}
-                />
-              </FormControl>
-            </div>
-            {/* Account/Group Name */}
-            <div className="col-md-3 mb-3">
-              <FormControl fullWidth variant="filled">
-                <TextField
-                  id="accountGroupName"
-                  label="Account/Group Name"
-                  size="small"
-                  required
-                  placeholder="Enter Group Name"
-                  inputProps={{ maxLength: 30 }}
-                  onChange={handleInputChange}
-                  name="accountGroupName"
-                  value={formData.accountGroupName}
-                  helperText={<span style={{ color: 'red' }}>{fieldErrors.accountGroupName ? fieldErrors.accountGroupName : ''}</span>}
-                />
-              </FormControl>
-            </div>
-            {/* natureOfAccount */}
-            <div className="col-md-3 mb-3">
-              <Autocomplete
-                options={[
-                  { type: 'Db' },
-                  { type: 'Cr' },
-                ]}
-                getOptionLabel={(option) => option.type || ''}
-                value={formData.natureOfAccount ? { type: formData.natureOfAccount } : null}
-                onChange={(event, newValue) => {
-                  const value = newValue ? newValue.type : '';
-                  setFormData((prev) => ({ ...prev, natureOfAccount: value }));
-                }}
-                size="small"
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={
-                      <span>
-                        Nature of Account<span style={{ color: 'red' }}> *</span>
-                      </span>
-                    }
-                    variant="outlined"
-                    error={!!fieldErrors.natureOfAccount}
-                    helperText={fieldErrors.natureOfAccount || ''}
-                  />
-                )}
-                clearOnEscape
-              />
-            </div>
-            {/* Currency */}
-            <div className="col-md-3 mb-3">
-              <FormControl fullWidth size="small">
-                <TextField
-                  id="currency"
-                  label="Currency"
-                  size="small"
-                  disabled
-                  inputProps={{ maxLength: 30 }}
-                  onChange={handleInputChange}
-                  name="currency"
-                  value={formData.currency}
-                />
-              </FormControl>
-            </div>
-            {/* interBranchAc */}
-            <div className="col-md-3 mb-2">
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.interBranchAc}
-                      onChange={handleInputChange}
-                      name="interBranchAc"
-                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
-                    />
-                  }
-                  label="Interbranch A/c"
-                />
-              </FormGroup>
-            </div>
-            {/* controllAc */}
-            <div className="col-md-3 mb-2">
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.controllAc}
-                      onChange={handleInputChange}
-                      name="controllAc"
-                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
-                    />
-                  }
-                  label="Control A/c"
-                />
-              </FormGroup>
-            </div>
-            {/* active */}
-            <div className="col-md-3 mb-3">
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.active}
-                      name="active"
-                      onChange={handleInputChange}
-                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
-                    />
-                  }
-                  label="Active"
-                />
-              </FormGroup>
-            </div>
-          </div>
+          </>
         ) : (
           <CommonTable columns={columns} data={data} blockEdit={true} toEdit={getGruopById} />
         )}

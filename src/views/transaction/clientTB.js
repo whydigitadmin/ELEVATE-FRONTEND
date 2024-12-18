@@ -23,7 +23,6 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import GridOnIcon from '@mui/icons-material/GridOn';
 
 const ClientTB = () => {
@@ -52,7 +51,6 @@ const ClientTB = () => {
 
   const [tbData, setTbData] = useState([
     {
-      id: 1,
       accountCode: '',
       accountName: '',
       credit: '',
@@ -107,6 +105,12 @@ const ClientTB = () => {
 
   const handleSave = async () => {
     let errors = {};
+    let tbValidationErrors = tbData.map((row) => ({
+      accountCode: row.accountCode ? '' : 'Account Code is required',
+      accountName: row.accountName ? '' : 'Account Name is required',
+      debit: row.debit ? '' : 'Debit is required',
+      credit: row.credit ? '' : 'Credit is required'
+    }));
 
     if (!formData.totalCreditAmount) {
       errors.totalCreditAmount = 'Total Credit Amount is required';
@@ -114,61 +118,70 @@ const ClientTB = () => {
     if (!formData.totalDebitAmount) {
       errors.totalDebitAmount = 'Total Debit Amount is required';
     }
-
     if (!formData.tbNo) {
       errors.tbNo = 'Trail Balance No is required';
     }
+
+    const hasTbErrors = tbValidationErrors.some(
+      (rowErrors) => Object.values(rowErrors).some((error) => error)
+    );
+
     setFieldErrors(errors);
+    setTbErrors(tbValidationErrors);
 
-    if (Object.keys(errors).length === 0) {
-      setIsLoading(true);
+    if (Object.keys(errors).length > 0 || hasTbErrors) {
+      console.log('Validation Errors:', errors, tbValidationErrors);
+      return;
+    }
 
-      const saveData = {
-        ...(editId && { id: editId }),
-        active: formData.active,
-        totalCreditAmount: formData.totalCreditAmount,
-        totalDebitAmount: formData.totalDebitAmount,
-        tbNo: formData.tbNo,
-        createdBy: loginUserName,
-        updatedBy: loginUserName
-      };
+    setIsLoading(true);
 
-      console.log('DATA TO SAVE', saveData);
+    const saveData = {
+      ...(editId && { id: editId }),
+      active: formData.active,
+      totalCreditAmount: formData.totalCreditAmount,
+      totalDebitAmount: formData.totalDebitAmount,
+      tbNo: formData.tbNo,
+      createdBy: loginUserName,
+      updatedBy: loginUserName
+    };
 
-      try {
-        const response = await apiCalls('put', `businesscontroller/createUpdateCoa`, saveData);
-        if (response.status === true) {
-          showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
-          // getGroup();
-          // getAllGroupName();
-          // handleClear();
-        } else {
-          showToast('error', editId ? 'COA updation failed' : 'COA creation failed');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
+    console.log('DATA TO SAVE', saveData);
+
+    try {
+      const response = await apiCalls('put', `businesscontroller/createUpdateCoa`, saveData);
+      if (response.status === true) {
+        showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
+        handleClear();
+      } else {
+        showToast('error', editId ? 'COA updation failed' : 'COA creation failed');
       }
-    } else {
-      console.log('Validation Errors:', errors);
-      setFieldErrors(errors);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+
   const handleClear = () => {
-    setFormData({
+    setFieldErrors({
       tbNo: '',
       totalCreditAmount: '',
       totalDebitAmount: '',
     });
-    setFieldErrors({
-      tbNo: false,
-      totalCreditAmount: false,
-      totalDebitAmount: false,
-    });
-    setEditId('');
+  
+    setTbErrors(
+      tbData.map(() => ({
+        accountCode: '',
+        accountName: '',
+        debit: '',
+        credit: '',
+      }))
+    );
   };
+  
+
 
   const handleListView = () => {
     setShowForm(!showForm);
@@ -200,8 +213,10 @@ const ClientTB = () => {
   };
 
   const handleAddRow = () => {
+    setTbData([...tbData, { accountCode: '', accountName: '', debit: '', credit: '' }]);
+    setTbErrors([...tbErrors, { accountCode: '', accountName: '', debit: '', credit: '' }]);
     if (isLastRowEmpty(tbData)) {
-      displayRowError();
+      displayRowError(tbData);
       return;
     }
 
@@ -227,12 +242,10 @@ const ClientTB = () => {
     if (table && table.length > 0) {
       setTbErrors((prevErrors) => {
         const newErrors = [...prevErrors];
-
         const lastRowIndex = table.length - 1;
         const lastRow = table[lastRowIndex];
 
         newErrors[lastRowIndex] = {
-          ...newErrors[lastRowIndex],
           accountCode: !lastRow.accountCode ? 'Account Code is required' : '',
           accountName: !lastRow.accountName ? 'Account Name is required' : '',
           credit: !lastRow.credit ? 'Credit is required' : '',
@@ -243,16 +256,6 @@ const ClientTB = () => {
       });
     }
   };
-
-  // const handleDeleteRow = (id, table, setTable, errorTable, setErrorTable) => {
-  //   const rowIndex = table.findIndex((row) => row.id === id);
-  //   if (rowIndex !== -1) {
-  //     const updatedData = table.filter((row) => row.id !== id);
-  //     const updatedErrors = errorTable.filter((_, index) => index !== rowIndex);
-  //     setTable(updatedData);
-  //     setErrorTable(updatedErrors);
-  //   }
-  // };
 
   const handleFillGrid = async () => {
     console.log('Editing Exchange Rate:', loginUserName);
@@ -288,8 +291,6 @@ const ClientTB = () => {
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <>
@@ -429,33 +430,16 @@ const ClientTB = () => {
                                   <th className="table-header">S.No</th>
                                   <th className="table-header">Account Code</th>
                                   <th className="table-header">Account Name</th>
-                                  <th className="table-header">Cr</th>
                                   <th className="table-header">Db</th>
+                                  <th className="table-header">Cr</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {tbData.map((row, index) => (
                                   <tr key={row.id}>
-                                    {/* <td className="border px-2 py-2 text-center">
-                                      <ActionButton
-                                        title="Delete"
-                                        icon={DeleteIcon}
-                                        onClick={() =>
-                                          handleDeleteRow(
-                                            row.id,
-                                            tbData,
-                                            setTbData,
-                                            tbErrors,
-                                            setTbErrors
-                                          )
-                                        }
-                                      />
-                                    </td> */}
-
                                     <td className="text-center">
-                                      <div className="pt-2">{index + 1}</div>
+                                      {index + 1}
                                     </td>
-
                                     <td className="border px-2 py-2">
                                       <input
                                         type="text"
@@ -463,7 +447,7 @@ const ClientTB = () => {
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           setTbData((prev) =>
-                                            prev.map((r) => (r.id === row.id ? { ...r, accountCode: value } : r))
+                                            prev.map((r, i) => (i === index ? { ...r, accountCode: value } : r))
                                           );
                                           setTbErrors((prev) => {
                                             const newErrors = [...prev];
@@ -477,12 +461,13 @@ const ClientTB = () => {
                                         className={tbErrors[index]?.accountCode ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.accountCode && (
-                                        <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>
                                           {tbErrors[index].accountCode}
                                         </div>
                                       )}
                                     </td>
 
+                                    {/* Account Name Input */}
                                     <td className="border px-2 py-2">
                                       <input
                                         type="text"
@@ -490,7 +475,7 @@ const ClientTB = () => {
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           setTbData((prev) =>
-                                            prev.map((r) => (r.id === row.id ? { ...r, accountName: value } : r))
+                                            prev.map((r, i) => (i === index ? { ...r, accountName: value } : r))
                                           );
                                           setTbErrors((prev) => {
                                             const newErrors = [...prev];
@@ -504,12 +489,41 @@ const ClientTB = () => {
                                         className={tbErrors[index]?.accountName ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.accountName && (
-                                        <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>
                                           {tbErrors[index].accountName}
                                         </div>
                                       )}
                                     </td>
 
+                                    {/* Debit Input */}
+                                    <td className="border px-2 py-2">
+                                      <input
+                                        type="text"
+                                        value={row.debit}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          setTbData((prev) =>
+                                            prev.map((r, i) => (i === index ? { ...r, debit: value } : r))
+                                          );
+                                          setTbErrors((prev) => {
+                                            const newErrors = [...prev];
+                                            newErrors[index] = {
+                                              ...newErrors[index],
+                                              debit: !value ? 'Debit is required' : ''
+                                            };
+                                            return newErrors;
+                                          });
+                                        }}
+                                        className={tbErrors[index]?.debit ? 'error form-control' : 'form-control'}
+                                      />
+                                      {tbErrors[index]?.debit && (
+                                        <div style={{ color: 'red', fontSize: '12px' }}>
+                                          {tbErrors[index].debit}
+                                        </div>
+                                      )}
+                                    </td>
+
+                                    {/* Credit Input */}
                                     <td className="border px-2 py-2">
                                       <input
                                         type="text"
@@ -517,7 +531,7 @@ const ClientTB = () => {
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           setTbData((prev) =>
-                                            prev.map((r) => (r.id === row.id ? { ...r, credit: value } : r))
+                                            prev.map((r, i) => (i === index ? { ...r, credit: value } : r))
                                           );
                                           setTbErrors((prev) => {
                                             const newErrors = [...prev];
@@ -531,33 +545,8 @@ const ClientTB = () => {
                                         className={tbErrors[index]?.credit ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.credit && (
-                                        <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>
                                           {tbErrors[index].credit}
-                                        </div>
-                                      )}
-                                    </td>
-
-                                    <td className="border px-2 py-2">
-                                      <input
-                                        type="text"
-                                        value={row.debit}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          setTbData((prev) => prev.map((r) => (r.id === row.id ? { ...r, debit: value } : r)));
-                                          setTbErrors((prev) => {
-                                            const newErrors = [...prev];
-                                            newErrors[index] = {
-                                              ...newErrors[index],
-                                              debit: !value ? 'Debit is required' : ''
-                                            };
-                                            return newErrors;
-                                          });
-                                        }}
-                                        className={tbErrors[index]?.debit ? 'error form-control' : 'form-control'}
-                                      />
-                                      {tbErrors[index]?.debit && (
-                                        <div className="mt-2" style={{ color: 'red', fontSize: '12px' }}>
-                                          {tbErrors[index].debit}
                                         </div>
                                       )}
                                     </td>

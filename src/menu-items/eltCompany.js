@@ -45,21 +45,21 @@ const eltCompany = {
           },
           {
             id: 'createCompanyEmployee',
-            title: 'Company Employee',
+            title: 'Employee',
             type: 'item',
             url: '/elevateCompany/createCompanyEmployee',
             icon: icons1.IconSquareRoundedPlus
           },
-          {
-            id: 'createClient',
-            title: 'Client Employee',
-            type: 'item',
-            url: '/elevateCompany/createClient',
-            icon: icons1.IconSquareRoundedPlus
-          },
+          // {
+          //   id: 'createClient',
+          //   title: 'Client Employee',
+          //   type: 'item',
+          //   url: '/elevateCompany/createClient',
+          //   icon: icons1.IconSquareRoundedPlus
+          // },
           {
             id: 'admin',
-            title: 'Company User Creation',
+            title: 'User Creation',
             type: 'item',
             url: '/elevateCompany/admin/user-creation/userCreation',
             icon: icons1.IconSquareRoundedPlus

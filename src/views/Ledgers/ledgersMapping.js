@@ -14,6 +14,7 @@ import CommonTable from 'views/basicMaster/CommonTable';
 
 const LedgersMapping = () => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -48,6 +49,7 @@ const LedgersMapping = () => {
 
     getAllLedgerMapping();
     getCOALedgersMapping();
+    getCCOALedgersMapping();
   }, [loginUserName]);
 
   const getAllLedgerMapping = async () => {
@@ -73,6 +75,32 @@ const LedgersMapping = () => {
       console.error('Error fetching data:', error);
     }
   };
+
+  // Client Coa API 
+  const getCCOALedgersMapping = async () => {
+    const clientCode = loginUserName;
+    setLoading(true); // Show loading indicator
+    try {
+      const response = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=${clientCode}`);
+      if (response.status === true) {
+        setAllCOA(response.paramObjectsMap.COA); // Set fetched data
+      } else {
+        console.error('API Error:', response);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false); // Hide loading indicator
+    }
+  };
+
+    // Handle dropdown click/focus to trigger the API call
+    const handleDropdownFocus = () => {
+      if (allCOA.length === 0) { // Only fetch if the data is not already loaded
+        getCCOALedgersMapping();
+      }
+    };
+  
 
   const getLedgersMappingById = async (row) => {
     console.log('Editing Exchange Rate:', row.original.id);
@@ -208,7 +236,7 @@ const LedgersMapping = () => {
       const result = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=${clientCode}`);
 
       if (result && result.paramObjectsMap && result.paramObjectsMap.COA) {
-        
+
         const fillGrid = result.paramObjectsMap.COA;
         setEditMode(true);
 
@@ -254,6 +282,38 @@ const LedgersMapping = () => {
               <div key={index} className="row d-flex">
                 <div className="col-md-3 mb-3">
                   <FormControl fullWidth variant="filled">
+                    <Autocomplete
+                      options={allCOA}
+                      getOptionLabel={(option) => (option ? option.accountGroupName : '')}
+                      value={allCOA.find((item) => item.accountGroupName === formData.rows[index]?.coa) || null}
+                      onChange={(event, newValue) => {
+                        const updatedRows = [...formData.rows];
+                        updatedRows[index].coa = newValue ? newValue.accountGroupName : '';
+                        updatedRows[index].coaCode = newValue ? newValue.accountCode : '';
+
+                        const updatedErrors = { ...fieldErrors };
+                        delete updatedErrors[`coa-${index}`];
+
+                        setFormData({ ...formData, rows: updatedRows });
+                        setFieldErrors(updatedErrors);
+                      }}
+                      onFocus={handleDropdownFocus} // Trigger API call when dropdown is focused
+                      size="small"
+                      loading={loading} // Show loading indicator
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Client COA"
+                          variant="outlined"
+                          error={!!fieldErrors[`coa-${index}`]}
+                          helperText={fieldErrors[`coa-${index}`] || ''}
+                        />
+                      )}
+                    />
+                  </FormControl>
+                </div>
+                {/* <div className="col-md-3 mb-3">
+                  <FormControl fullWidth variant="filled">
                     <TextField
                       label="Client COA"
                       size="small"
@@ -265,7 +325,7 @@ const LedgersMapping = () => {
                       helperText={fieldErrors[`clientCoa-${index}`] || ''}
                     />
                   </FormControl>
-                </div>
+                </div> */}
 
                 <div className="col-md-3 mb-3">
                   <FormControl fullWidth variant="filled">
