@@ -58,8 +58,15 @@ const companySetup = {
           id: 'company',
           title: 'Company Setup',
           type: 'item',
-          url: '/companysetup/companysetup',
+          url: '/companysetup/Company',
           icon: icons2.IconSettingsPlus
+        },
+        {
+          id: 'branch',
+          title: 'Branch',
+          type: 'item',
+          url: '/companysetup/branch',
+          icon: icons1.IconSquareRoundedPlus
         }
       ]
     }

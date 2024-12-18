@@ -50,7 +50,8 @@ const ReconciliationSummary = Loadable(lazy(() => import('views/Finance/Reconcil
 // const CompanyMain = Loadable(lazy(() => import('views/company/companyMain')));
 // const CreateCompany = Loadable(lazy(() => import('views/company/CreateCompany')));
 const CreateCompany = Loadable(lazy(() => import('views/companySetup/CreateCompany')));
-const CompanySetup = Loadable(lazy(() => import('views/companySetup/CompanySetup')));
+const Company = Loadable(lazy(() => import('views/companySetup/Company')));
+const Branch = Loadable(lazy(() => import('views/companySetup/Branch')));
 const Country = Loadable(lazy(() => import('views/basicMaster/country')));
 const State = Loadable(lazy(() => import('views/basicMaster/state')));
 const City = Loadable(lazy(() => import('views/basicMaster/city')));
@@ -106,8 +107,12 @@ const FinanceRoute = {
       element: <CreateCompany />
     },
     {
-      path: '/companysetup/companysetup',
-      element: <CompanySetup />
+      path: '/companysetup/Company',
+      element: <Company />
+    },
+    {
+      path: '/companysetup/Branch',
+      element: <Branch />
     },
     // {
     //   path: '/company/companyMain',

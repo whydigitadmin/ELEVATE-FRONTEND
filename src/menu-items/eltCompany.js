@@ -45,7 +45,7 @@ const eltCompany = {
           },
           {
             id: 'createCompanyEmployee',
-            title: 'Company Employee',
+            title: 'Employee',
             type: 'item',
             url: '/elevateCompany/createCompanyEmployee',
             icon: icons1.IconSquareRoundedPlus
@@ -59,7 +59,7 @@ const eltCompany = {
           // },
           {
             id: 'admin',
-            title: 'Company User Creation',
+            title: 'User Creation',
             type: 'item',
             url: '/elevateCompany/admin/user-creation/userCreation',
             icon: icons1.IconSquareRoundedPlus
