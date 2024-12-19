@@ -26,6 +26,7 @@ const CoA = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
+  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [allGroupName, setAllGroupName] = useState([]);
@@ -84,7 +85,7 @@ const CoA = () => {
 
   const getGroup = async () => {
     try {
-      const result = await apiCalls('get', `/businesscontroller/getAllCao`);
+      const result = await apiCalls('get', `/businesscontroller/getAllCao?orgId=${orgId}`);
       if (result) {
         setData(result.paramObjectsMap.coaVO.reverse());
       } else {
@@ -162,7 +163,8 @@ const CoA = () => {
         accountCode: formData.accountCode,
         currency: 'INR',
         createdBy: loginUserName,
-        updatedBy: loginUserName
+        updatedBy: loginUserName,
+        orgId: parseInt(orgId)
       };
 
       console.log('DATA TO SAVE', saveData);
@@ -276,7 +278,7 @@ const CoA = () => {
 
   const getAllGroupName = async () => {
     try {
-      const response = await apiCalls('get', `/businesscontroller/getGroupName`);
+      const response = await apiCalls('get', `/businesscontroller/getGroupName?orgId=${orgId}`);
       console.log('API Response:', response);
 
       if (response.status === true) {

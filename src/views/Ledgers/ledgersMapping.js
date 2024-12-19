@@ -1,37 +1,40 @@
 import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
-import GridOnIcon from '@mui/icons-material/GridOn';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
-import { Autocomplete, FormControl, TextField } from '@mui/material';
+import { Autocomplete, Checkbox, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import apiCalls from 'apicall';
 import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
+import CommonBulkUpload from 'utils/CommonBulkUpload';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
+import UploadIcon from '@mui/icons-material/Upload';
+import SampleFile from '../../../src/assets/sample-files/LedgerMappingUpload.xlsx';
 
 const LedgersMapping = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [clientCode, setClientCode] = useState(localStorage.getItem('clientCode'));
+  const [client, setClient] = useState(localStorage.getItem('client'));
+  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [formData, setFormData] = useState({
-    rows: [
-      {
-        clientCoa: '',
-        clientCoaCode: '',
-        coa: '',
-        coaCode: '',
-        active: true,
-        clientCode: ''
-      }
-    ]
+    clientCoa: '',
+    clientCoaCode: '',
+    coa: '',
+    coaCode: '',
+    active: '',
+    // clientCode: '',
+    clientName: ''
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
+  const [allClientAccountCode, setAllClientAccountCode] = useState([]);
   const [allCOA, setAllCOA] = useState([]);
   const [editId, setEditId] = useState('');
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
@@ -40,16 +43,12 @@ const LedgersMapping = () => {
     if (loginUserName) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        rows: prevFormData.rows.map((row) => ({
-          ...row,
-          clientCode: loginUserName
-        }))
+        clientCode: loginUserName
       }));
     }
-
     getAllLedgerMapping();
     getCOALedgersMapping();
-    getCCOALedgersMapping();
+    getAccountCodeLedgersMapping();
   }, [loginUserName]);
 
   const getAllLedgerMapping = async () => {
@@ -65,7 +64,7 @@ const LedgersMapping = () => {
 
   const getCOALedgersMapping = async () => {
     try {
-      const response = await apiCalls('get', `/businesscontroller/getCOAForLedgerMapping`);
+      const response = await apiCalls('get', `/businesscontroller/getCOAForLedgerMapping?orgId=${orgId}`);
       if (response.status === true) {
         setAllCOA(response.paramObjectsMap.ledgerMappingVO);
       } else {
@@ -76,102 +75,72 @@ const LedgersMapping = () => {
     }
   };
 
-  // Client Coa API 
-  const getCCOALedgersMapping = async () => {
-    const clientCode = loginUserName;
-    setLoading(true); // Show loading indicator
+  const getAccountCodeLedgersMapping = async () => {
+    setLoading(true);
     try {
-      const response = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=${clientCode}`);
+      const response = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=WDS&orgId=${orgId}`);
       if (response.status === true) {
-        setAllCOA(response.paramObjectsMap.COA); // Set fetched data
+        setAllClientAccountCode(response.paramObjectsMap.COA);
       } else {
         console.error('API Error:', response);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false); // Hide loading indicator
+      setLoading(false);
     }
   };
 
-    // Handle dropdown click/focus to trigger the API call
-    const handleDropdownFocus = () => {
-      if (allCOA.length === 0) { // Only fetch if the data is not already loaded
-        getCCOALedgersMapping();
-      }
-    };
-  
-
-  const getLedgersMappingById = async (row) => {
-    console.log('Editing Exchange Rate:', row.original.id);
-    setEditId(row.original.id);
-    setShowForm(true);
-    try {
-      const result = await apiCalls('get', `/businesscontroller/getLedgerMappingbyId?id=${row.original.id}`);
-      if (result) {
-        const ledgers = result.paramObjectsMap.ledgerMappingVO;
-        setEditMode(true);
-
-        setFormData({
-          rows: [
-            {
-              clientCoa: ledgers.clientCoa || '',
-              clientCoaCode: ledgers.clientCoaCode || '',
-              coa: ledgers.coa || '',
-              coaCode: ledgers.coaCode || '',
-              active: true,
-              clientCode: ledgers.clientCode || ''
-            }
-          ]
-        });
-
-        console.log('DataToEdit', ledgers);
-      } else {
-        console.error('No data found for the given ID');
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value
+    }));
   };
 
-  const handleListView = () => {
-    setShowForm(!showForm);
-    setFieldErrors({});
+  const handleBulkUploadOpen = () => {
+    setUploadOpen(true);
   };
 
-  const columns = [
-    { accessorKey: 'clientCoa', header: 'Client COA', size: 140 },
-    { accessorKey: 'clientCoaCode', header: 'CCOA Code', size: 100 },
-    { accessorKey: 'coa', header: 'COA', size: 140 },
-    { accessorKey: 'coaCode', header: 'COA Code', size: 100 }
-  ];
+  const handleBulkUploadClose = () => {
+    setUploadOpen(false);
+  };
+
+  const handleFileUpload = (event) => {
+    console.log(event.target.files[0]);
+  };
+
+  const handleSubmit = async () => {
+    console.log('Submit clicked');
+    handleBulkUploadClose();
+  };
 
   const handleSave = async () => {
     const errors = {};
 
-    formData.rows.forEach((row, index) => {
-      if (!row.coa) {
-        errors[`coa-${index}`] = 'COA is required';
-      }
-    });
+    if (!formData.clientCoaCode) {
+      errors.clientCoaCode = 'Account Code is required';
+    }
+    if (!formData.coaCode) {
+      errors.coaCode = 'COA Code is required';
+    }
 
     setFieldErrors(errors);
 
     if (Object.keys(errors).length === 0) {
       setIsLoading(true);
-      const saveData = formData.rows.map((row) => ({
-        // id: row.id || editId,
-        active: row.active,
-        clientCoa: row.clientCoa,
-        clientCoaCode: row.clientCoaCode,
-        clientCode: loginUserName,
-        coa: row.coa,
-        coaCode: row.coaCode,
+      const saveData = {
+        ...formData,
+        clientCode: clientCode,
+        clientName: client,
         createdBy: loginUserName,
-      }));
+        orgId: parseInt(orgId)
+      };
 
       try {
         const response = await apiCalls('put', '/businesscontroller/createUpdateLedgerMapping', saveData);
+
         if (response.status === true) {
           showToast(
             'success',
@@ -190,78 +159,32 @@ const LedgersMapping = () => {
     }
   };
 
-  const handleInputChange = (index, event) => {
-    const { name, value } = event.target;
-    const updatedRows = [...formData.rows];
-    updatedRows[index] = {
-      ...updatedRows[index],
-      [name]: value
-    };
-
-    const updatedErrors = { ...fieldErrors };
-    delete updatedErrors[`${name}-${index}`];
-
-    setFormData({
-      ...formData,
-      rows: updatedRows
-    });
-  };
-
   const handleClear = () => {
     setFormData({
-      rows: [
-        {
-          clientCoa: '',
-          clientCoaCode: '',
-          coa: '',
-          coaCode: '',
-          active: true,
-          clientCode: ''
-        }
-      ]
+      clientCoaCode: '',
+      clientCoa: '',
+      coa: '',
+      // coaCode: '',
+      active: '',
+      clientCode: '',
+      clientName: ''
     });
+
     setFieldErrors({});
   };
 
-  const handleFillGrid = async () => {
-    console.log('Editing Exchange Rate:', loginUserName);
-    setIsLoading(true);
-
-    const clientCode = loginUserName;
-    setEditId(clientCode);
-    setShowForm(true);
-
-
-    try {
-      const result = await apiCalls('get', `/businesscontroller/getFillGridForLedgerMapping?clientCode=${clientCode}`);
-
-      if (result && result.paramObjectsMap && result.paramObjectsMap.COA) {
-
-        const fillGrid = result.paramObjectsMap.COA;
-        setEditMode(true);
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          rows: fillGrid.map((grid) => ({
-            clientCoa: grid.clientCOA || '',
-            clientCoaCode: grid.clientCoaCode || '',
-            coa: grid.coa || '',
-            coaCode: grid.coaCode || '',
-            active: true,
-            clientCode: clientCode
-          }))
-        }));
-
-        console.log('DataToEdit:', fillGrid);
-      } else {
-        console.error('No valid data received from the API');
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleListView = () => {
+    setShowForm(!showForm);
+    setFieldErrors({});
   };
+
+  const columns = [
+    { accessorKey: 'clientCoaCode', header: 'Account Code', size: 100 },
+    { accessorKey: 'clientCoa', header: 'Account Name', size: 140 },
+    { accessorKey: 'coaCode', header: 'COA Code', size: 100 },
+    { accessorKey: 'coa', header: 'COA', size: 140 },
+    { accessorKey: 'active', header: 'Active', size: 140 },
+  ];
 
   return (
     <>
@@ -274,131 +197,126 @@ const LedgersMapping = () => {
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} />
-          <ActionButton title="Fill Grid" icon={GridOnIcon} isLoading={isLoading} onClick={handleFillGrid} />
+          <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
+
+          {uploadOpen && (
+            <CommonBulkUpload
+              open={uploadOpen}
+              handleClose={handleBulkUploadClose}
+              dialogTitle="Upload Files"
+              uploadText="Upload File"
+              downloadText="Sample File"
+              fileName="sampleFile.xlsx"
+              onSubmit={handleSubmit}
+              sampleFileDownload={SampleFile}
+              handleFileUpload={handleFileUpload}
+              apiUrl={`businesscontroller/excelUploadForLedgerMapping`}
+              screen="PutAway"
+              clientCode={clientCode}
+              clientName={client}
+              orgId={orgId}
+              loginUser={loginUserName}
+            />
+
+          )}
         </div>
         {showForm ? (
           <div className="row d-flex">
-            {formData.rows.map((row, index) => (
-              <div key={index} className="row d-flex">
-                <div className="col-md-3 mb-3">
-                  <FormControl fullWidth variant="filled">
-                    <Autocomplete
-                      options={allCOA}
-                      getOptionLabel={(option) => (option ? option.accountGroupName : '')}
-                      value={allCOA.find((item) => item.accountGroupName === formData.rows[index]?.coa) || null}
-                      onChange={(event, newValue) => {
-                        const updatedRows = [...formData.rows];
-                        updatedRows[index].coa = newValue ? newValue.accountGroupName : '';
-                        updatedRows[index].coaCode = newValue ? newValue.accountCode : '';
 
-                        const updatedErrors = { ...fieldErrors };
-                        delete updatedErrors[`coa-${index}`];
-
-                        setFormData({ ...formData, rows: updatedRows });
-                        setFieldErrors(updatedErrors);
-                      }}
-                      onFocus={handleDropdownFocus} // Trigger API call when dropdown is focused
-                      size="small"
-                      loading={loading} // Show loading indicator
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Client COA"
-                          variant="outlined"
-                          error={!!fieldErrors[`coa-${index}`]}
-                          helperText={fieldErrors[`coa-${index}`] || ''}
-                        />
-                      )}
-                    />
-                  </FormControl>
-                </div>
-                {/* <div className="col-md-3 mb-3">
-                  <FormControl fullWidth variant="filled">
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth variant="filled">
+                <Autocomplete
+                  options={allClientAccountCode}
+                  getOptionLabel={(option) => option ? option.clientAccountCode : ''}
+                  value={allClientAccountCode.find((item) => item.clientAccountCode === formData.clientCoaCode)}
+                  onChange={(event, newValue) => {
+                    setFormData({
+                      ...formData,
+                      clientCoa: newValue ? newValue.clientAccountName : '',
+                      clientCoaCode: newValue ? newValue.clientAccountCode : ''
+                    });
+                  }}
+                  size="small"
+                  renderInput={(params) => (
                     <TextField
-                      label="Client COA"
-                      size="small"
-                      required
-                      onChange={(e) => handleInputChange(index, e)}
-                      name="clientCoa"
-                      value={row.clientCoa}
-                      error={!!fieldErrors[`clientCoa-${index}`]}
-                      helperText={fieldErrors[`clientCoa-${index}`] || ''}
-                    />
-                  </FormControl>
-                </div> */}
-
-                <div className="col-md-3 mb-3">
-                  <FormControl fullWidth variant="filled">
-                    <TextField
-                      label="Client COA Code"
-                      size="small"
-                      required
-                      onChange={(e) => handleInputChange(index, e)}
+                      {...params}
+                      label="Account Code"
+                      variant="outlined"
                       name="clientCoaCode"
-                      value={row.clientCoaCode}
-                      error={!!fieldErrors[`clientCoaCode-${index}`]}
-                      helperText={fieldErrors[`clientCoaCode-${index}`] || ''}
+                      error={!!fieldErrors.clientCoaCode}
+                      helperText={fieldErrors.clientCoaCode || ''}
                     />
-                  </FormControl>
-                </div>
+                  )}
+                />
+              </FormControl>
+            </div>
 
-                <div className="col-md-3 mb-3">
-                  <FormControl fullWidth variant="filled">
-                    <Autocomplete
-                      options={allCOA}
-                      getOptionLabel={(option) => (option ? option.accountGroupName : '')}
-                      value={allCOA.find((item) => item.accountGroupName === row.coa) || null}
-                      onChange={(event, newValue) => {
-                        const updatedRows = [...formData.rows];
-                        updatedRows[index].coa = newValue ? newValue.accountGroupName : '';
-                        updatedRows[index].coaCode = newValue ? newValue.accountCode : '';
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth variant="filled">
+                <TextField
+                  label="Account Name"
+                  size="small"
+                  disabled
+                  name="clientAccountName"
+                  value={formData.clientCoa}
+                />
+              </FormControl>
+            </div>
 
-                        const updatedErrors = { ...fieldErrors };
-                        delete updatedErrors[`coa-${index}`];
-
-                        setFormData({ ...formData, rows: updatedRows });
-                        setFieldErrors(updatedErrors);
-                      }}
-                      size="small"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="COA"
-                          variant="outlined"
-                          error={!!fieldErrors[`coa-${index}`]}
-                          helperText={fieldErrors[`coa-${index}`] || ''}
-                        />
-                      )}
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth variant="filled">
+                <Autocomplete
+                  options={allCOA}
+                  getOptionLabel={(option) => (option ? option.accountCode : '')}
+                  value={allCOA.find((item) => item.accountCode === formData.coaCode) || null}
+                  onChange={(event, newValue) => {
+                    setFormData({
+                      ...formData,
+                      coa: newValue ? newValue.accountGroupName : '',
+                      coaCode: newValue ? newValue.accountCode : ''
+                    });
+                  }}
+                  size="small"
+                  renderInput={(params) => ( 
+                    <TextField 
+                      {...params} 
+                      label="COA Code" 
+                      variant="outlined" 
+                      error={!!fieldErrors.coaCode}
+                      helperText={fieldErrors.coaCode || ''}
                     />
-                  </FormControl>
-                </div>
+                  )}
+                />
+              </FormControl>
+            </div>
 
-                <div className="col-md-3 mb-3">
-                  <FormControl fullWidth variant="filled">
-                    <TextField
-                      label="COA Code"
-                      size="small"
-                      required
-                      onChange={(e) => {
-                        handleInputChange(index, e);
+            <div className="col-md-3 mb-3">
+              <FormControl fullWidth variant="filled">
+                <TextField
+                  label="COA Name"
+                  size="small"
+                  disabled
+                  name="coaCode"
+                  value={formData.coa}
+                />
+              </FormControl>
+            </div>
 
-                        const updatedErrors = { ...fieldErrors };
-                        if (e.target.value) {
-                          delete updatedErrors[`coaCode-${index}`];
-                        }
-                        setFieldErrors(updatedErrors);
-                      }}
-                      name="coaCode"
-                      value={row.coaCode}
-                      error={!!fieldErrors[`coaCode-${index}`]}
-                      helperText={fieldErrors[`coaCode-${index}`] || ''}
+            <div className="col-md-3 mb-3">
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.active}
+                      name="active"
+                      onChange={handleInputChange}
+                      sx={{ '& .MuiSvgIcon-root': { color: '#5e35b1' } }}
                     />
-
-                  </FormControl>
-                </div>
-
-              </div>
-            ))}
+                  }
+                  label="Active"
+                />
+              </FormGroup>
+            </div>
           </div>
         ) : (
           <CommonTable columns={columns} data={data} />
@@ -409,3 +327,4 @@ const LedgersMapping = () => {
 };
 
 export default LedgersMapping;
+

@@ -27,6 +27,8 @@ const ClientCOA = () => {
   const [editMode, setEditMode] = useState(false);
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [clientCode, setClientCode] = useState(localStorage.getItem('clientCode'));
+  const [client, setClient] = useState(localStorage.getItem('client'));
+  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -61,7 +63,7 @@ const ClientCOA = () => {
 
   const getAllCCao = async () => {
     try {
-      const result = await apiCalls('get', `/businesscontroller/getAllCCao`);
+      const result = await apiCalls('get', `/businesscontroller/getAllCCao?clientCode=${clientCode}&orgId=${orgId}`);
       if (result) {
         setData(result.paramObjectsMap.cCoaVO.reverse());
       } else {
@@ -116,8 +118,10 @@ const ClientCOA = () => {
         accountCode: formData.accountCode,
         accountName: formData.accountName,
         createdBy: loginUserName,
-        updatedBy: loginUserName,
         currency: 'INR',
+        clientCode: clientCode,
+        clientName: client,
+        orgId: parseInt(orgId)
       };
 
       console.log('DATA TO SAVE', saveData);

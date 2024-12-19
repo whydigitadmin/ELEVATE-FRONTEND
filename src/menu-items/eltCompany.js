@@ -29,13 +29,13 @@ const eltCompany = {
         icon: icons.IconCopyright,
   
         children: [
-          {
-            id: 'eltCompany',
-            title: 'Company',
-            type: 'item',
-            url: '/elevateCompany/eltCompany',
-            icon: icons1.IconSquareRoundedPlus
-          },
+          // {
+          //   id: 'eltCompany',
+          //   title: 'Company',
+          //   type: 'item',
+          //   url: '/elevateCompany/eltCompany',
+          //   icon: icons1.IconSquareRoundedPlus
+          // },
           {
             id: 'clientCompany',
             title: 'Client',

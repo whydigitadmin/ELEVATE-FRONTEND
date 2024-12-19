@@ -24,6 +24,7 @@ const CommonBulkUpload = ({
   finYear,
   month,
   screen,
+  clientName,
   orgId
 }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -61,6 +62,7 @@ const CommonBulkUpload = ({
       formData.append('files', selectedFile);
       formData.append('createdBy', createdBy);
       formData.append('clientCode', clientCode);
+      formData.append('clientName', clientName);
       formData.append('finYear', finYear);
       formData.append('month', month);
       formData.append('orgId', orgId);

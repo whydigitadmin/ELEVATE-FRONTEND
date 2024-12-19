@@ -182,7 +182,7 @@ export const getAllActiveScreens = async () => {
 };
 export const getAllActiveRoles = async (orgId) => {
   try {
-    const response = await apiCalls('get', `auth/allRoles`);
+    const response = await apiCalls('get', `auth/allRoles?orgId=${orgId}`);
     console.log('API Response:', response);
 
     if (response.status === true) {

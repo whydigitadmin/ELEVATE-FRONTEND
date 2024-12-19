@@ -167,7 +167,7 @@ const RolesNew = () => {
 
   const getAllActiveResponsibilities = async () => {
     try {
-      const response = await apiCalls('get', `auth/allActiveResponsibility`);
+      const response = await apiCalls('get', `auth/allActiveResponsibility?orgId=${orgId}`);
       console.log('API Response:', response);
 
       if (response) {
@@ -183,7 +183,7 @@ const RolesNew = () => {
   };
   const getAllRoles = async () => {
     try {
-      const response = await apiCalls('get', `auth/allRoles`);
+      const response = await apiCalls('get', `auth/allRoles?orgId=${orgId}`);
       console.log('API Response:', response);
 
       if (response) {

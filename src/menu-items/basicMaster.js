@@ -27,12 +27,12 @@ const basicMaster = {
         //   type: 'item',
         //   url: '/company/branch'
         // },
-        {
-          id: 'employee',
-          title: 'Employee',
-          type: 'item',
-          url: '/basicMaster/employee'
-        },
+        // {
+        //   id: 'employee',
+        //   title: 'Employee',
+        //   type: 'item',
+        //   url: '/basicMaster/employee'
+        // },
         {
           id: 'country',
           title: 'Country',
@@ -57,24 +57,24 @@ const basicMaster = {
           type: 'item',
           url: '/basicMaster/currency'
         },
-        {
-          id: 'region',
-          title: 'Region',
-          type: 'item',
-          url: '/basicMaster/RegionMaster'
-        },
+        // {
+        //   id: 'region',
+        //   title: 'Region',
+        //   type: 'item',
+        //   url: '/basicMaster/RegionMaster'
+        // },
         {
           id: 'finYear',
           title: 'FinYear',
           type: 'item',
           url: '/basicMaster/finYear'
         },
-        {
-          id: 'roles',
-          title: 'Roles',
-          type: 'item',
-          url: '/basicMaster/roles'
-        }
+        // {
+        //   id: 'roles',
+        //   title: 'Roles',
+        //   type: 'item',
+        //   url: '/basicMaster/roles'
+        // }
       ]
     }
   ]

@@ -346,10 +346,10 @@ const FinanceRoute = {
       path: '/Finance/ContraVoucher',
       element: <ContraVoucher />
     },
-    {
-      path: '/elevateCompany/eltCompany',
-      element: <EltCompany />
-    },
+    // {
+    //   path: '/elevateCompany/eltCompany',
+    //   element: <EltCompany />
+    // },
     {
       path: '/elevateCompany/clientCompany',
       element: <ClientCompany />

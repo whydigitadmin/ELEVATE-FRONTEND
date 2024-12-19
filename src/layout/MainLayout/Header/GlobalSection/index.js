@@ -31,6 +31,7 @@ import { IconWorld } from '@tabler/icons-react';
 import apiCalls from 'apicall';
 import { ToastContainer } from 'react-toastify';
 import { showToast } from 'utils/toast-component';
+import { FormControl } from 'react-bootstrap';
 
 // notification status options
 
@@ -49,6 +50,7 @@ const GlobalSection = () => {
   const [customerValue, setCustomerValue] = useState('');
   // const [warehouseValue, setWarehouseValue] = useState('');
   const [clientValue, setClientValue] = useState('');
+  const [clientNameValue, setClientNameValue] = useState('');
   const [branchValue, setBranchValue] = useState('');
   const [orgId, setOrgId] = useState(parseInt(localStorage.getItem('orgId')));
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
@@ -56,12 +58,16 @@ const GlobalSection = () => {
   const [branchVO, setBranchVO] = useState([]);
   const [finVO, setFinVO] = useState([]);
   const [clientCodeVO, setClienCodetVO] = useState([]);
+  const [clientNameVO, setClientNametVO] = useState([]);
   const [warehouseVO, setWarehouseVO] = useState([]);
   const [customerVO, setCustomerVO] = useState([]);
   const [clientVO, setClientVO] = useState([]);
   const [globalParameter, setGlobalParameter] = useState([]);
   const [branchName, setBranchName] = useState('');
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
+  // const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({});
+  // const [clientName, setClientName] = useState('');
 
   /**
    * anchorRef is used on different componets and specifying one type leads to other components throwing an error
@@ -73,6 +79,7 @@ const GlobalSection = () => {
     getAccessBranch();
     getFinYear();
     getClientCode();
+    // getClientName();
   }, []);
 
   const handleToggle = () => {
@@ -113,7 +120,7 @@ const GlobalSection = () => {
   // getFinYear
   const getFinYear = async () => {
     try {
-      const result = await apiCalls('get', `/commonmaster/getAllAciveFInYear`);
+      const result = await apiCalls('get', `/commonmaster/getAllAciveFInYear?orgId=${orgId}`);
       setFinVO(result.paramObjectsMap.financialYearVOs);
       console.log('Test', result);
     } catch (err) {
@@ -177,7 +184,7 @@ const GlobalSection = () => {
       const globalParameterVO = result.paramObjectsMap.globalParameterVO;
       setGlobalParameter(globalParameterVO);
       // setCustomerValue(globalParameterVO.customer);
-      setClientValue(globalParameterVO.client);
+      setClientNameValue(globalParameterVO.clientName);
       setFinYearValue(globalParameterVO.finYear);
       setClientValue(globalParameterVO.clientCode);
       setMonth(globalParameterVO.month);
@@ -187,7 +194,7 @@ const GlobalSection = () => {
       console.log('Test', result);
 
       localStorage.setItem('customer', globalParameterVO.customer);
-      localStorage.setItem('client', globalParameterVO.client);
+      localStorage.setItem('client', globalParameterVO.clientName);
       localStorage.setItem('finYear', globalParameterVO.finYear);
       localStorage.setItem('clientCode', globalParameterVO.clientCode);
       localStorage.setItem('finYear', globalParameterVO.finYear);
@@ -205,14 +212,18 @@ const GlobalSection = () => {
   };
 
   const handleSubmit = async () => {
+
+    console.log("client", clientNameValue)
+
     const formData = {
       finYear: finYearValue,
       clientCode: clientValue,
+      clientName: clientNameValue,
       month: month,
       userId: userId,
       orgId
     };
-   
+
     try {
       const result = await apiCalls('put', `/GlobalParam/updateCreateGlobalparam`, formData);
       showToast('success', 'Global Parameter updated succesfully');
@@ -240,6 +251,11 @@ const GlobalSection = () => {
   };
   const handleClientCodeChange = (event) => {
     setClientValue(event.target.value);
+  };
+  const handleClientNameChange = (event) => {
+
+    setClientNameValue(event.target.value);
+    console.log(clientNameValue)
   };
   const handleMonthChange = (value) => {
     setMonth(value); // Update state with the selected value
@@ -397,26 +413,84 @@ const GlobalSection = () => {
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
                             <TextField
-                              id="outlined-select-currency-native"
+                              id="outlined-select-client"
                               select
                               fullWidth
-                              label="client"
+                              label="Client"
                               value={clientValue}
-                              onChange={handleClientCodeChange}
+                              onChange={(event) => {
+                                const selectedClientCode = event.target.value; // Get the selected clientCode
+                                setClientValue(selectedClientCode); // Update clientCode state
+
+                                // Find the corresponding clientName
+                                const selectedClient = clientCodeVO.find(
+                                  (client) => client.clientCode === selectedClientCode
+                                );
+                                setClientNameValue(selectedClient?.clientName || ''); // Update clientName state
+                              }}
                               SelectProps={{
-                                native: true
+                                native: true,
                               }}
                               size="small"
                             >
-                              <option value="" disabled></option>
-                              {clientCodeVO?.map((option) => (
+                              {/* Default option */}
+                              <option value="" disabled>
+                                Select a client
+                              </option>
+                              {/* Map through clientCodeVO to populate options */}
+                              {clientCodeVO.map((option) => (
                                 <option key={option.clientCode} value={option.clientCode}>
                                   {option.clientCode}
                                 </option>
                               ))}
                             </TextField>
+
                           </Box>
                         </Grid>
+
+                        <Grid item xs={12}>
+                          <Box sx={{ px: 2, pt: 0.25 }}>
+                            <TextField
+                              id="outlined-select-client-name"
+                              select
+                              fullWidth
+                              disabled
+                              label="Client Name"
+                              value={clientNameValue}
+                              onChange={handleClientNameChange}
+                              SelectProps={{
+                                native: true,
+                              }}
+                              size="small"
+                            >
+                              {clientCodeVO?.map((option) => (
+                                <option key={option.clientName} value={option.clientName}>
+                                  {option.clientName}
+                                </option>
+                              ))}
+                            </TextField>
+                          </Box>
+                        </Grid>
+
+
+                        {/* <Grid item xs={12}>
+                          <Box sx={{ px: 2, pt: 0.25 }}>
+                            <FormControl fullWidth variant="filled">
+                              <TextField
+                                id="clientName"
+                                label="Client Name"
+                                size="small"
+                                required
+                                disabled
+                                inputProps={{ maxLength: 30 }}
+                                // onChange={handleClientCodeChange}
+                                name="clientName"
+                                value={clientName} // Ensure this is defined
+                              />
+                            </FormControl>
+                          </Box>
+                        </Grid> */}
+
                         {/* 
                         <Grid item xs={12}>
                           <Box sx={{ px: 2, pt: 0.25 }}>
@@ -507,7 +581,7 @@ const GlobalSection = () => {
             </Paper>
           </Transitions>
         )}
-      </Popper>
+      </Popper >
       <ToastContainer />
     </>
   );

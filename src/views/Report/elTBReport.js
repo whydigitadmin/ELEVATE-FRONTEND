@@ -149,17 +149,7 @@ const ElTBReport = () => {
           }}
         >
           {/* Left-aligned title */}
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 'bold',
-              color: '#333333',
-              textTransform: 'uppercase',
-              letterSpacing: '1px'
-            }}
-          >
-            EL TB Report
-          </Typography>
+          
 
           {uploadOpen && (
             <CommonBulkUpload
@@ -258,7 +248,7 @@ const ElTBReport = () => {
                             <Edit />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete">
+                        {/* <Tooltip title="Delete">
                           <IconButton
                             color="error"
                             onClick={() => handleDeleteRow(row.id)}
@@ -266,7 +256,7 @@ const ElTBReport = () => {
                           >
                             <Delete />
                           </IconButton>
-                        </Tooltip>
+                        </Tooltip> */}
                       </>
                     )}
                   </TableCell>

@@ -22,10 +22,14 @@ const ClientCompany = () => {
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [editId, setEditId] = useState('');
   const [allcompanyCode, setAllcompanyCode] = useState([]);
+  const [empList, setEmpList] = useState([]);
   const [formData, setFormData] = useState({
-    companyCode: '',
     clientCode: '',
     clientName: '',
+    bussinessType: '',
+    turnOver: '',
+    levelOfService: '',
+    employeeName: '',
     email: '',
     phone: '',
     webSite: '',
@@ -36,6 +40,10 @@ const ClientCompany = () => {
     companyCode: '',
     clientCode: '',
     clientName: '',
+    bussinessType: '',
+    turnOver: '',
+    levelOfService: '',
+    employeeName: '',
     email: '',
     phone: '',
     webSite: '',
@@ -50,6 +58,10 @@ const ClientCompany = () => {
       header: 'Client Name',
       size: 140
     },
+    { accessorKey: 'bussinessType', header: 'Bussiness Type', size: 140 },
+    { accessorKey: 'turnOver', header: 'Turn Over', size: 140 },
+    { accessorKey: 'levelOfService', header: 'Level Of Service', size: 140 },
+    { accessorKey: 'employeeName', header: 'Repersentative Person', size: 140 },
     { accessorKey: 'active', header: 'Active', size: 140 }
   ];
 
@@ -57,8 +69,25 @@ const ClientCompany = () => {
 
   useEffect(() => {
     getAllClientCompany();
-    getAllcompanyCode();
+    // getAllcompanyCode();
+    getAllRepName();
   }, []);
+
+  const getAllRepName = async () => {
+    try {
+      const response = await apiCalls('get', `/companycontroller/getAllCompanyEmployeeByOrgId?orgId=${orgId}`);
+      console.log('API Response:', response);
+
+      if (response.status === true) {
+        setEmpList(response.paramObjectsMap.companyEmployeeVO);
+      } else {
+        console.error('API Error:', response);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
   const getAllClientCompany = async () => {
     try {
       const response = await apiCalls('get', `clientcompanycontroller/getClientCompanyByOrgId?orgId=${orgId}`);
@@ -90,6 +119,10 @@ const ClientCompany = () => {
           companyCode: particularClientCompany.companyCode,
           clientCode: particularClientCompany.clientCode,
           clientName: particularClientCompany.clientName,
+          bussinessType: particularClientCompany.bussinessType,
+          turnOver: particularClientCompany.turnOver,
+          levelOfService: particularClientCompany.levelOfService,
+          employeeName: particularClientCompany.employeeName,
           email: particularClientCompany.email,
           phone: particularClientCompany.phone,
           webSite: particularClientCompany.webSite,
@@ -103,27 +136,22 @@ const ClientCompany = () => {
     }
   };
 
-  const getAllcompanyCode = async () => {
-    try {
-      const response = await apiCalls('get', `companycontroller/getAllEltCompany`);
-      console.log('API Response of Company Code:', response);
+  const handleSelectChange = (e) => {
+    const value = e.target.value;
+    console.log('Selected employeeName value:', value);
 
-      if (response.status === true) {
-        const activeCompanies = response.paramObjectsMap.eltCompanyVOs
-          .filter((row) => row.active === 'Active')
-          .map(({ id, companyCode }) => ({
-            id,
-            // countryName: companyName,
-            companyCode: companyCode
-          }));
-        setAllcompanyCode(activeCompanies);
+    const selectedEmp = empList.find((emp) => emp.employeeName === value);
 
-        console.log('Filtered Active Companies:', activeCompanies);
-      } else {
-        console.error('API Error:', response);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    if (selectedEmp) {
+      console.log('Selected Employee:', selectedEmp);
+      setFormData((prevData) => ({
+        ...prevData,
+        employeeName: selectedEmp.employeeName,
+        // employeeCode: selectedEmp.employeeCode,
+        email: selectedEmp.email,
+      }));
+    } else {
+      console.log('No employee found with the given name:', value);
     }
   };
 
@@ -185,6 +213,10 @@ const ClientCompany = () => {
       companyCode: '',
       clientCode: '',
       clientName: '',
+      bussinessType: '',
+      turnOver: '',
+      levelOfService: '',
+      employeeName: '',
       email: '',
       phone: '',
       webSite: '',
@@ -194,6 +226,10 @@ const ClientCompany = () => {
       companyCode: '',
       clientCode: '',
       clientName: '',
+      bussinessType: '',
+      turnOver: '',
+      levelOfService: '',
+      employeeName: '',
       email: '',
       webSite: '',
       phone: ''
@@ -205,20 +241,23 @@ const ClientCompany = () => {
     const errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!formData.companyCode) {
-      errors.companyCode = 'Company Code is required';
-    }
     if (!formData.clientCode) {
       errors.clientCode = 'Client Code is required';
     }
     if (!formData.clientName) {
       errors.clientName = 'Client Name is required';
     }
-    if (!formData.webSite) {
-      errors.webSite = 'Website is required';
+    if (!formData.bussinessType) {
+      errors.bussinessType = 'Bussiness Name is required';
     }
-    if (!formData.phone) {
-      errors.phone = 'Phone is required';
+    if (!formData.turnOver) {
+      errors.turnOver = 'Turn Over is required';
+    }
+    if (!formData.levelOfService) {
+      errors.levelOfService = 'Level Of Service is required';
+    }
+    if (!formData.employeeName) {
+      errors.employeeName = 'Repersentative person is required';
     }
     if (!formData.email) {
       errors.email = 'Email ID is required';
@@ -235,6 +274,10 @@ const ClientCompany = () => {
         companyCode: formData.companyCode,
         clientCode: formData.clientCode,
         clientName: formData.clientName,
+        bussinessType: formData.bussinessType,
+        turnOver: formData.turnOver,
+        levelOfService: formData.levelOfService,
+        employeeName: formData.employeeName,
         createdBy: loginUserName,
         email: formData.email,
         // password: encryptPassword('Wds@2022'),
@@ -250,31 +293,14 @@ const ClientCompany = () => {
           console.log('Response:', response);
           showToast('success', editId ? 'Client Company Updated Successfully' : 'Client Company Created successfully');
           getAllClientCompany();
+          getAllRepName();
           handleClear();
           setIsLoading(false);
         } else {
           showToast('error', response.paramObjectsMap.message || 'Client Company creation failed');
         }
       } catch (error) {
-        // try {
-        //   // const method = editId ? 'put' : 'post';
-        //   // const url = editId ? '/clientcompanycontroller/updateCreateClientCompany' : '/clientcompanycontroller/updateCreateClientCompany';
-
-        //   // const response = await apiCalls(method, url, saveData);
-        //   // const response = await apiCalls('put',  `clientcompanycontroller/updateCreateClientCompany', saveFormData);
-
-        //   if (response.status === true) {
-        //     console.log('Response:', response);
-        //     showToast('success', editId ? 'Client Company Updated Successfully' : 'Client Company created successfully');
-
-        //     handleClear();
-        //     getAllClientCompany();
-        //     setIsLoading(false);
-        //   } else {
-        //     showToast('error', response.paramObjectsMap.message || 'Client Company creation failed');
-        //     setIsLoading(false);
-        //   }
-        // }
+        
         console.error('Error:', error);
         showToast('error', 'Client Company creation failed');
 
@@ -306,14 +332,14 @@ const ClientCompany = () => {
               data={listViewData}
               columns={listViewColumns}
               // editCallback={editEmployee}
-              blockEdit={true} // DISAPLE THE MODAL IF TRUE
+              blockEdit={true}
               toEdit={getClientCompanyById}
             />
           </div>
         ) : (
           <>
             <div className="row">
-              <div className="col-md-3 mb-3">
+              {/* <div className="col-md-3 mb-3">
                 <Autocomplete
                   options={allcompanyCode}
                   getOptionLabel={(option) => option.companyCode || ''}
@@ -334,7 +360,7 @@ const ClientCompany = () => {
                     />
                   )}
                 />
-              </div>
+              </div> */}
               <div className="col-md-3 mb-3">
                 <TextField
                   label="Code"
@@ -364,6 +390,70 @@ const ClientCompany = () => {
               </div>
               <div className="col-md-3 mb-3">
                 <TextField
+                  label="Bussiness Type"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  name="bussinessType"
+                  value={formData.bussinessType}
+                  onChange={handleInputChange}
+                  error={!!fieldErrors.bussinessType}
+                  helperText={fieldErrors.bussinessType}
+                // inputRef={clientNameRef}
+                />
+              </div>
+              <div className="col-md-3 mb-3">
+                <TextField
+                  label="Turn Over"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  name="turnOver"
+                  value={formData.turnOver}
+                  onChange={handleInputChange}
+                  error={!!fieldErrors.turnOver}
+                  helperText={fieldErrors.turnOver}
+                // inputRef={clientNameRef}
+                />
+              </div>
+              <div className="col-md-3 mb-3">
+                <TextField
+                  label="Level of Service"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  name="levelOfService"
+                  value={formData.levelOfService}
+                  onChange={handleInputChange}
+                  error={!!fieldErrors.levelOfService}
+                  helperText={fieldErrors.levelOfService}
+                // inputRef={clientNameRef}
+                />
+              </div>
+
+              <div className="col-md-3 mb-3">
+                <FormControl size="small" variant="outlined" fullWidth error={!!fieldErrors.employeeName}>
+                  <InputLabel id="employeeName-label">Representative Person</InputLabel>
+                  <Select
+                    labelId="employeeName-label"
+                    label="Representative Person"
+                    value={formData.employeeName || ''} // Ensure a fallback value is provided
+                    onChange={handleSelectChange}
+                    name="employeeName"
+                  >
+                    {empList.length > 0 &&
+                      empList.map((bussiness, index) => (
+                        <MenuItem key={index} value={bussiness.employeeName}>
+                          {bussiness.employeeName} {/* Display employee name */}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                  {fieldErrors.employeeName && <FormHelperText>{fieldErrors.employeeName}</FormHelperText>}
+                </FormControl>
+              </div>
+              
+              <div className="col-md-3 mb-3">
+                <TextField
                   label="Email"
                   variant="outlined"
                   size="small"
@@ -384,8 +474,6 @@ const ClientCompany = () => {
                   name="webSite"
                   value={formData.webSite}
                   onChange={handleInputChange}
-                  error={!!fieldErrors.webSite}
-                  helperText={fieldErrors.webSite}
                 />
               </div>
               <div className="col-md-3 mb-3">
@@ -398,8 +486,6 @@ const ClientCompany = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   inputProps={{ maxLength: 10 }}
-                  error={!!fieldErrors.phone}
-                  helperText={fieldErrors.phone}
                 />
               </div>
               <div className="col-md-3 mb-3">
