@@ -50,6 +50,13 @@ const ledgers = {
           url: '/report/salesReport',
           icon: icons1.IconSquareRoundedPlus
         },
+        {
+          id: 'mismatchDb',
+          title: 'Mismatch DB',
+          type: 'item',
+          url: '/report/mismatchDB',
+          icon: icons1.IconSquareRoundedPlus
+        },
       ]
     }
   ]

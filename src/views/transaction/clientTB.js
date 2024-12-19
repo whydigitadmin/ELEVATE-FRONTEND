@@ -15,7 +15,7 @@ import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
 import UploadIcon from '@mui/icons-material/Upload';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
-import SampleFile from '../../assets/sample-files/SampleFormat.xlsx';
+import SampleFile from '../../assets/sample-files/tbsampledata.xlsx';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -311,7 +311,7 @@ const ClientTB = () => {
               dialogTitle="Upload Files"
               uploadText="Upload File"
               downloadText="Sample File"
-              fileName="sampleFile.xlsx"
+              fileName="ClientTbsampledata.xlsx"
               onSubmit={handleSubmit}
               sampleFileDownload={SampleFile}
               handleFileUpload={handleFileUpload}
@@ -322,7 +322,6 @@ const ClientTB = () => {
               finYear={finYear}
               month={month}
             />
-
           )}
 
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} margin="0 10px 0 10px" />
@@ -338,7 +337,7 @@ const ClientTB = () => {
                     id="tbNo"
                     label="Trail Balance No"
                     size="small"
-                    disabled
+                    // disabled
                     inputProps={{ maxLength: 30 }}
                     onChange={handleInputChange}
                     name="tbNo"
@@ -356,7 +355,7 @@ const ClientTB = () => {
                       label="Date"
                       value={formData.docDate}
                       onChange={(date) => handleDateChange('docDate', date)}
-                      disabled
+                      // disabled
                       slotProps={{
                         textField: { size: 'small', clearable: true }
                       }}
@@ -373,7 +372,7 @@ const ClientTB = () => {
                     label="Total Credit Amount"
                     size="small"
                     placeholder=''
-                    disabled
+                    // disabled
                     inputProps={{ maxLength: 30 }}
                     onChange={handleInputChange}
                     name="totalCreditAmount"
@@ -389,7 +388,7 @@ const ClientTB = () => {
                     id="totalDebitAmount"
                     label="Total Debit Amount"
                     size="small"
-                    disabled
+                    // disabled
                     inputProps={{ maxLength: 30 }}
                     onChange={handleInputChange}
                     name="totalDebitAmount"

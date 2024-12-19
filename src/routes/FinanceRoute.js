@@ -7,6 +7,7 @@ import DocumentTypeMaster from 'views/Finance/DocumentType/documentType';
 import DocumentTypeMappingMaster from 'views/Finance/DocumentType/documentTypeMapping';
 import ReconcileCash from 'views/Finance/Reconcile/ReconcileCash';
 import ReconcileCorp from 'views/Finance/Reconcile/ReconcileCorp';
+// import MismatchDB from 'views/Report/misMatchTB';
 // import ElDemoReport from 'views/demoReport/elDemoReport';
 // import CoA from 'views/Ledgers/CoA';
 // import CreateClient from 'views/basicMaster/CreateClient';
@@ -83,6 +84,7 @@ const CoA = Loadable(lazy(() => import('views/Ledgers/CoA')));
 const ClientCOA = Loadable(lazy(() => import('views/Ledgers/ClientCOA')));
 const LedgersMapping = Loadable(lazy(() => import('views/Ledgers/ledgersMapping')));
 const SalesReport = Loadable(lazy(() => import('views/Report/salesReport')));
+const MismatchDB = Loadable(lazy(() => import('views/Report/misMatchTB')));
 const CLientTBReport = Loadable(lazy(() => import('views/Report/clientTBReport')));
 const ElTBReport = Loadable(lazy(() => import('views/Report/elTBReport')));
 const ClientTB = Loadable(lazy(() => import('views/transaction/clientTB')));
@@ -384,6 +386,10 @@ const FinanceRoute = {
     {
       path: '/report/salesReport',
       element: <SalesReport />
+    },
+    {
+      path: '/report/mismatchDB',
+      element: <MismatchDB />
     },
     {
       path: '/report/clientTBReport',
