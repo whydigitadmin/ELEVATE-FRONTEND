@@ -1,27 +1,27 @@
-import PropTypes from 'prop-types';
-
-// material-ui
 import { Avatar, Box, ButtonBase } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import PropTypes from 'prop-types';
+import { useLocation } from 'react-router-dom'; // Import useLocation hook
 
-// project imports
 import LogoSection from '../LogoSection';
 import NotificationSection from './NotificationSection';
 import ProfileSection from './ProfileSection';
 import SearchSection from './SearchSection';
 
-// assets
 import { IconMenu2 } from '@tabler/icons-react';
 import GlobalSection from './GlobalSection';
 
-// ==============================|| MAIN NAVBAR / HEADER ||============================== //
-
 const Header = ({ handleLeftDrawerToggle }) => {
   const theme = useTheme();
+  const location = useLocation(); // Get the current location
+
+  // Check if the current path matches the condition to hide the Header
+  if (location.pathname === '/Client/ClientReport') {
+    return null; // Do not render Header
+  }
 
   return (
     <>
-      {/* logo & toggler button */}
       <Box
         sx={{
           width: 228,
@@ -55,28 +55,8 @@ const Header = ({ handleLeftDrawerToggle }) => {
           </Avatar>
         </ButtonBase>
       </Box>
-
-      {/* header search */}
       <SearchSection />
       <Box sx={{ flexGrow: 1 }} />
-      {/* Remove or adjust this Box component to reduce space */}
-      {/* <Box sx={{ flexGrow: 1 }} /> */}
-
-      {/* notification & profile */}
-      {/* <div className="mt-2" style={{ display: 'flex', alignItems: 'center' }}>
-        <span
-          style={{
-            height: '11px',
-            width: '11px',
-            backgroundColor: '#25BE2B',
-            borderRadius: '50%',
-            display: 'inline-block',
-            marginRight: '8px',
-            marginBottom: '8px'
-          }}
-        ></span>
-        <h6>elEVAte</h6>
-      </div> */}
       <NotificationSection />
       <GlobalSection />
       <ProfileSection />

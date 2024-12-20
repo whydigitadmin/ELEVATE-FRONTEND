@@ -73,7 +73,7 @@ const CommonBulkUpload = ({
         };
         const response = await apiCalls('post', apiUrl, formData, {}, headers);
 
-        if (response.status === true) {
+        if (response.paramObjectsMap.status === true) {
           const message = response.paramObjectsMap.message || 'Upload successful';
           const uploadsCount = response.paramObjectsMap.successfulUploads || 0;
           setSuccessMessage(message);
@@ -81,6 +81,8 @@ const CommonBulkUpload = ({
           setSuccessDialogOpen(true);
           setSelectedFile(null);
           showToast('success', message);
+        } else if (response.paramObjectsMap.status === false) {
+          showToast('error', response.paramObjectsMap.uploadResult.failureReasons[0] || 'Bulk Uploaded failed');
         } else {
           showToast('error', response.paramObjectsMap.errorMessage || `${screen} Bulk Uploaded failed`);
           showToast('error', response.paramObjectsMap.errorMessage || 'Bulk Uploaded failed');

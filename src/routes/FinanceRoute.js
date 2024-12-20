@@ -89,10 +89,7 @@ const CLientTBReport = Loadable(lazy(() => import('views/Report/clientTBReport')
 const ElTBReport = Loadable(lazy(() => import('views/Report/elTBReport')));
 const ClientTB = Loadable(lazy(() => import('views/transaction/clientTB')));
 
-
-
-
-
+const ClientReport = Loadable(lazy(() => import('views/Client/ClientReport')));
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
@@ -363,7 +360,8 @@ const FinanceRoute = {
     {
       path: '/elevateCompany/createCompanyEmployee',
       element: <CreateCompanyEmployee />
-    }, {
+    },
+    {
       path: '/elevateCompany/admin/user-creation/userCreation',
       element: <UserCreation />
     },
@@ -398,6 +396,10 @@ const FinanceRoute = {
     {
       path: '/report/elTBReport',
       element: <ElTBReport />
+    },
+    {
+      path: '/Client/ClientReport',
+      element: <ClientReport />
     }
   ]
 };

@@ -1,7 +1,5 @@
 // assets
-import { IconKey } from '@tabler/icons-react';
-import { IconCopyright } from '@tabler/icons-react';
-import { IconSettingsPlus, IconSquareRoundedPlus } from '@tabler/icons-react';
+import { IconCopyright, IconSettingsPlus, IconSquareRoundedPlus } from '@tabler/icons-react';
 
 // constant
 const icons = {
@@ -67,6 +65,18 @@ const companySetup = {
           type: 'item',
           url: '/companysetup/branch',
           icon: icons1.IconSquareRoundedPlus
+        },
+        {
+          id: 'documentType',
+          title: 'Document Type',
+          type: 'item',
+          url: '/finance/DocumentType/documentType'
+        },
+        {
+          id: 'documentTypeMaping',
+          title: 'Document Type Mapping',
+          type: 'item',
+          url: '/finance/DocumentType/documentTypeMapping'
         }
       ]
     }
