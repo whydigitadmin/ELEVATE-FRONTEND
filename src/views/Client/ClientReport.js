@@ -1,6 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, Typography } from '@mui/material';
 import { useState } from 'react';
-import Confetti from 'react-confetti';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import HeaderClient from './ClientHeader';
 import './clientReport.css';
@@ -33,25 +32,25 @@ const clientReportData = [
 
 const ClientReport = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(true);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const { width, height } = useWindowSize();
 
   const handlePopupClose = () => {
     setIsPopupOpen(false);
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false);
-    }, 3000); // Hide confetti after 3 seconds
   };
 
   const handleLogout = () => {
     console.log('Logged out');
   };
 
-  return (
-    <>
-      {showConfetti && <Confetti width={width} height={height} />}
+  const toggleCallBack = () => {
+    setIsDarkMode((prevMode) => !prevMode);
 
+    console.log('Toggle', isDarkMode);
+  };
+
+  return (
+    <div style={{ backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
       <Dialog
         open={isPopupOpen}
         onClose={handlePopupClose}
@@ -107,7 +106,7 @@ const ClientReport = () => {
       </Dialog>
 
       <div style={{ marginBottom: '40px' }}>
-        <HeaderClient username={'PRIME GOLD INTERNATIONAL LIMITED'} onLogout={handleLogout} />
+        <HeaderClient username={'PRIME GOLD INTERNATIONAL LIMITED'} onLogout={handleLogout} onToggleCallBack={toggleCallBack} />
       </div>
       <div className="ag-format-container">
         <div className="ag-courses_box">
@@ -117,35 +116,28 @@ const ClientReport = () => {
                 <div className="ag-courses-item_bg"></div>
                 <div className="ag-courses-item_title">{item.name}</div>
                 <div className="ag-courses-item_date-box">
-                  Code : &nbsp;
-                  <span className="ag-courses-item_date">{item.code}</span>
-                </div>
-                <div
-                  className="mt-2 ag-courses-item_date-box"
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    color: '#fff',
-                    marginLeft: '20%',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <img
-                    src={'https://cdn-icons-png.flaticon.com/128/10007/10007105.png'}
-                    width={20}
-                    height={20}
-                    alt="Download Icon"
-                    style={{ marginRight: '4px' }}
-                  />
-                  <span style={{ fontWeight: '500' }}>Download</span>
+                  <span className="ag-courses-item_date">
+                    {item.code}
+                    &nbsp;
+                    <img
+                      src={'https://cdn-icons-png.flaticon.com/128/4208/4208397.png'}
+                      width={27}
+                      height={27}
+                      alt="Download Icon"
+                      style={{
+                        marginLeft: '8px',
+                        filter: 'brightness(0) invert(1)', // Converts to white
+                        marginBottom: '8px'
+                      }}
+                    />
+                  </span>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

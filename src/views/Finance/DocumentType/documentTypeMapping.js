@@ -393,12 +393,12 @@ export const DocumentTypeMappingMaster = () => {
                               <th className="px-2 py-2 text-white text-center" style={{ width: '250px' }}>
                                 Screen Code
                               </th>
-                              {/* <th className="px-2 py-2 text-white text-center" style={{ width: '200px' }}>
+                              <th className="px-2 py-2 text-white text-center" style={{ width: '200px' }}>
                                 Client
                               </th>
                               <th className="px-2 py-2 text-white text-center" style={{ width: '200px' }}>
                                 Client Code
-                              </th> */}
+                              </th>
                               <th className="px-2 py-2 text-white text-center" style={{ width: '200px' }}>
                                 Doc Code
                               </th>
@@ -420,12 +420,12 @@ export const DocumentTypeMappingMaster = () => {
                                   <td className="text-center">
                                     <div className="pt-2">{row.screenCode}</div>
                                   </td>
-                                  {/* <td className="text-center">
+                                  <td className="text-center">
                                     <div className="pt-2">{row.client}</div>
                                   </td>
                                   <td className="text-center">
                                     <div className="pt-2">{row.clientCode}</div>
-                                  </td> */}
+                                  </td>
                                   <td className="text-center">
                                     <div className="pt-2">{row.docCode}</div>
                                   </td>

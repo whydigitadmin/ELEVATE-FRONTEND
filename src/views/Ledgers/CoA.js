@@ -2,6 +2,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
 import { Autocomplete } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
@@ -14,10 +15,9 @@ import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
+import CommonBulkUpload from 'utils/CommonBulkUpload';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
-import UploadIcon from '@mui/icons-material/Upload';
-import CommonBulkUpload from 'utils/CommonBulkUpload';
 import SampleFile from '../../assets/sample-files/SampleFormat.xlsx';
 
 const CoA = () => {
@@ -61,7 +61,6 @@ const CoA = () => {
     getGroup();
     getAllGroupName();
   }, []);
-
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -141,6 +140,7 @@ const CoA = () => {
   const handleSubmit = async () => {
     console.log('Submit clicked');
     handleBulkUploadClose();
+    getGroup();
   };
 
   const handleSave = async () => {
@@ -291,7 +291,6 @@ const CoA = () => {
     }
   };
 
-
   return (
     <>
       <div>
@@ -302,7 +301,7 @@ const CoA = () => {
           <ActionButton title="Search" icon={SearchIcon} onClick={() => console.log('Search Clicked')} />
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
-          <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
+          <ActionButton icon={UploadIcon} title="Upload" onClick={handleBulkUploadOpen} />
 
           {uploadOpen && (
             <CommonBulkUpload
@@ -311,17 +310,17 @@ const CoA = () => {
               dialogTitle="Upload Files"
               uploadText="Upload File"
               downloadText="Sample File"
-              fileName="sampleFile.xlsx"
+              fileName="sampleFile-COA.xlsx"
               onSubmit={handleSubmit}
               sampleFileDownload={SampleFile}
               handleFileUpload={handleFileUpload}
               apiUrl="businesscontroller/excelUploadForCoa"
               screen="PutAway"
               loginUser={loginUserName}
+              orgId={orgId}
               // createdBy={loginUserName}
-            // loginUser={localStorage.getItem('loginUserName')} // Pass the loginUserName here
+              // loginUser={localStorage.getItem('loginUserName')} // Pass the loginUserName here
             />
-
           )}
 
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} margin="0 10px 0 10px" />
@@ -331,10 +330,7 @@ const CoA = () => {
           <div className="row d-flex ">
             <div className="col-md-3 mb-3">
               <Autocomplete
-                options={[
-                  { type: 'Group' },
-                  { type: 'Account' },
-                ]}
+                options={[{ type: 'Group' }, { type: 'Account' }]}
                 getOptionLabel={(option) => option.type || ''}
                 value={formData.type ? { type: formData.type } : null}
                 onChange={(event, newValue) => {
@@ -363,11 +359,7 @@ const CoA = () => {
               <Autocomplete
                 options={allGroupName}
                 getOptionLabel={(option) => option.group || ''}
-                value={
-                  formData.groupName
-                    ? allGroupName.find((item) => item.group === formData.groupName)
-                    : null
-                }
+                value={formData.groupName ? allGroupName.find((item) => item.group === formData.groupName) : null}
                 onChange={(event, newValue) => {
                   const value = newValue ? newValue.group : '';
                   setFormData((prev) => ({ ...prev, groupName: value }));
@@ -424,10 +416,7 @@ const CoA = () => {
 
             <div className="col-md-3 mb-3">
               <Autocomplete
-                options={[
-                  { type: 'Db' },
-                  { type: 'Cr' },
-                ]}
+                options={[{ type: 'Db' }, { type: 'Cr' }]}
                 getOptionLabel={(option) => option.type || ''}
                 value={formData.natureOfAccount ? { type: formData.natureOfAccount } : null}
                 onChange={(event, newValue) => {
@@ -523,4 +512,3 @@ const CoA = () => {
 };
 
 export default CoA;
-

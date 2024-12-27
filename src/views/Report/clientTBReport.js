@@ -25,6 +25,7 @@ const ClientTBReport = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
 
   useEffect(() => {
     getMapData();
@@ -32,7 +33,7 @@ const ClientTBReport = () => {
 
   const getMapData = async () => {
     try {
-      const result = await apiCalls('get', `/businesscontroller/getCOAMap`);
+      const result = await apiCalls('get', `/businesscontroller/getCOAMap?orgId=${orgId}`);
       if (result?.paramObjectsMap?.COA) {
         const transformedData = transformCOAData(result.paramObjectsMap.COA);
         setTreeData(transformedData);

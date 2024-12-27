@@ -1,29 +1,32 @@
-import React from 'react'
+import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
+import GridOnIcon from '@mui/icons-material/GridOn';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
+import { Button, Checkbox, Modal, Paper } from '@mui/material';
+import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import apiCalls from 'apicall';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
+import CommonBulkUpload from 'utils/CommonBulkUpload';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
-import UploadIcon from '@mui/icons-material/Upload';
-import CommonBulkUpload from 'utils/CommonBulkUpload';
 import SampleFile from '../../assets/sample-files/tbsampledata.xlsx';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import AddIcon from '@mui/icons-material/Add';
-import GridOnIcon from '@mui/icons-material/GridOn';
+
+import { Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 
 const ClientTB = () => {
   const [data, setData] = useState([]);
@@ -31,10 +34,13 @@ const ClientTB = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginUserName, setLoginUserName] = useState(localStorage.getItem('userName'));
   const [clientCode, setClientCode] = useState(localStorage.getItem('clientCode'));
+  const [client, setClient] = useState(localStorage.getItem('client'));
+  const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
   const [finYear, setFinYear] = useState(localStorage.getItem('finYear'));
   const [month, setMonth] = useState(localStorage.getItem('month'));
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [listViewData, setListViewData] = useState([]);
   const [value, setValue] = useState(0);
   const [formData, setFormData] = useState({
     tbNo: '',
@@ -42,6 +48,11 @@ const ClientTB = () => {
     totalCreditAmount: '',
     totalDebitAmount: ''
   });
+
+  const [popupData, setPopupData] = useState([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState({
     tbNo: false,
@@ -53,18 +64,61 @@ const ClientTB = () => {
     {
       accountCode: '',
       accountName: '',
+      coaCode: '',
+      coa: '',
       credit: '',
       debit: '',
+      openingBalance: '',
+      closingBalance: ''
     }
   ]);
   const [tbErrors, setTbErrors] = useState([
     {
       accountCode: '',
       accountName: '',
+      coaCode: '',
+      coa: '',
       credit: '',
       debit: '',
+      openingBalance: '',
+      closingBalance: ''
     }
   ]);
+
+  useEffect(() => {
+    getDocId();
+    getAllTB();
+  }, []);
+
+  const getDocId = async () => {
+    try {
+      const result = await apiCalls('get', `/trailBalanceController/getTBDocId?orgId=${orgId}&finYear=${finYear}&clientCode=${clientCode}`);
+      if (result) {
+        setFormData((prevData) => ({
+          ...prevData,
+          tbNo: result.paramObjectsMap.tbDocId,
+          docDate: dayjs()
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+    }
+  };
+
+  const getAllTB = async () => {
+    try {
+      const result = await apiCalls(
+        'get',
+        `/trailBalanceController/getAllTrialBalanceByClient?orgId=${orgId}&finYear=${finYear}&client=${client}`
+      );
+      if (result) {
+        setListViewData(result.paramObjectsMap.tbHeaderVO);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -107,24 +161,14 @@ const ClientTB = () => {
     let errors = {};
     let tbValidationErrors = tbData.map((row) => ({
       accountCode: row.accountCode ? '' : 'Account Code is required',
-      accountName: row.accountName ? '' : 'Account Name is required',
-      debit: row.debit ? '' : 'Debit is required',
-      credit: row.credit ? '' : 'Credit is required'
+      accountName: row.accountName ? '' : 'Account Name is required'
     }));
 
-    if (!formData.totalCreditAmount) {
-      errors.totalCreditAmount = 'Total Credit Amount is required';
-    }
-    if (!formData.totalDebitAmount) {
-      errors.totalDebitAmount = 'Total Debit Amount is required';
-    }
     if (!formData.tbNo) {
       errors.tbNo = 'Trail Balance No is required';
     }
 
-    const hasTbErrors = tbValidationErrors.some(
-      (rowErrors) => Object.values(rowErrors).some((error) => error)
-    );
+    const hasTbErrors = tbValidationErrors.some((rowErrors) => Object.values(rowErrors).some((error) => error));
 
     setFieldErrors(errors);
     setTbErrors(tbValidationErrors);
@@ -136,6 +180,18 @@ const ClientTB = () => {
 
     setIsLoading(true);
 
+    // Map tbData to the expected structure
+    const mappedTbData = tbData.map((row) => ({
+      clientAccountCode: row.accountCode,
+      clientAccountName: row.accountName,
+      debit: parseFloat(row.debit) || 0,
+      credit: parseFloat(row.credit) || 0,
+      openingBalance: parseFloat(row.openingBalance) || 0,
+      closingBalance: parseFloat(row.closingBalance) || 0,
+      coa: row.coa || '',
+      coaCode: row.coaCode || ''
+    }));
+
     const saveData = {
       ...(editId && { id: editId }),
       active: formData.active,
@@ -143,13 +199,19 @@ const ClientTB = () => {
       totalDebitAmount: formData.totalDebitAmount,
       tbNo: formData.tbNo,
       createdBy: loginUserName,
-      updatedBy: loginUserName
+      updatedBy: loginUserName,
+      client: client,
+      clientCode: clientCode,
+      tbMonth: month,
+      orgId: orgId,
+      finYear: finYear,
+      tbDetailsDTO: mappedTbData // Include the mapped tbData
     };
 
     console.log('DATA TO SAVE', saveData);
 
     try {
-      const response = await apiCalls('put', `businesscontroller/createUpdateCoa`, saveData);
+      const response = await apiCalls('put', `/trailBalanceController/createUpdateTrailBalance`, saveData);
       if (response.status === true) {
         showToast('success', editId ? 'COA updated successfully' : 'COA created successfully');
         handleClear();
@@ -163,25 +225,49 @@ const ClientTB = () => {
     }
   };
 
-
   const handleClear = () => {
     setFieldErrors({
       tbNo: '',
       totalCreditAmount: '',
-      totalDebitAmount: '',
+      totalDebitAmount: ''
     });
-  
+
+    setTbData([
+      {
+        accountCode: '',
+        accountName: '',
+        coaCode: '',
+        coa: '',
+        credit: '',
+        debit: '',
+        openingBalance: '',
+        closingBalance: ''
+      }
+    ]);
+    setFormData([
+      {
+        tbNo: '',
+        docDate: dayjs(),
+        totalCreditAmount: '',
+        totalDebitAmount: ''
+      }
+    ]);
+
+    getDocId();
+
     setTbErrors(
       tbData.map(() => ({
         accountCode: '',
         accountName: '',
         debit: '',
         credit: '',
+        coaCode: '',
+        coa: '',
+        openingBalance: '',
+        closingBalance: ''
       }))
     );
   };
-  
-
 
   const handleListView = () => {
     setShowForm(!showForm);
@@ -195,11 +281,9 @@ const ClientTB = () => {
   };
 
   const columns = [
-    { accessorKey: 'tbNo', header: 'Trail Balance No', size: 140 },
+    { accessorKey: 'docId', header: 'Trial Balance No', size: 140 },
     { accessorKey: 'docDate', header: 'Date', size: 140 },
-    { accessorKey: 'totalCreditAmount', header: 'Total Credit Amount', size: 100 },
-    { accessorKey: 'totalDebitAmount', header: 'Total Debit Amount', size: 100 },
-    { accessorKey: 'active', header: 'Active', size: 100 }
+    { accessorKey: 'tbMonth', header: 'TB Month', size: 100 }
   ];
 
   const handleDateChange = (field, date) => {
@@ -213,8 +297,14 @@ const ClientTB = () => {
   };
 
   const handleAddRow = () => {
-    setTbData([...tbData, { accountCode: '', accountName: '', debit: '', credit: '' }]);
-    setTbErrors([...tbErrors, { accountCode: '', accountName: '', debit: '', credit: '' }]);
+    setTbData([
+      ...tbData,
+      { accountCode: '', accountName: '', debit: '', credit: '', coaCode: '', coa: '', openingBalance: '', closingBalance: '' }
+    ]);
+    setTbErrors([
+      ...tbErrors,
+      { accountCode: '', accountName: '', debit: '', credit: '', coaCode: '', coa: '', openingBalance: '', closingBalance: '' }
+    ]);
     if (isLastRowEmpty(tbData)) {
       displayRowError(tbData);
       return;
@@ -225,11 +315,18 @@ const ClientTB = () => {
       accountCode: '',
       accountName: '',
       credit: '',
-      debit: ''
+      debit: '',
+      coaCode: '',
+      coa: '',
+      openingBalance: '',
+      closingBalance: ''
     };
 
     setTbData([...tbData, newRow]);
-    setTbErrors([...tbErrors, { accountCode: '', accountName: '', credit: '', debit: '' }]);
+    setTbErrors([
+      ...tbErrors,
+      { accountCode: '', accountName: '', credit: '', debit: '', coaCode: '', coa: '', openingBalance: '', closingBalance: '' }
+    ]);
   };
 
   const isLastRowEmpty = (data) => {
@@ -250,6 +347,10 @@ const ClientTB = () => {
           accountName: !lastRow.accountName ? 'Account Name is required' : '',
           credit: !lastRow.credit ? 'Credit is required' : '',
           debit: !lastRow.debit ? 'Debit is required' : '',
+          coaCode: !lastRow.coaCode ? 'coaCode is required' : '',
+          coa: !lastRow.coa ? 'coa is requied' : '',
+          openingBalance: !lastRow.openingBalance ? 'opening Balance is required' : '',
+          closingBalance: !lastRow.closingBalance ? 'closing Balance is required' : ''
         };
 
         return newErrors;
@@ -258,39 +359,85 @@ const ClientTB = () => {
   };
 
   const handleFillGrid = async () => {
-    console.log('Editing Exchange Rate:', loginUserName);
-    setIsLoading(true);
-
+    // setIsLoading(true);
     try {
-      const result = await apiCalls('get', `/trailBalanceController/getFillGridForTbExcelUpload?clientCode=${clientCode}&finYear=${finYear}&month=${month}`);
+      const result = await apiCalls(
+        'get',
+        `/trailBalanceController/getFillGridForTbFromExcelUpload?clientCode=${clientCode}&client=${client}&finYear=${finYear}&tbMonth=${month}&orgId=${orgId}`
+      );
 
-      if (result && result.paramObjectsMap && result.paramObjectsMap.excelUploadForTb) {
+      if (result?.paramObjectsMap?.excelUploadForTb) {
         const fillGrid = result.paramObjectsMap.excelUploadForTb;
-
-        console.log('DataToEdit:', fillGrid);
 
         const mappedData = fillGrid.map((grid, index) => ({
           id: index + 1,
-          accountCode: grid.accountCode || '',
-          accountName: grid.accountName || '',
-          credit: grid.credit || '',
-          debit: grid.debit || '',
+          accountCode: grid.clientAccountCode || '',
+          accountName: grid.clientAccountName || '',
+          coaCode: grid.coaCode || '',
+          coa: grid.coa || '',
+          openingBalance: grid.openingBalance,
+          closingBalance: grid.closingBalance,
+          credit: grid.credit,
+          debit: grid.debit
         }));
 
-        setTbData(mappedData);
-
-        setTbErrors(mappedData.map(() => ({})));
-
-        console.log('Mapped Data:', mappedData);
-      } else {
-        console.error('No valid data received from the API');
+        setPopupData(mappedData);
+        setIsPopupOpen(true); // Open popup
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
+
+  const handleSelectAll = (event) => {
+    setIsSelectAllChecked(event.target.checked);
+    setSelectedRows(event.target.checked ? popupData.map((row) => row.id) : []);
+  };
+
+  const handleRowSelection = (rowId) => {
+    setSelectedRows((prevSelected) =>
+      prevSelected.includes(rowId) ? prevSelected.filter((id) => id !== rowId) : [...prevSelected, rowId]
+    );
+  };
+
+  const handleConfirm = () => {
+    const selectedData = popupData.filter((item) => selectedRows.includes(item.id));
+    setTbData(selectedData); // Set selected data in the main state
+    setIsPopupOpen(false); // Close popup
+  };
+
+  const columnss = [
+    {
+      field: 'select',
+      headerName: <Checkbox checked={isSelectAllChecked} onChange={handleSelectAll} color="primary" />,
+      width: 50,
+      renderCell: (params) => (
+        <Checkbox checked={selectedRows.includes(params.row.id)} onChange={() => handleRowSelection(params.row.id)} color="primary" />
+      ),
+      sortable: false,
+      disableColumnMenu: true
+    },
+    { field: 'accountCode', headerName: 'Account Code', width: 140 },
+    { field: 'accountName', headerName: 'Account Name', width: 140 },
+    { field: 'coaCode', headerName: 'COA Code', width: 140 },
+    { field: 'coa', headerName: 'COA', width: 140 },
+    { field: 'openingBalance', headerName: 'Opening Balance', width: 140 },
+    { field: 'closingBalance', headerName: 'Closing Balance', width: 140 },
+    { field: 'credit', headerName: 'Credit', width: 140 },
+    { field: 'debit', headerName: 'Debit', width: 140 }
+  ];
+
+  const handleCheckboxChange = (id) => {
+    setSelectedRows((prevSelected) => (prevSelected.includes(id) ? prevSelected.filter((rowId) => rowId !== id) : [...prevSelected, id]));
+  };
+
+  // const handleConfirm = () => {
+  //   const selectedData = popupData.filter((item) => selectedRows.includes(item.id));
+  //   setTbData(selectedData); // Set selected data in the main state
+  //   setIsPopupOpen(false); // Close popup
+  // };
 
   return (
     <>
@@ -302,7 +449,7 @@ const ClientTB = () => {
           <ActionButton title="Search" icon={SearchIcon} onClick={() => console.log('Search Clicked')} />
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
-          <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
+          <ActionButton icon={UploadIcon} title="Upload" onClick={handleBulkUploadOpen} />
 
           {uploadOpen && (
             <CommonBulkUpload
@@ -319,8 +466,10 @@ const ClientTB = () => {
               screen="PutAway"
               loginUser={loginUserName}
               clientCode={clientCode}
+              clientName={client}
               finYear={finYear}
               month={month}
+              orgId={orgId}
             />
           )}
 
@@ -330,14 +479,13 @@ const ClientTB = () => {
         {showForm ? (
           <>
             <div className="row d-flex ">
-
               <div className="col-md-3 mb-3">
                 <FormControl fullWidth variant="filled">
                   <TextField
                     id="tbNo"
                     label="Trail Balance No"
                     size="small"
-                    // disabled
+                    disabled
                     inputProps={{ maxLength: 30 }}
                     onChange={handleInputChange}
                     name="tbNo"
@@ -355,46 +503,13 @@ const ClientTB = () => {
                       label="Date"
                       value={formData.docDate}
                       onChange={(date) => handleDateChange('docDate', date)}
-                      // disabled
+                      disabled
                       slotProps={{
                         textField: { size: 'small', clearable: true }
                       }}
                       format="DD-MM-YYYY"
                     />
                   </LocalizationProvider>
-                </FormControl>
-              </div>
-
-              <div className="col-md-3 mb-3">
-                <FormControl fullWidth variant="filled">
-                  <TextField
-                    id="totalCreditAmount"
-                    label="Total Credit Amount"
-                    size="small"
-                    placeholder=''
-                    // disabled
-                    inputProps={{ maxLength: 30 }}
-                    onChange={handleInputChange}
-                    name="totalCreditAmount"
-                    value={formData.totalCreditAmount}
-                    helperText={<span style={{ color: 'red' }}>{fieldErrors.totalCreditAmount ? fieldErrors.totalCreditAmount : ''}</span>}
-                  />
-                </FormControl>
-              </div>
-
-              <div className="col-md-3 mb-3">
-                <FormControl fullWidth variant="filled">
-                  <TextField
-                    id="totalDebitAmount"
-                    label="Total Debit Amount"
-                    size="small"
-                    // disabled
-                    inputProps={{ maxLength: 30 }}
-                    onChange={handleInputChange}
-                    name="totalDebitAmount"
-                    value={formData.totalDebitAmount}
-                    helperText={<span style={{ color: 'red' }}>{fieldErrors.totalDebitAmount ? fieldErrors.totalDebitAmount : ''}</span>}
-                  />
                 </FormControl>
               </div>
             </div>
@@ -429,25 +544,26 @@ const ClientTB = () => {
                                   <th className="table-header">S.No</th>
                                   <th className="table-header">Account Code</th>
                                   <th className="table-header">Account Name</th>
+                                  <th className="table-header">COA Code</th>
+                                  <th className="table-header">COA</th>
+                                  <th className="table-header">Op Bal</th>
                                   <th className="table-header">Db</th>
                                   <th className="table-header">Cr</th>
+                                  <th className="table-header">Cl Bal</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {tbData.map((row, index) => (
                                   <tr key={row.id}>
-                                    <td className="text-center">
-                                      {index + 1}
-                                    </td>
+                                    <td className="text-center">{index + 1}</td>
                                     <td className="border px-2 py-2">
                                       <input
                                         type="text"
                                         value={row.accountCode}
+                                        style={{ width: '100px' }}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          setTbData((prev) =>
-                                            prev.map((r, i) => (i === index ? { ...r, accountCode: value } : r))
-                                          );
+                                          setTbData((prev) => prev.map((r, i) => (i === index ? { ...r, accountCode: value } : r)));
                                           setTbErrors((prev) => {
                                             const newErrors = [...prev];
                                             newErrors[index] = {
@@ -460,9 +576,7 @@ const ClientTB = () => {
                                         className={tbErrors[index]?.accountCode ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.accountCode && (
-                                        <div style={{ color: 'red', fontSize: '12px' }}>
-                                          {tbErrors[index].accountCode}
-                                        </div>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].accountCode}</div>
                                       )}
                                     </td>
 
@@ -471,11 +585,10 @@ const ClientTB = () => {
                                       <input
                                         type="text"
                                         value={row.accountName}
+                                        style={{ width: 'auto' }}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          setTbData((prev) =>
-                                            prev.map((r, i) => (i === index ? { ...r, accountName: value } : r))
-                                          );
+                                          setTbData((prev) => prev.map((r, i) => (i === index ? { ...r, accountName: value } : r)));
                                           setTbErrors((prev) => {
                                             const newErrors = [...prev];
                                             newErrors[index] = {
@@ -488,9 +601,86 @@ const ClientTB = () => {
                                         className={tbErrors[index]?.accountName ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.accountName && (
-                                        <div style={{ color: 'red', fontSize: '12px' }}>
-                                          {tbErrors[index].accountName}
-                                        </div>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].accountName}</div>
+                                      )}
+                                    </td>
+
+                                    <td className="border px-2 py-2">
+                                      <input
+                                        type="text"
+                                        value={row.coaCode}
+                                        style={{ width: '100px' }}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          setTbData((prev) => prev.map((r, i) => (i === index ? { ...r, coaCode: value } : r)));
+                                          setTbErrors((prev) => {
+                                            const newErrors = [...prev];
+                                            newErrors[index] = {
+                                              ...newErrors[index],
+                                              coaCode: !value ? 'coaCode is required' : ''
+                                            };
+                                            return newErrors;
+                                          });
+                                        }}
+                                        className={tbErrors[index]?.coaCode ? 'error form-control' : 'form-control'}
+                                      />
+                                      {tbErrors[index]?.coaCode && (
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].coaCode}</div>
+                                      )}
+                                    </td>
+
+                                    <td className="border px-2 py-2">
+                                      <input
+                                        type="text"
+                                        value={row.coa}
+                                        style={{ width: 'auto' }}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          setTbData((prev) => prev.map((r, i) => (i === index ? { ...r, coa: value } : r)));
+                                          setTbErrors((prev) => {
+                                            const newErrors = [...prev];
+                                            newErrors[index] = {
+                                              ...newErrors[index],
+                                              coa: !value ? 'coa is required' : ''
+                                            };
+                                            return newErrors;
+                                          });
+                                        }}
+                                        className={tbErrors[index]?.coa ? 'error form-control' : 'form-control'}
+                                      />
+                                      {tbErrors[index]?.coa && <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].coa}</div>}
+                                    </td>
+
+                                    <td className="border px-2 py-2">
+                                      <input
+                                        type="text"
+                                        value={Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+                                          row.openingBalance || 0
+                                        )}
+                                        style={{ width: '150px' }}
+                                        onChange={(e) => {
+                                          const rawValue = e.target.value.replace(/,/g, ''); // Remove commas for numeric conversion
+                                          const numericValue = parseFloat(rawValue);
+
+                                          if (!isNaN(numericValue)) {
+                                            setTbData((prev) =>
+                                              prev.map((r, i) => (i === index ? { ...r, openingBalance: numericValue } : r))
+                                            );
+
+                                            setTbErrors((prev) => {
+                                              const newErrors = [...prev];
+                                              newErrors[index] = {
+                                                ...newErrors[index],
+                                                openingBalance: !numericValue ? 'openingBalance is required' : ''
+                                              };
+                                              return newErrors;
+                                            });
+                                          }
+                                        }}
+                                        className={tbErrors[index]?.openingBalance ? 'error form-control' : 'form-control'}
+                                      />
+                                      {tbErrors[index]?.openingBalance && (
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].openingBalance}</div>
                                       )}
                                     </td>
 
@@ -498,27 +688,31 @@ const ClientTB = () => {
                                     <td className="border px-2 py-2">
                                       <input
                                         type="text"
-                                        value={row.debit}
+                                        value={Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+                                          row.debit || 0
+                                        )}
+                                        style={{ width: '150px' }}
                                         onChange={(e) => {
-                                          const value = e.target.value;
-                                          setTbData((prev) =>
-                                            prev.map((r, i) => (i === index ? { ...r, debit: value } : r))
-                                          );
-                                          setTbErrors((prev) => {
-                                            const newErrors = [...prev];
-                                            newErrors[index] = {
-                                              ...newErrors[index],
-                                              debit: !value ? 'Debit is required' : ''
-                                            };
-                                            return newErrors;
-                                          });
+                                          const rawValue = e.target.value.replace(/,/g, ''); // Remove commas for numeric conversion
+                                          const numericValue = parseFloat(rawValue);
+
+                                          if (!isNaN(numericValue)) {
+                                            setTbData((prev) => prev.map((r, i) => (i === index ? { ...r, debit: numericValue } : r)));
+
+                                            setTbErrors((prev) => {
+                                              const newErrors = [...prev];
+                                              newErrors[index] = {
+                                                ...newErrors[index],
+                                                debit: !numericValue ? 'Debit is required' : ''
+                                              };
+                                              return newErrors;
+                                            });
+                                          }
                                         }}
                                         className={tbErrors[index]?.debit ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.debit && (
-                                        <div style={{ color: 'red', fontSize: '12px' }}>
-                                          {tbErrors[index].debit}
-                                        </div>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].debit}</div>
                                       )}
                                     </td>
 
@@ -526,30 +720,67 @@ const ClientTB = () => {
                                     <td className="border px-2 py-2">
                                       <input
                                         type="text"
-                                        value={row.credit}
+                                        value={Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+                                          row.credit || 0
+                                        )}
+                                        style={{ width: '150px' }}
                                         onChange={(e) => {
-                                          const value = e.target.value;
-                                          setTbData((prev) =>
-                                            prev.map((r, i) => (i === index ? { ...r, credit: value } : r))
-                                          );
-                                          setTbErrors((prev) => {
-                                            const newErrors = [...prev];
-                                            newErrors[index] = {
-                                              ...newErrors[index],
-                                              credit: !value ? 'Credit is required' : ''
-                                            };
-                                            return newErrors;
-                                          });
+                                          const rawValue = e.target.value.replace(/,/g, ''); // Remove commas for numeric conversion
+                                          const numericValue = parseFloat(rawValue);
+
+                                          if (!isNaN(numericValue)) {
+                                            setTbData((prev) => prev.map((r, i) => (i === index ? { ...r, credit: numericValue } : r)));
+
+                                            setTbErrors((prev) => {
+                                              const newErrors = [...prev];
+                                              newErrors[index] = {
+                                                ...newErrors[index],
+                                                credit: !numericValue ? 'Credit is required' : ''
+                                              };
+                                              return newErrors;
+                                            });
+                                          }
                                         }}
                                         className={tbErrors[index]?.credit ? 'error form-control' : 'form-control'}
                                       />
                                       {tbErrors[index]?.credit && (
-                                        <div style={{ color: 'red', fontSize: '12px' }}>
-                                          {tbErrors[index].credit}
-                                        </div>
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].credit}</div>
                                       )}
                                     </td>
 
+                                    {/* Closing Balance Input */}
+                                    <td className="border px-2 py-2">
+                                      <input
+                                        type="text"
+                                        value={Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+                                          row.closingBalance || 0
+                                        )}
+                                        style={{ width: '150px' }}
+                                        onChange={(e) => {
+                                          const rawValue = e.target.value.replace(/,/g, ''); // Remove commas for numeric conversion
+                                          const numericValue = parseFloat(rawValue);
+
+                                          if (!isNaN(numericValue)) {
+                                            setTbData((prev) =>
+                                              prev.map((r, i) => (i === index ? { ...r, closingBalance: numericValue } : r))
+                                            );
+
+                                            setTbErrors((prev) => {
+                                              const newErrors = [...prev];
+                                              newErrors[index] = {
+                                                ...newErrors[index],
+                                                closingBalance: !numericValue ? 'Closing Balance is required' : ''
+                                              };
+                                              return newErrors;
+                                            });
+                                          }
+                                        }}
+                                        className={tbErrors[index]?.closingBalance ? 'error form-control' : 'form-control'}
+                                      />
+                                      {tbErrors[index]?.closingBalance && (
+                                        <div style={{ color: 'red', fontSize: '12px' }}>{tbErrors[index].closingBalance}</div>
+                                      )}
+                                    </td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -563,9 +794,47 @@ const ClientTB = () => {
               </Box>
             </div>
 
+            <Modal open={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
+              <Box
+                sx={{
+                  width: '90%',
+                  margin: 'auto',
+                  marginTop: '5%',
+                  padding: '20px',
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  boxShadow: 24
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  Select Records
+                </Typography>
+                <Paper sx={{ height: 400, width: '100%' }}>
+                  <DataGrid
+                    rows={popupData}
+                    columns={columnss}
+                    pageSize={5}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    checkboxSelection={false}
+                    disableSelectionOnClick
+                    components={{
+                      NoRowsOverlay: () => <Typography>No records available</Typography>
+                    }}
+                  />
+                </Paper>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                  <Button onClick={() => setIsPopupOpen(false)} color="secondary" variant="outlined">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleConfirm} color="primary" variant="contained" sx={{ marginLeft: '10px' }}>
+                    Confirm
+                  </Button>
+                </Box>
+              </Box>
+            </Modal>
           </>
         ) : (
-          <CommonTable columns={columns} data={data} blockEdit={true} />
+          <CommonTable columns={columns} data={listViewData} blockEdit={true} />
         )}
       </div>
     </>
@@ -573,5 +842,3 @@ const ClientTB = () => {
 };
 
 export default ClientTB;
-
-

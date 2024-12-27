@@ -2,19 +2,26 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
 import { Autocomplete, Checkbox, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import apiCalls from 'apicall';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
 import CommonBulkUpload from 'utils/CommonBulkUpload';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
-import UploadIcon from '@mui/icons-material/Upload';
 import SampleFile from '../../../src/assets/sample-files/LedgerMappingUpload.xlsx';
 
 const LedgersMapping = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  // Extract `accountCode` from the query parameters
+  const accountCode = queryParams.get('accountCode');
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(true);
@@ -25,10 +32,10 @@ const LedgersMapping = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [formData, setFormData] = useState({
     clientCoa: '',
-    clientCoaCode: '',
+    clientCoaCode: accountCode || '',
     coa: '',
     coaCode: '',
-    active: '',
+    active: true,
     // clientCode: '',
     clientName: ''
   });
@@ -50,6 +57,23 @@ const LedgersMapping = () => {
     getCOALedgersMapping();
     getAccountCodeLedgersMapping();
   }, [loginUserName]);
+
+  useEffect(() => {
+    if (accountCode) {
+      // Automatically set the corresponding name for `clientCoa` based on `accountCode`
+      const selectedOption = allClientAccountCode.find((item) => item.clientAccountCode === accountCode);
+
+      console.log('selectedOption==>', selectedOption);
+
+      if (selectedOption) {
+        setFormData({
+          ...formData,
+          clientCoaCode: selectedOption.clientAccountCode,
+          clientCoa: selectedOption.clientAccountName
+        });
+      }
+    }
+  }, [accountCode, allClientAccountCode]);
 
   const getAllLedgerMapping = async () => {
     try {
@@ -132,6 +156,7 @@ const LedgersMapping = () => {
       setIsLoading(true);
       const saveData = {
         ...formData,
+        active: formData.active === 'on' ? true : false,
         clientCode: clientCode,
         clientName: client,
         createdBy: loginUserName,
@@ -142,10 +167,7 @@ const LedgersMapping = () => {
         const response = await apiCalls('put', '/businesscontroller/createUpdateLedgerMapping', saveData);
 
         if (response.status === true) {
-          showToast(
-            'success',
-            editId ? 'Ledgers Mapping updated successfully' : 'Ledgers Mapping created successfully'
-          );
+          showToast('success', editId ? 'Ledgers Mapping updated successfully' : 'Ledgers Mapping created successfully');
           getAllLedgerMapping();
           handleClear();
         } else {
@@ -183,7 +205,7 @@ const LedgersMapping = () => {
     { accessorKey: 'clientCoa', header: 'Account Name', size: 140 },
     { accessorKey: 'coaCode', header: 'COA Code', size: 100 },
     { accessorKey: 'coa', header: 'COA', size: 140 },
-    { accessorKey: 'active', header: 'Active', size: 140 },
+    { accessorKey: 'active', header: 'Active', size: 140 }
   ];
 
   return (
@@ -197,7 +219,7 @@ const LedgersMapping = () => {
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
           <ActionButton title="Save" icon={SaveIcon} isLoading={isLoading} onClick={handleSave} />
-          <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
+          <ActionButton icon={UploadIcon} title="Upload" onClick={handleBulkUploadOpen} />
 
           {uploadOpen && (
             <CommonBulkUpload
@@ -217,17 +239,15 @@ const LedgersMapping = () => {
               orgId={orgId}
               loginUser={loginUserName}
             />
-
           )}
         </div>
         {showForm ? (
           <div className="row d-flex">
-
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
                 <Autocomplete
                   options={allClientAccountCode}
-                  getOptionLabel={(option) => option ? option.clientAccountCode : ''}
+                  getOptionLabel={(option) => (option ? option.clientAccountCode : '')}
                   value={allClientAccountCode.find((item) => item.clientAccountCode === formData.clientCoaCode)}
                   onChange={(event, newValue) => {
                     setFormData({
@@ -253,13 +273,7 @@ const LedgersMapping = () => {
 
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
-                <TextField
-                  label="Account Name"
-                  size="small"
-                  disabled
-                  name="clientAccountName"
-                  value={formData.clientCoa}
-                />
+                <TextField label="Account Name" size="small" disabled name="clientAccountName" value={formData.clientCoa} />
               </FormControl>
             </div>
 
@@ -277,11 +291,11 @@ const LedgersMapping = () => {
                     });
                   }}
                   size="small"
-                  renderInput={(params) => ( 
-                    <TextField 
-                      {...params} 
-                      label="COA Code" 
-                      variant="outlined" 
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="COA Code"
+                      variant="outlined"
                       error={!!fieldErrors.coaCode}
                       helperText={fieldErrors.coaCode || ''}
                     />
@@ -292,13 +306,7 @@ const LedgersMapping = () => {
 
             <div className="col-md-3 mb-3">
               <FormControl fullWidth variant="filled">
-                <TextField
-                  label="COA Name"
-                  size="small"
-                  disabled
-                  name="coaCode"
-                  value={formData.coa}
-                />
+                <TextField label="COA Name" size="small" disabled name="coaCode" value={formData.coa} />
               </FormControl>
             </div>
 
@@ -327,4 +335,3 @@ const LedgersMapping = () => {
 };
 
 export default LedgersMapping;
-

@@ -1,7 +1,5 @@
 // assets
-import { IconKey } from '@tabler/icons-react';
-import { IconCopyright } from '@tabler/icons-react';
-import { IconSettingsPlus, IconSquareRoundedPlus } from '@tabler/icons-react';
+import { IconCopyright, IconSettingsPlus, IconSquareRoundedPlus } from '@tabler/icons-react';
 
 // constant
 const icons = {
@@ -52,16 +50,14 @@ const ledgers = {
         },
         {
           id: 'mismatchDb',
-          title: 'Mismatch DB',
+          title: 'Mismatch TB',
           type: 'item',
           url: '/report/mismatchDB',
           icon: icons1.IconSquareRoundedPlus
-        },
+        }
       ]
     }
   ]
 };
 
 export default ledgers;
-
-

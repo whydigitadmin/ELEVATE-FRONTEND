@@ -2,6 +2,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FormatListBulletedTwoToneIcon from '@mui/icons-material/FormatListBulletedTwoTone';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -9,18 +10,24 @@ import FormGroup from '@mui/material/FormGroup';
 import TextField from '@mui/material/TextField';
 import apiCalls from 'apicall';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import 'react-tabs/style/react-tabs.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ActionButton from 'utils/ActionButton';
+import CommonBulkUpload from 'utils/CommonBulkUpload';
 import { showToast } from 'utils/toast-component';
 import CommonTable from 'views/basicMaster/CommonTable';
-import { toast } from 'react-toastify';
-import UploadIcon from '@mui/icons-material/Upload';
-import CommonBulkUpload from 'utils/CommonBulkUpload';
 import SampleFile from '../../assets/sample-files/SampleFormat.xlsx';
 
 const ClientCOA = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  // Extract `accountCode` from the query parameters
+  const accountCode = queryParams.get('accountCode');
+  const accountName = queryParams.get('accountName');
+
   const [data, setData] = useState([]);
   const [showForm, setShowForm] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +39,9 @@ const ClientCOA = () => {
   const [editId, setEditId] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [formData, setFormData] = useState({
-    accountCode: '',
-    accountName: '',
-    active: false
+    accountCode: accountCode || '',
+    accountName: accountName || '',
+    active: true
   });
 
   const [fieldErrors, setFieldErrors] = useState({
@@ -47,7 +54,6 @@ const ClientCOA = () => {
     getAllCCao();
     // getAllGroupName();
   }, []);
-
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -101,9 +107,9 @@ const ClientCOA = () => {
   };
 
   const handleSubmit = () => {
-    toast.success("File uploaded successfully");
     console.log('Submit clicked');
     handleBulkUploadClose();
+    getAllCCao();
   };
 
   const handleSave = async () => {
@@ -211,7 +217,7 @@ const ClientCOA = () => {
           <ActionButton title="Search" icon={SearchIcon} onClick={() => console.log('Search Clicked')} />
           <ActionButton title="Clear" icon={ClearIcon} onClick={handleClear} />
           <ActionButton title="List View" icon={FormatListBulletedTwoToneIcon} onClick={handleListView} />
-          <ActionButton icon={UploadIcon} title='Upload' onClick={handleBulkUploadOpen} />
+          <ActionButton icon={UploadIcon} title="Upload" onClick={handleBulkUploadOpen} />
 
           {uploadOpen && (
             <CommonBulkUpload
@@ -228,6 +234,8 @@ const ClientCOA = () => {
               screen="PutAway"
               loginUser={loginUserName}
               clientCode={clientCode}
+              clientName={client}
+              orgId={orgId}
             />
           )}
 
@@ -300,4 +308,3 @@ const ClientCOA = () => {
 };
 
 export default ClientCOA;
-

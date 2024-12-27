@@ -1,4 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Slide, Typography } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import apiCalls from 'apicall';
 import React, { useState } from 'react';
 import { FaCloudUploadAlt } from 'react-icons/fa';
@@ -33,6 +34,7 @@ const CommonBulkUpload = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [successfulUploads, setSuccessfulUploads] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -56,6 +58,8 @@ const CommonBulkUpload = ({
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
+
     if (selectedFile) {
       const createdBy = loginUser || 'default_user';
       const formData = new FormData();
@@ -80,15 +84,18 @@ const CommonBulkUpload = ({
           setSuccessfulUploads(uploadsCount);
           setSuccessDialogOpen(true);
           setSelectedFile(null);
+          setIsLoading(false);
           showToast('success', message);
         } else if (response.paramObjectsMap.status === false) {
           showToast('error', response.paramObjectsMap.uploadResult.failureReasons[0] || 'Bulk Uploaded failed');
+          setIsLoading(false);
         } else {
           showToast('error', response.paramObjectsMap.errorMessage || `${screen} Bulk Uploaded failed`);
           showToast('error', response.paramObjectsMap.errorMessage || 'Bulk Uploaded failed');
           const errorMessage = response.paramObjectsMap.errorMessage || 'Upload failed';
           setErrorMessage(errorMessage);
           setErrorDialogOpen(true);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -178,10 +185,22 @@ const CommonBulkUpload = ({
           </div>
         </DialogContent>
         <DialogActions className="d-flex justify-content-between p-2">
-          <Button onClick={handleClose} color="secondary" style={{ textTransform: 'none', padding: '4px 8px' }}>
+          <Button
+            onClick={handleClose}
+            color="secondary"
+            style={{ textTransform: 'none', padding: '4px 8px' }}
+            disabled={isLoading} // Disable cancel button while loading to prevent accidental changes
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} color="secondary" variant="contained" style={{ textTransform: 'none', padding: '4px 8px' }}>
+          <Button
+            onClick={handleSubmit}
+            color="secondary"
+            variant="contained"
+            style={{ textTransform: 'none', padding: '4px 8px', display: 'flex', alignItems: 'center' }}
+            disabled={isLoading} // Disable the button during loading
+          >
+            {isLoading ? <CircularProgress size={20} color="inherit" style={{ marginRight: '8px' }} /> : null}
             Submit
           </Button>
         </DialogActions>

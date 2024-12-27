@@ -10,6 +10,8 @@ const CommonListViewTable = ({ data, columns, blockEdit, toEdit, disableEditIcon
   const [tableData, setTableData] = useState(data || []);
   const [orgId, setOrgId] = useState(localStorage.getItem('orgId'));
 
+  console.log('Table =>', data);
+
   const theme = useTheme();
 
   const chipSX = {
